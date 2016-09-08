@@ -7,92 +7,92 @@
 ╠════════╩════════════╩════════════════════════════════════════════════╩═══════╩══════════╩════════╣
 ║                                      Instrukcje transferowe                                      ║
 ╠════════╦════════════╦════════════════════════════════════════════════╦═══════╦══════════╦════════╣
-║        ║ scf 0/1    ║ ustawia flage Carry                            ║ C     ║ -        ║ 1      ║
+║ 1h     ║ scf 0/1    ║ ustawia flage Carry                            ║ C     ║ -        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ cff        ║ pobiera wartość flagi Carry do DX              ║ -     ║ DX       ║ 1      ║
+║ 2h     ║ cff        ║ pobiera wartość flagi Carry do DX              ║ -     ║ DX       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ cof        ║ pobiera wartość flagi OF do DX                 ║ -     ║ DX       ║ 1      ║
+║ 3h     ║ cof        ║ pobiera wartość flagi OF do DX                 ║ -     ║ DX       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ czf        ║ pobiera wartość flagi Zero do DX               ║ -     ║ DX       ║ 1      ║
+║ 4h     ║ czf        ║ pobiera wartość flagi Zero do DX               ║ -     ║ DX       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ mov A,B    ║ kopiuje do adresu A, wartość z rejestru B      ║ -     ║ -        ║ 1-2    ║
+║ 5h     ║ mov A,B    ║ kopiuje do adresu A, wartość z rejestru B      ║ -     ║ -        ║ 1-2    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ mov B,A    ║ kopiuje do rejestu B wartość z adresu A        ║ -     ║ B        ║ 1-2    ║
+║ 6h     ║ mov B,A    ║ kopiuje do rejestu B wartość z adresu A        ║ -     ║ B        ║ 1-2    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ mov B,C    ║ kopiuje do rejestru B wartość z rejestru C     ║ -     ║ B        ║ 1      ║
+║ 7h     ║ mov B,C    ║ kopiuje do rejestru B wartość z rejestru C     ║ -     ║ B        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ mov B,x    ║ wpisuje do rejestru B wartość liczbową x       ║ -     ║ B        ║ 1      ║
+║ 8h     ║ mov B,x    ║ wpisuje do rejestru B wartość liczbową x       ║ -     ║ B        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ pop A      ║ pobiera wartość ze stosu do rejestru A         ║ -     ║ A, SP    ║ 1-2    ║
+║ 9h     ║ pop A      ║ pobiera wartość ze stosu do rejestru A         ║ -     ║ A, SP    ║ 1-2    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ out        ║ wysyła dane z DX na adres BX                   ║ -     ║ -        ║ 1      ║
+║ Ah     ║ out        ║ wysyła dane z DX na adres BX                   ║ -     ║ -        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ push A     ║ umieszcza na stosie warotść z rejestru A       ║ -     ║ SP       ║ 1-2    ║
+║ Bh     ║ push A     ║ umieszcza na stosie warotść z rejestru A       ║ -     ║ SP       ║ 1-2    ║
 ╠════════╩════════════╩════════════════════════════════════════════════╩═══════╩══════════╩════════╣
 ║                                      Instrukcje arytmetyczne                                     ║
 ╠════════╦════════════╦════════════════════════════════════════════════╦═══════╦══════════╦════════╣
-║        ║ add        ║ sumuje DX oraz AX                              ║ C,O,Z ║ AX       ║ 1-2    ║
+║ Ch     ║ add        ║ sumuje DX oraz AX                              ║ C,O,Z ║ AX       ║ 1-2    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ adc        ║ sumuje DX, AX oraz CF                          ║ C,O,Z ║ AX       ║ 1-2    ║
+║ Dh     ║ adc        ║ sumuje DX, AX oraz CF                          ║ C,O,Z ║ AX       ║ 1-2    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ sub        ║ odejmuje AX od DX                              ║ C,O,Z ║ AX       ║ 1-2    ║
+║ Eh     ║ sub        ║ odejmuje AX od DX                              ║ C,O,Z ║ AX       ║ 1-2    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ suc        ║ odejmuje AX i CF od DX                         ║ C,O,Z ║ AX       ║ 1-2    ║
+║ Fh     ║ suc        ║ odejmuje AX i CF od DX                         ║ C,O,Z ║ AX       ║ 1-2    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ mul8       ║ [8bit]mnoży AX razy DX, wynik: AX              ║ Z     ║ AX       ║ 2-4    ║
+║ 10h    ║ mul8       ║ [8bit]mnoży AX razy DX, wynik: AX              ║ Z     ║ AX       ║ 2-4    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ mul6       ║ [16bit]mnoży AX razy DX, wynik:BX:AX           ║ Z     ║ BX,AX    ║ 3-8    ║
+║ 11h    ║ mul6       ║ [16bit]mnoży AX razy DX, wynik:BX:AX           ║ Z     ║ BX,AX    ║ 3-8    ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ div8       ║ ?                                              ║       ║          ║        ║
+║ 12h    ║ div8       ║ ?                                              ║       ║          ║        ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ div6       ║ ?                                              ║       ║          ║        ║
+║ 13h    ║ div6       ║ ?                                              ║       ║          ║        ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ cmp A,B    ║ porownuje rejestr A z rejestrem B,             ║ C,O,Z ║ -        ║ 2      ║
+║ 14h    ║ cmp A,B    ║ porownuje rejestr A z rejestrem B,             ║ C,O,Z ║ -        ║ 2      ║
 ║        ║            ║ jeżeli równe Z=1, A>B O=1, B<A C=1             ║       ║          ║        ║
 ╠════════╩════════════╩════════════════════════════════════════════════╩═══════╩══════════╩════════╣
 ║                                        Instrukcje logiczne                                       ║
 ╠════════╦════════════╦════════════════════════════════════════════════╦═══════╦══════════╦════════╣
-║        ║ and A,B    ║ wykonuje iloczyn logiczny rejestrów A i B      ║ -     ║ A        ║ 1      ║
+║ 15h    ║ and A,B    ║ wykonuje iloczyn logiczny rejestrów A i B      ║ -     ║ A        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ neg A      ║ wykonuje uzupełnienie dwójkowe rejestru A      ║ -     ║ A        ║ 1      ║
+║ 16h    ║ neg A      ║ wykonuje uzupełnienie dwójkowe rejestru A      ║ -     ║ A        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ not A      ║ neguje wszystkie bity rejetru A                ║ -     ║ A        ║ 1      ║
+║ 17h    ║ not A      ║ neguje wszystkie bity rejetru A                ║ -     ║ A        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ or         ║ wykonuje sumę locziczną rejestrów A i B        ║ -     ║ A        ║ 1      ║
+║ 18h    ║ or         ║ wykonuje sumę locziczną rejestrów A i B        ║ -     ║ A        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ shl A,B    ║ przesuwa bity rejestru A o liczbę z rejestru B ║ -     ║ A        ║ 1      ║
+║ 19h    ║ shl A,B    ║ przesuwa bity rejestru A o liczbę z rejestru B ║ C     ║ A        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ shr A,B    ║ przesuwa bity rejestru A o liczbę z rejestru B ║ -     ║ A        ║ 1      ║
+║ 1Ah    ║ shr A,B    ║ przesuwa bity rejestru A o liczbę z rejestru B ║ -     ║ A        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ xor A,B    ║ wykonuje alternatywe wykluczającą              ║ -     ║ A        ║ 1      ║
+║ 1Bh    ║ xor A,B    ║ wykonuje alternatywe wykluczającą              ║ -     ║ A        ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ test A.B   ║ jeżeli A=B Z=1, A!=B Z=0                       ║ Z     ║ -        ║ 1      ║
+║ 1Ch    ║ test A.B   ║ jeżeli A=B Z=1, A!=B Z=0                       ║ Z     ║ -        ║ 1      ║
 ╠════════╩════════════╩════════════════════════════════════════════════╩═══════╩══════════╩════════╣
 ║                                        Instrukcje skokowe                                        ║
 ╠════════╦════════════╦════════════════════════════════════════════════╦═══════╦══════════╦════════╣
-║        ║ int x      ║ wywołuje przerwanie określone kodem x,         ║ C,O,Z ║ AX,BX    ║ 1+x    ║
+║ 1Dh    ║ int x      ║ wywołuje przerwanie określone kodem x,         ║ C,O,Z ║ AX,BX    ║ 1+x    ║
 ║        ║            ║ parametry podaje się na stosie,                ║       ║ CX,DX    ║        ║
 ║        ║            ║ flagi oraz rejestry mogą zostać zmienione      ║       ║ SP, PC   ║        ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ call x     ║ skok do podporgramu na adres w pamięci         ║ C,O,Z ║ AX,BX    ║ 1+x    ║
+║ 1Eh    ║ call x     ║ skok do podporgramu na adres w pamięci         ║ C,O,Z ║ AX,BX    ║ 1+x    ║
 ║        ║            ║ programu x, parametry podaje się na stosie     ║       ║ CX,DX    ║        ║
 ║        ║            ║ flagi oraz rejestry mogą zostać zmienione      ║       ║ SP, PC   ║        ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ ret        ║ pobiera ze stosu adres powrotu                 ║ -     ║ SP, PC   ║ 1      ║
+║ 1Fh    ║ ret        ║ pobiera ze stosu adres powrotu                 ║ -     ║ SP, PC   ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ jmp x      ║ skacze do adresu x w programie                 ║ -     ║ PC       ║ 1      ║
+║ 20h    ║ jmp x      ║ skacze do adresu x w programie                 ║ -     ║ PC       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ jc x       ║ skacze jeśli CF = 1                            ║ -     ║ PC       ║ 1      ║
+║ 21h    ║ jc x       ║ skacze jeśli CF = 1                            ║ -     ║ PC       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ jnc x      ║ skacze jeśli CF = 0                            ║ -     ║ PC       ║ 1      ║
+║ 22h    ║ jnc x      ║ skacze jeśli CF = 0                            ║ -     ║ PC       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ jz x       ║ skacze jeśli ZF = 1                            ║ -     ║ PC       ║ 1      ║
+║ 23h    ║ jz x       ║ skacze jeśli ZF = 1                            ║ -     ║ PC       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ jnz x      ║ skacze jeśli ZF = 0                            ║ -     ║ PC       ║ 1      ║
+║ 24h    ║ jnz x      ║ skacze jeśli ZF = 0                            ║ -     ║ PC       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ jo x       ║ skacze jeśli OF = 1                            ║ -     ║ PC       ║ 1      ║
+║ 25h    ║ jo x       ║ skacze jeśli OF = 1                            ║ -     ║ PC       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
-║        ║ jno x      ║ skacze jeśli OF = 0                            ║ -     ║ PC       ║ 1      ║
+║ 26h    ║ jno x      ║ skacze jeśli OF = 0                            ║ -     ║ PC       ║ 1      ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
 ║        ║            ║                                                ║       ║          ║        ║
 ╠════════╬════════════╬════════════════════════════════════════════════╬═══════╬══════════╬════════╣
