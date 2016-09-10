@@ -7,9 +7,11 @@ module alu (
 	output c_flag,
 	output z_flag,
 	output o_flag,
-	output [15:0] acc
-	output [15:0] c;);
-
+	output [15:0] acc,
+	output [15:0] c);
+	
+	reg c_flag;
+	reg [15:0] c;
 	reg [15:0] acc;
 	assign z_flag = acc[15:0] == 0;
 	assign o_flag = c_flag ^ acc[15];

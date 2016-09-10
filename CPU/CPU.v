@@ -83,4 +83,9 @@ module CPU(
 	always @(posedge clk) begin : FSM
 		nstate <= 0;
 		case (state)
-			16'h00 : 
+			16'h00 : begin
+				pc = pc + 1;
+				opcode <= pmem[pc];
+				par1 <= pmem[pc+1];
+				par2 <= pmem[pc+2];
+				
