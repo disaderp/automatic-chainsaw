@@ -7,23 +7,25 @@ module CPU(
 	output [15:0] data
 	);
 	
+	assign base, bx;//maybe :/
 	//reg
 	reg [15:0] ax;
 	reg [15:0] bx;
 	reg [15:0] cx;
 	reg [15:0] dx;
-	reg [15:0] sp;
-	reg [15:0] pc;
+	reg [15:0] sp;//stackpointer
+	reg [15:0] bp;//basepointer
+	reg [15:0] pc;//programcounter
 	
 	//flg
-	reg cf;
-	reg zf;
-	reg of;
+	reg cf;//carry
+	reg zf;//zero
+	reg of;//overflow
 	
 	//stack, ram
 	reg [1023:0] stack[15:0];
 	reg [1023:0] ram[15:0];
-	reg [1023:0] pmem[15:0];
+	reg [1023:0] pmem[15:0];//programmemory
 	
 	//op
 	parameter oNOP = 16'h0;
@@ -92,6 +94,31 @@ module CPU(
 	parameter xXOR = 8'h10;
 	parameter xTEST = 8'h11;
 	
+	reg [15:0] ain;
+	reg [15:0] bin;
+	reg [7:0] op;
+	reg cf;
+	reg zf;
+	reg of;
+	wire c_flag;
+	wire z_flag;
+	wire o_flag;
+	wire [15:0] acc;
+	wire [15:0] c;
+	
+	alu d0 (
+		.clk (clk),
+		.a(ain),
+		.b(bin),
+		.op(op),
+		.cf(cf),
+		.c_flag(c_flag),
+		.z_flag(z_flag),
+		.o_flag(o_flag),
+		.acc(acc),
+		.c(c)
+	);
+	
 	//fsm
 	reg [15:0] state;
 	reg [15:0] nstate;
@@ -100,6 +127,7 @@ module CPU(
 	reg [15:0] par1;
 	reg [15:0] par2;
 	reg [15:0] tmp;
+	reg alustate;
 	
 	
 	always @(posedge clk) begin : FSM
@@ -107,10 +135,10 @@ module CPU(
 		case (state)
 			16'h0 : begin
 				pc = pc + 1;
-				opcode <= pmem[pc];
+				opcode = pmem[pc];
 				par1 <= pmem[pc+1];
 				par2 <= pmem[pc+2];
-				case (pcmem[pc])
+				case (opcode)//pcmem[pc] can potentially load prev value
 					oNOP: nstate <= 16'h0;
 					oSCF: begin 
 						cf <= par1;
@@ -208,10 +236,12 @@ module CPU(
 					end
 					oOUT: begin
 						//idk
+						$display("Address: %b, Data: %b", bx, dx);
+						data <= dx;
 						nstate <= 16'h0;
 					end
 					oIN: begin
-						//idk
+						dx <= in;
 						nstate <= 16'h0;
 					end
 					oXCH: begin
@@ -244,9 +274,416 @@ module CPU(
 						nstate <= 16'h0;
 					end
 					
+					oADD: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xADD;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ax <= acc;
+								cf <= c_flag;
+								zf <= z_flag;
+								of <= o_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oADC: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xADC;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ain <= dx;
+								bin <= ax;
+								ax <= acc;
+								cf <= c_flag;
+								zf <= z_flag;
+								of <= o_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oSUB: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xSUB;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ax <= acc;
+								cf <= c_flag;
+								zf <= z_flag;
+								of <= o_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oSUC: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xSUC;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ax <= acc;
+								cf <= c_flag;
+								zf <= z_flag;
+								of <= o_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oMUL8: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xMUL8;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ax <= acc;
+								zf <= z_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oMUL6: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xMUL6;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ax <= acc;
+								bx <= c;
+								zf <= z_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oDIV8: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xDIV8;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ax <= acc;
+								zf <= z_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oDIV6: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xDIV6;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								ax <= acc;
+								bx <= c;
+								zf <= z_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oCMP: begin
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								ain <= dx;
+								bin <= ax;
+								op <= xCMP;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								cf <= c_flag;
+								zf <= z_flag;
+								of <= o_flag;
+								alustate <= 0;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
 					
-					
-					
-					
+					oAND: begin //xx,yx xx <= xx&&yx
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: bin <= ax;
+									2'b01: bin <= bx;
+									2'b10: bin <= cx;
+									2'b11: bin <= dx;
+								endcase
+								op <= xAND;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ax <= acc;
+									2'b01: bx <= acc;
+									2'b10: cx <= acc;
+									2'b11: dx <= acc;
+								endcase
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oNEG: begin //xx xx <= ~xx
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								op <= xNEG;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ax <= acc;
+									2'b01: bx <= acc;
+									2'b10: cx <= acc;
+									2'b11: dx <= acc;
+								endcase
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oNOT: begin //xx xx <= !xx
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								op <= xNOT;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ax <= acc;
+									2'b01: bx <= acc;
+									2'b10: cx <= acc;
+									2'b11: dx <= acc;
+								endcase
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oOR: begin //xx,yx xx <= xx||yx
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: bin <= ax;
+									2'b01: bin <= bx;
+									2'b10: bin <= cx;
+									2'b11: bin <= dx;
+								endcase
+								op <= xOR;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ax <= acc;
+									2'b01: bx <= acc;
+									2'b10: cx <= acc;
+									2'b11: dx <= acc;
+								endcase
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oSHL: begin //xx xx <= xx << 1
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								op <= xSHL;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ax <= acc;
+									2'b01: bx <= acc;
+									2'b10: cx <= acc;
+									2'b11: dx <= acc;
+								endcase
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oSHR: begin //xx xx <= xx >> 1
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								op <= xSHR;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ax <= acc;
+									2'b01: bx <= acc;
+									2'b10: cx <= acc;
+									2'b11: dx <= acc;
+								endcase
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oXOR: begin //xx,yx xx <= xx^yx
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: bin <= ax;
+									2'b01: bin <= bx;
+									2'b10: bin <= cx;
+									2'b11: bin <= dx;
+								endcase
+								op <= xXOR;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ax <= acc;
+									2'b01: bx <= acc;
+									2'b10: cx <= acc;
+									2'b11: dx <= acc;
+								endcase
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
+					oTEST: begin //xx,yx xx ?= yx
+						case (alustate) //0- not initiated 1-waiting
+							1'b0: begin
+								case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+									2'b00: ain <= ax;
+									2'b01: ain <= bx;
+									2'b10: ain <= cx;
+									2'b11: ain <= dx;
+								endcase
+								case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+									2'b00: bin <= ax;
+									2'b01: bin <= bx;
+									2'b10: bin <= cx;
+									2'b11: bin <= dx;
+								endcase
+								op <= xTEST;
+								pc <= pc - 1;
+								nstate <= 16'h0;
+								alustate <= 1;
+							end
+							1'b1: begin
+								zf <= z_flag;
+								alustate <= 0;
+								pc <= pc + 1;
+								nstate <= 16'h0;
+							end
+						endcase
+					end
 					
 					
