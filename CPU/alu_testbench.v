@@ -26,13 +26,12 @@ module testbench();
 	
 	
 	initial begin
-		//$display ("time\t clk a b op cf");
-		$monitor ("%g\t %b %b %b %b %b %b %b %b %b %b",
-		$time, clk, a, b, op, cf, c_flag, o_flag, z_flag, acc, c);
+		$monitor ("%g\t a=%b b=%b op=%h cf=%b coz=%b%b%b acc=%b c=%b",
+		$time, a, b, op, cf, c_flag, o_flag, z_flag, acc, c);
 		clk = 1;
 		a = 16'd10;
 		b = 16'd11;
-		op = 8'd2;
+		op = 8'h2;
 		cf = 1;
 		#15 $finish;
 	end

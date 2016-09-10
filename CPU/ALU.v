@@ -15,7 +15,6 @@ module alu (
 	reg [15:0] acc;
 	assign z_flag = acc[15:0] == 0;
 	assign o_flag = c_flag ^ acc[15];
-	//assign value  = acc;
 
 	parameter xADD = 8'h1;
 	parameter xADC = 8'h2;
@@ -40,17 +39,17 @@ module alu (
 		case (op)
 			xADD: {c_flag, acc} <= {a[15], a} + {b[15], b};
 			xADC: {c_flag, acc} <= {a[15], a} + {b[15], b} + cf;
-			xSUB: {c_flag, acc} <= {a[15], a} + {!b[15], ~b};
-			xSUC: {c_flag, acc} <= {a[15], a} + {!b[15], ~b} + !cf;
+			xSUB: {c_flag, acc} <= {a[15], a} - {b[15], b};
+			xSUC: {c_flag, acc} <= {a[15], a} - {b[15], b} - cf;
 			xMUL8: acc <= a[7:0] * b[7:0];
-			xMUL6: {c, acc} <= a * b;//to kiedys jebnie
+			xMUL6: {c, acc} <= a * b;
 			xDIV8: acc <= a[7:0] / b[7:0];
-			xDIV6: {c, acc} <= a / b;//to tez kiedys jebnie :/
+			xDIV6: {c, acc} <= a / b;
 			xCMP: begin
-				if (a==b) acc <= 0;//trzeba pilnowac w cpu
-				if (a<b) c_flag <= 1;//pilnowac
-				if (a>b) begin//a to juz w ogole jebnie
-					acc <= 16'hFF;
+				if (a==b) acc <= 0;//trzeba pilnowac w cpu z => c => o
+				if (a<b) c_flag <= 1;
+				if (a>b) begin
+					acc <= 16'hFFFF;
 					c_flag <= 0;
 				end
 			end
@@ -62,7 +61,7 @@ module alu (
 			xSHL: acc <= a << 1;
 			xSHR: acc <= a >> 1;
 			xXOR: acc <= a ^ b;
-			xTEST: acc <= !(a && b);//moze
+			xTEST: acc <= !(a == b);
 		endcase
 	end
 endmodule
