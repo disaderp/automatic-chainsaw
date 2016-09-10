@@ -1,16 +1,16 @@
-Pin	  Name		Dir	Use	
-1	  Red       >	  Red Video
-2	  Green		  >	  Green Video
-3	  Blue	  	>	  Blue Video
-4	  ID2		    <	  Useless
-5	  GND		    -   Ground
-6	  RGND		  -	  Ground Red
-7	  GGND		  -	  Ground Green
-8	  BGND		  -	  Ground Blue
-9	  Key		    -	  No pin
-10	SGND		  -	  Ground Sync
-11	ID0/RES	  <	  Useless
-12	ID1/SDA	  <	  Useless
-13	H Sync		>	  Horizontal Sync
-14	V Sync		>	  Vertical Sync
-15	ID3/SCL		<	  Useless
+﻿Pin	  Name		Dir	Use	
+1	Red       	>	Red Video
+2	Green		>	Green Video
+3	Blue	  	>	Blue Video
+4	ID2		<	Useless
+5	GND		-	Ground
+6	RGND		-	Ground Red
+7	GGND		-	Ground Green
+8	BGND		-	Ground Blue
+9	Key		-	No pin
+10	SGND		-	Ground Sync
+11	ID0/RES		<	Useless
+12	ID1/SDA		<	Useless
+13	H Sync		>	Horizontal Sync
+14	V Sync		>	Vertical Sync
+15	ID3/SCL		<	Useless
