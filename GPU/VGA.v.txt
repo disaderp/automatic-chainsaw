@@ -1,0 +1,18 @@
+module vga
+(
+input	clk,
+input	dat,
+output	hs,
+output	vsync,
+output	R,
+output	G,
+output	B
+);
+parameter hpix=1056;
+parameter hsp=128;
+parameter hbp=216;
+parameter hfp=1016;
+parameter vpix=624;
+parameter vsp=4;
+parameter vbp=23;
+parameter vfp=623;
