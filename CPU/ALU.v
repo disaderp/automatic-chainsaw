@@ -15,9 +15,7 @@ module alu (
 	reg [15:0] acc;
 	reg o_flag;
 	reg z_flag;
-	//assign z_flag = acc[15:0] == 0;
-	//assign o_flag = c_flag ^ acc[15];
-
+	
 	parameter xADD = 8'h1;
 	parameter xADC = 8'h2;
 	parameter xSUB = 8'h3;
@@ -27,7 +25,7 @@ module alu (
 	parameter xDIV8 = 8'h7;
 	parameter xDIV6 = 8'h8;
 	parameter xCMP = 8'h9;
-
+	
 	parameter xAND = 8'hA;
 	parameter xNEG = 8'hB;
 	parameter xNOT = 8'hC;
@@ -36,7 +34,7 @@ module alu (
 	parameter xSHR = 8'hF;
 	parameter xXOR = 8'h10;
 	parameter xTEST = 8'h11;
-  
+	
 	always @(posedge clk) begin
 		case (op)
 			xADD: begin {c_flag, acc} = {a[15], a} + {b[15], b}; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
@@ -48,8 +46,8 @@ module alu (
 			xDIV8: acc = a[7:0] / b[7:0];
 			xDIV6: {c, acc} = a / b;
 			xCMP: begin
-				if (a==b) z_flag = 1;//trzeba pilnowac w cpu z => c => o
-				if (a<b) begin z_flag = 0; c_flag = 1; end
+				if (a==b) begin z_flag = 1; c_flag = 0; o_flag = 0; end
+				if (a<b) begin z_flag = 0; c_flag = 1; o_flag = 0; end
 				if (a>b) begin z_flag = 0; c_flag = 0; o_flag = 1; end
 			end
 			

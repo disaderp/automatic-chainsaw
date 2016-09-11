@@ -2,7 +2,7 @@
 
 Module Asm
 	Function Trail16(str As String) As String
-		For i As Integer = 0 To 16 - str.Length()
+		For i As Integer = 0 To 15 - str.Length()
 			str = "0" + str
 		Next
 		Return str
@@ -104,13 +104,13 @@ Module Asm
 					regs = "11"
 				End If
 				If params(1) = "AX" Then
-					regs += Trail16("00" + regs)
+					regs = Trail16(regs + "00")
 				ElseIf params(1) = "BX" Then
-					regs += Trail16("01" + regs)
+					regs = Trail16(regs + "01")
 				ElseIf params(1) = "CX" Then
-					regs += Trail16("10" + regs)
+					regs = Trail16(regs + "10")
 				ElseIf params(1) = "DX" Then
-					regs += Trail16("11" + regs)
+					regs = Trail16(regs + "11")
 				End If
 				code += regs
 				ic += 1
@@ -128,13 +128,13 @@ Module Asm
 					regs = "11"
 				End If
 				If params(1) = "AX" Then
-					regs += Trail16("00" + regs)
+					regs = Trail16(regs + "00")
 				ElseIf params(1) = "BX" Then
-					regs += Trail16("01" + regs)
+					regs = Trail16(regs + "01")
 				ElseIf params(1) = "CX" Then
-					regs += Trail16("10" + regs)
+					regs = Trail16(regs + "10")
 				ElseIf params(1) = "DX" Then
-					regs += Trail16("11" + regs)
+					regs = Trail16(regs + "11")
 				End If
 				code += regs
 				ic += 1
@@ -178,13 +178,13 @@ Module Asm
 					regs = "11"
 				End If
 				If params(1) = "AX" Then
-					regs += Trail16("00" + regs)
+					regs = Trail16(regs + "00")
 				ElseIf params(1) = "BX" Then
-					regs += Trail16("01" + regs)
+					regs = Trail16(regs + "01")
 				ElseIf params(1) = "CX" Then
-					regs += Trail16("10" + regs)
+					regs = Trail16(regs + "10")
 				ElseIf params(1) = "DX" Then
-					regs += Trail16("11" + regs)
+					regs = Trail16(regs + "11")
 				End If
 				code += regs
 				ic += 1
@@ -241,13 +241,13 @@ Module Asm
 					regs = "11"
 				End If
 				If params(1) = "AX" Then
-					regs += Trail16("00" + regs)
+					regs = Trail16(regs + "00")
 				ElseIf params(1) = "BX" Then
-					regs += Trail16("01" + regs)
+					regs = Trail16(regs + "01")
 				ElseIf params(1) = "CX" Then
-					regs += Trail16("10" + regs)
+					regs = Trail16(regs + "10")
 				ElseIf params(1) = "DX" Then
-					regs += Trail16("11" + regs)
+					regs = Trail16(regs + "11")
 				End If
 				code += regs
 				ic += 1
@@ -264,25 +264,25 @@ Module Asm
 				code += Trail16("11111")
 
 			ElseIf mn.StartsWith("JMP") Then
-				code += Trail16("100000,") + mn.Remove(0, 4) + ","
+				code += Trail16("100000") + "," + mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JC") Then
-				code += Trail16("100001,") + mn.Remove(0, 4) + ","
+				code += Trail16("100001,") + "," + +mn.Remove(0, 3) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JNC") Then
-				code += Trail16("100010,") + mn.Remove(0, 4) + ","
+				code += Trail16("100010,") + "," + +mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JZ") Then
-				code += Trail16("100011,") + mn.Remove(0, 4) + ","
+				code += Trail16("100011,") + "," + +mn.Remove(0, 3) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JNZ") Then
-				code += Trail16("100100,") + mn.Remove(0, 4) + ","
+				code += Trail16("100100,") + "," + +mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JO") Then
-				code += Trail16("100101,") + mn.Remove(0, 4) + ","
+				code += Trail16("100101,") + "," + +mn.Remove(0, 3) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JNO") Then
-				code += Trail16("100110,") + mn.Remove(0, 4) + ","
+				code += Trail16("100110,") + "," + +mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn = "" Then
 				ic -= 1
@@ -295,28 +295,25 @@ Module Asm
 			End If
 			ic += 1
 		Next
-		Dim lab As String() = code.Split(".")
-		For i As Integer = 0 To lab.Count()
-			If lab(i) Then
-				Dim add As String = ""
-				Try
-					add = Trail16(Convert.ToString(labels(lab(i))))
-				Catch
-					Console.WriteLine("error in label dictionary")
-					Console.ReadLine()
-					Environment.Exit(2)
-				End Try
-				code = code.Replace("," + lab(i) + ",", add)
-			End If
+		Dim lab As String() = code.Split(",")
+		For i As Integer = 1 To lab.Count() - 1 Step 2
+			Dim add As String = ""
+			Try
+				add = Trail16(Convert.ToString(labels(lab(i)), 2))
+			Catch
+				Console.WriteLine("error in label dictionary")
+				Console.ReadLine()
+				Environment.Exit(2)
+			End Try
+			code = code.Replace("," + lab(i) + ",", add)
 		Next
 		Return code
 	End Function
 	Sub Main(args As String())
-		Console.WriteLine(String.Join(", ", args))
 		Try
 			Console.WriteLine(assemble(File.ReadAllText(args(0))))
 		Catch ex As Exception
-			Console.WriteLine("file not specified")
+			Console.WriteLine(ex.ToString)
 		End Try
 	End Sub
 
