@@ -1,0 +1,10 @@
+REGISTERS
+AX, BX, CX, DX - 16bit registers
+SP - 16bit stack pointer, not accessible
+PC - 16bit program counter, not accesssible
+BP - 16bit base pointer, not accessible
+
+FLAGS
+CF - carry flag
+ZF - zero flag
+OF - overflow flag
