@@ -1,0 +1,105 @@
+
+
+backspace = 8'h08
+escape = = 8'h1B
+space = 8'h20
+exclamation = 8'h21
+double quotes = 8'h23
+hash = 8'h24
+dollar = 8'h25
+procent = 8'h25
+and = = 8'h26
+single quote = 8'h27
+open bracket = 8'h28
+close bracket = 8'h29
+star = 8'h2A
+plus = 8'h2B
+comma = 8'h2C
+minus = 8'h2D
+dot = 8'h2E
+slash = 8'h2F
+
+zero = 8'h30
+one = 8'h31
+two = 8'h32
+three = 8'h33
+four = 8'h34
+five = 8'h35
+six = 8'h36
+seven = 8'h37
+eight = 8'h38
+nine = 8'h39
+colon = 8'h3A
+semicolon = 8'h3B
+less = 8'h3C
+equal = 8'h3D
+more = 8'h3E
+question = 8'h3F
+at = 8'h40
+A = 8'h41
+B = 8'h42
+C = 8'h43
+D = 8'h44
+E = 8'h45
+F = 8'h46
+G = 8'h47
+H = 8'h48
+I = 8'h49
+J = 8'h4A
+K = 8'h4B
+L = 8'h4C
+M = 8'h4D
+N = 8'h4E
+O = 8'h4F
+P = 8'h50
+Q = 8'h51
+R = 8'h52
+S = 8'h53
+T = 8'h54
+U = 8'h55
+V = 8'h56
+W = 8'h57
+X = 8'h58
+Y = 8'h59
+Z = 8'h5A
+hard bracket = 8'h5B
+backslash = 8'h5C
+hard bracket close = 8'h5D
+sumfin = 8'h5E
+underscore = 8'h5F
+grave accent = 8'h60
+a = 8'h61
+b = 8'h62
+c = 8'h63
+d = 8'h64
+e = 8'h65
+f = 8'h66
+g = 8'h67
+h = 8'h68
+i = 8'h69
+j = 8'h6A
+k = 8'h6B
+l = 8'h6C
+m = 8'h6D
+n = 8'h6E
+o = 8'h6F
+p = 8'h70
+q = 8'h71
+r = 8'h72
+s = 8'h73
+t = 8'h74
+u = 8'h75
+v = 8'h76
+w = 8'h77
+x = 8'h78
+y = 8'h79
+z = 8'h7A
+funny bracket = 8'h7B
+vertical bar = 8'h7C
+funny bracket close = 8'h7D
+tilde = 8'h7E
+delete = 8'h7F
+
+
+
+
