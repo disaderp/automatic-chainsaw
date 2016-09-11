@@ -4,10 +4,15 @@ module CPU(
 	input clk,
 	input [15:0] in,
 	output [15:0] base,
-	output [15:0] data
+	output [15:0] data,
+	output flag,//r/w flag
+	input reset
 	);
 	
-	assign base, bx;//maybe :/
+	assign base = bx;//maybe :/
+	assign data = dx;
+	reg flag;
+	
 	//reg
 	reg [15:0] ax;
 	reg [15:0] bx;
@@ -23,9 +28,9 @@ module CPU(
 	reg of;//overflow
 	
 	//stack, ram
-	reg [1023:0] stack[15:0];
-	reg [1023:0] ram[15:0];
-	reg [1023:0] pmem[15:0];//programmemory
+	reg [15:0] stack[1023:0];
+	reg [15:0] ram[2047:0];//ram+programmemory
+	//reg [1023:0] pmem[15:0];//programmemory
 	
 	//op
 	parameter oNOP = 16'h0;
@@ -97,9 +102,6 @@ module CPU(
 	reg [15:0] ain;
 	reg [15:0] bin;
 	reg [7:0] op;
-	reg cf;
-	reg zf;
-	reg of;
 	wire c_flag;
 	wire z_flag;
 	wire o_flag;
@@ -129,14 +131,51 @@ module CPU(
 	reg [15:0] tmp;
 	reg alustate;
 	
+	always @(posedge clk) begin : res
+		if (!reset) disable res;
+		ax <= 0;
+		bx <= 0;
+		cx <= 0;
+		dx <= 0;
+		sp <= 0;
+		pc <= 0;
+		bp <= 0;
+		alustate <= 0;
+		flag <= 0;
+		cf <= 0;
+		zf <= 0;
+		of <= 0;
+		
+		ram[0] <= oNOP;
+		ram[1] <= oMOV4;//int to reg
+		ram[2] <= 2'b01;//bx
+		ram[3] <= 16'd1;//port 1
+		ram[4] <= oMOV4;//int to reg
+		ram[5] <= 2'b11;//dx
+		ram[6] <= 16'd1;//data=10
+		ram[7] <= oMOV4;//int to reg
+		ram[8] <= 2'b00;//ax
+		ram[9] <= 16'd0;//ax=11
+		ram[10] <= oSUB;//add with carry//2clock cycles
+		ram[11] <= oMOV3;//reg to reg
+		ram[12] <= 4'b1100;//dx = ax
+		ram[13] <= oOUT;
+		ram[14] <= oADD;//add without carry//1clock cycle
+		ram[15] <= oMOV3;//reg to reg
+		ram[16] <= 4'b1100;//dx=ax
+		ram[17] <= oOUT;
+		ram[18] <= oNOP;
+	end
 	
 	always @(posedge clk) begin : FSM
+		if (!reset) disable FSM;
+		flag <= 0;
 		pc = pc + 1;
-		opcode = pmem[pc];
-		par1 <= pmem[pc+1];
-		par2 <= pmem[pc+2];
-		case (opcode)//pcmem[pc] can potentially load prev value
-			oNOP: nstate <= 16'h0;
+		opcode = ram[pc];
+		par1 = ram[pc+1];
+		par2 = ram[pc+2];
+		case (opcode)
+			oNOP: begin end
 			oSCF: begin 
 				cf <= par1;
 				pc <= pc + 1;
@@ -224,25 +263,25 @@ module CPU(
 			oOUT: begin
 				//idk
 				$display("Address: %b, Data: %b", bx, dx);
-				data <= dx;
+				flag <= 1;
 			end
 			oIN: begin
 				dx <= in;
 			end
 			oXCH: begin
 				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: begin tmp = ax; ax <= bx; bx <= tmp; end//idk
-					4'b0010: begin tmp = ax; ax <= cx; cx <= tmp; end//idk
-					4'b0011: begin tmp = ax; ax <= dx; dx <= tmp; end//idk
-					4'b0100: begin tmp = bx; bx <= ax; ax <= tmp; end//idk
-					4'b0110: begin tmp = bx; bx <= cx; cx <= tmp; end//idk
-					4'b0111: begin tmp = bx; bx <= dx; dx <= tmp; end//idk
-					4'b1000: begin tmp = cx; cx <= ax; ax <= tmp; end//idk
-					4'b1001: begin tmp = cx; cx <= bx; bx <= tmp; end//idk
-					4'b1011: begin tmp = cx; cx <= dx; dx <= tmp; end//idk
-					4'b1100: begin tmp = dx; dx <= ax; ax <= tmp; end//idk
-					4'b1101: begin tmp = dx; dx <= bx; bx <= tmp; end//idk
-					4'b1110: begin tmp = dx; dx <= cx; cx <= tmp; end//idk
+					4'b0001: begin tmp = ax; ax = bx; bx = tmp; end//idk
+					4'b0010: begin tmp = ax; ax = cx; cx = tmp; end//idk
+					4'b0011: begin tmp = ax; ax = dx; dx = tmp; end//idk
+					4'b0100: begin tmp = bx; bx = ax; ax = tmp; end//idk
+					4'b0110: begin tmp = bx; bx = cx; cx = tmp; end//idk
+					4'b0111: begin tmp = bx; bx = dx; dx = tmp; end//idk
+					4'b1000: begin tmp = cx; cx = ax; ax = tmp; end//idk
+					4'b1001: begin tmp = cx; cx = bx; bx = tmp; end//idk
+					4'b1011: begin tmp = cx; cx = dx; dx = tmp; end//idk
+					4'b1100: begin tmp = dx; dx = ax; ax = tmp; end//idk
+					4'b1101: begin tmp = dx; dx = bx; bx = tmp; end//idk
+					4'b1110: begin tmp = dx; dx = cx; cx = tmp; end//idk
 				endcase
 				pc <= pc + 1;
 			end
@@ -653,7 +692,7 @@ module CPU(
 				sp <= sp - 2;
 			end
 			oJMP: begin
-				pc <= par1 + bp - 1;;
+				pc <= par1 + bp - 1;
 			end
 			oJC: begin
 				if (cf) pc <= par1 + bp - 1;

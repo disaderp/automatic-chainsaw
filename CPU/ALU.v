@@ -13,8 +13,10 @@ module alu (
 	reg c_flag;
 	reg [15:0] c;
 	reg [15:0] acc;
-	assign z_flag = acc[15:0] == 0;
-	assign o_flag = c_flag ^ acc[15];
+	reg o_flag;
+	reg z_flag;
+	//assign z_flag = acc[15:0] == 0;
+	//assign o_flag = c_flag ^ acc[15];
 
 	parameter xADD = 8'h1;
 	parameter xADC = 8'h2;
@@ -37,31 +39,28 @@ module alu (
   
 	always @(posedge clk) begin
 		case (op)
-			xADD: {c_flag, acc} <= {a[15], a} + {b[15], b};
-			xADC: {c_flag, acc} <= {a[15], a} + {b[15], b} + cf;
-			xSUB: {c_flag, acc} <= {a[15], a} - {b[15], b};
-			xSUC: {c_flag, acc} <= {a[15], a} - {b[15], b} - cf;
-			xMUL8: acc <= a[7:0] * b[7:0];
-			xMUL6: {c, acc} <= a * b;
-			xDIV8: acc <= a[7:0] / b[7:0];
-			xDIV6: {c, acc} <= a / b;
+			xADD: begin {c_flag, acc} = {a[15], a} + {b[15], b}; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
+			xADC: begin {c_flag, acc} = {a[15], a} + {b[15], b} + cf; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
+			xSUB: begin {c_flag, acc} = {a[15], a} - {b[15], b}; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
+			xSUC: begin {c_flag, acc} = {a[15], a} - {b[15], b} - cf; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
+			xMUL8: acc = a[7:0] * b[7:0];
+			xMUL6: {c, acc} = a * b;
+			xDIV8: acc = a[7:0] / b[7:0];
+			xDIV6: {c, acc} = a / b;
 			xCMP: begin
-				if (a==b) acc <= 0;//trzeba pilnowac w cpu z => c => o
-				if (a<b) c_flag <= 1;
-				if (a>b) begin
-					acc <= 16'hFFFF;
-					c_flag <= 0;
-				end
+				if (a==b) z_flag = 1;//trzeba pilnowac w cpu z => c => o
+				if (a<b) begin z_flag = 0; c_flag = 1; end
+				if (a>b) begin z_flag = 0; c_flag = 0; o_flag = 1; end
 			end
 			
-			xAND: acc <= a & b;
-			xNEG: acc <= ~a;
-			xNOT: acc <= !a;
-			xOR: acc <= a | b;
-			xSHL: acc <= a << 1;
-			xSHR: acc <= a >> 1;
-			xXOR: acc <= a ^ b;
-			xTEST: acc <= !(a == b);
+			xAND: acc = a & b;
+			xNEG: acc = ~a;
+			xNOT: acc = !a;
+			xOR: acc = a | b;
+			xSHL: acc = a << 1;
+			xSHR: acc = a >> 1;
+			xXOR: acc = a ^ b;
+			xTEST: acc = !(a == b);
 		endcase
 	end
 endmodule
