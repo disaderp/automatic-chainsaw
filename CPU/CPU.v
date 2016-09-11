@@ -191,10 +191,10 @@ module CPU(
 			end
 			oMOV1: begin //[adr],xx [adr]<=xx
 				case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
-					2'b00: ram[par2] <= ax;
-					2'b01: ram[par2] <= bx;
-					2'b10: ram[par2] <= cx;
-					2'b11: ram[par2] <= dx;
+					2'b00: ram[par1] <= ax;
+					2'b01: ram[par1] <= bx;
+					2'b10: ram[par1] <= cx;
+					2'b11: ram[par1] <= dx;
 				endcase
 				pc <= pc + 2;
 			end
