@@ -41,10 +41,10 @@ module alu (
 			xADC: begin {c_flag, acc} = {a[15], a} + {b[15], b} + cf; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
 			xSUB: begin {c_flag, acc} = {a[15], a} - {b[15], b}; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
 			xSUC: begin {c_flag, acc} = {a[15], a} - {b[15], b} - cf; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
-			xMUL8: acc = a[7:0] * b[7:0];
-			xMUL6: {c, acc} = a * b;
-			xDIV8: acc = a[7:0] / b[7:0];
-			xDIV6: {c, acc} = a / b;
+			xMUL8: begin acc = a[7:0] * b[7:0]; z_flag = acc[15:0] == 0;end
+			xMUL6: begin {c, acc} = a * b; z_flag = acc[15:0] == 0;end
+			xDIV8: begin acc = a[7:0] / b[7:0]; z_flag = acc[15:0] == 0;end
+			xDIV6: begin {c, acc} = a / b; z_flag = acc[15:0] == 0;end
 			xCMP: begin
 				if (a==b) begin z_flag = 1; c_flag = 0; o_flag = 0; end
 				if (a<b) begin z_flag = 0; c_flag = 1; o_flag = 0; end
@@ -58,7 +58,7 @@ module alu (
 			xSHL: acc = a << 1;
 			xSHR: acc = a >> 1;
 			xXOR: acc = a ^ b;
-			xTEST: acc = !(a == b);
+			xTEST: z_flag = (a == b);
 		endcase
 	end
 endmodule
