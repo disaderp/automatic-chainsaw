@@ -1,3 +1,5 @@
+// jeszcze nie wiem jak to działa, będę musiał to jeszcze raz przenanalizowac i zrozumieć co napisałem XD
+
 module text(
 input clk,
 input [9:0] hcounter, 
