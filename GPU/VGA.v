@@ -1,23 +1,23 @@
 module vga
 (
-	input	clk,    //clock
+	input clk,    //clock
 	input clr,    //clear
-	input	dat,    //data input
+	input dat,    //data input
 	output hsync,    //horizontal sync
 	output vsync,    //vertical sync
-	output pos,		//position
-	output R,    //red
-	output G,    //green
-	output B     //blue
+	output pixv,	//pixel vertical location
+	output pixh,	//pixel horizontal location
+	output dis_en	//enables the display
+	
 );
 	parameter hpix=1056;    //horizontal pixel count
 	parameter hsp=128;      //horizontal sync pulse
 	parameter hbp=216;      //horizontal back porch
 	parameter hfp=1016;     //horizontal front porch
-	parameter vpix=624;     //vertical pixel count
+	parameter vpix=628;     //vertical pixel count
 	parameter vsp=4;        //vertical sync pulse
 	parameter vbp=23;       //vertical back porch
-	parameter vfp=623;      //vertical front porch
+	parameter vfp=627;      //vertical front porch
     
 reg [9:0] hcounter;     //horizontal counter
 reg [9:0] vcounter;     //vertical counter
@@ -33,19 +33,27 @@ always @(posedge clk or posedge clr)
 		end
 	else
 	begin
-	//counts until end of the line 
-    if (hcounter < hpix - 1)
-	hcounter <= hcounter +1;
+		//counts until end of the line 
+		if (hcounter < hpix - 1)
+		hcounter <= hcounter +1;
 	else
 	//end of the line = horizontal counter reset + vertical counter increase
 	//if vertical counter is at the end = reset of both counters
     begin
 		hcounter <= 0;
 			if (vcounter < vpix -1)
-			vounter <= vcounter +1;
+			vcounter <= vcounter +1;
 	else 
 		vcounter <=0;
 			end
+		end
+		if (vcounter >= vbp+vsp && vcounter < vfp)
+		begin
+			if (hcounter >= 256 && hcounter < hpix)
+			begin
+			dis_en <= 1;
+			pixh <= hcounter - 10'd256;
+			pixv <= vcounter - 10'd27;
 		end
 	end
 //synchronization pulses generation
