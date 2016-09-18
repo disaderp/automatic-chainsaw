@@ -1,0 +1,22 @@
+NOP
+MOV AX,(1010)
+MOV BX,(1)
+PUSH AX
+CALL :programA
+MOV DX,(1111)
+OUT
+JMP .goout
+MOV DX,(1111111111111111)
+OUT
+	:programA
+	MOV DX,(1010)
+	TEST AX,DX
+	JZ .git
+	MOV DX,(0)
+	OUT
+	.git
+	MOV DX,(11111111)
+	OUT
+	RET
+.goout
+NOP

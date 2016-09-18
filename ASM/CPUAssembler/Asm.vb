@@ -23,13 +23,21 @@ Module Asm
 
 	Function assemble(ByVal asm As String) As String
 		Dim code As String = ""
-		Dim lines As String() = asm.Split(vbNewLine)
+		Dim lines As String() = asm.Replace(vbCr, "").Split(vbLf)
 		Dim ic As Integer = 0
 		Dim labels As New Dictionary(Of String, Integer)
+		Dim context As Integer = 0
+		Dim contable As New Dictionary(Of Integer, Integer)
+		contable(0) = 0
 		For i As Integer = 0 To lines.Count() - 1
 			Dim mn As String = lines(i).ToUpper().Trim().Replace(vbTab, " ")
 			If mn.StartsWith(".") Then
-				labels(mn) = ic
+				labels(mn) = ic - contable(context)
+				ic -= 1
+			ElseIf mn.StartsWith(":") Then
+				labels(mn) = ic - contable(context)
+				context += 1
+				contable(context) = ic
 				ic -= 1
 			ElseIf mn.StartsWith("NOP") Then
 				code += Trail16("0")
@@ -61,7 +69,6 @@ Module Asm
 				code += Trail16("110")
 				Dim params As String() = mn.Remove(0, 4).Split(",")
 				params(1) = params(1).Remove(params(1).Length - 1).Remove(0, 1)
-				Dim regs As String
 				If params(0) = "AX" Then
 					code += Trail16("00")
 				ElseIf params(0) = "BX" Then
@@ -259,7 +266,7 @@ Module Asm
 				ic += 1
 			ElseIf mn.StartsWith("RET") Then
 				code += Trail16("11111")
-
+				context -= 1
 			ElseIf mn.StartsWith("JMP") Then
 				code += Trail16("100000") + "," + mn.Remove(0, 4) + ","
 				ic += 1
@@ -285,8 +292,7 @@ Module Asm
 				ic -= 1
 			Else
 				code += "ZZ "
-				Console.WriteLine("not implemented line: " + i + 1 + " line: " + lines(i))
-				Console.ReadLine()
+				Console.WriteLine("not implemented line: " & i + 1 & " line: " + lines(i))
 				Environment.Exit(1)
 				Continue For
 			End If

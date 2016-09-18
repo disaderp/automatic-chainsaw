@@ -680,7 +680,7 @@ module CPU(
 			oCALL: begin
 				//idk
 				stack[sp] <= bp;
-				stack[sp+1] <= pc;
+				stack[sp+1] <= pc + 1;
 				sp <= sp + 2;
 				bp <= par1;
 				pc <= par1 - 1;
