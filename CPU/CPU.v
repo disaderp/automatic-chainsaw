@@ -679,16 +679,16 @@ module CPU(
 			end
 			oCALL: begin
 				//idk
-				stack[sp+1] <= bp;
-				stack[sp+2] <= pc;
+				stack[sp] <= bp;
+				stack[sp+1] <= pc;
 				sp <= sp + 2;
 				bp <= par1;
 				pc <= par1 - 1;
 			end
 			oRET: begin
 				//idk
-				pc <= stack[sp];
-				bp <= stack[sp-1];
+				pc <= stack[sp-1];
+				bp <= stack[sp-2];
 				sp <= sp - 2;
 			end
 			oJMP: begin

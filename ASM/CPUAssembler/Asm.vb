@@ -255,8 +255,7 @@ Module Asm
 				code += Trail16(mn.Remove(0, 4))
 				ic += 1
 			ElseIf mn.StartsWith("CALL") Then
-				code += Trail16("11110")
-				code += Trail16(mn.Remove(0, 5))
+				code += Trail16("11110") + "," + mn.Remove(0, 5) + ","
 				ic += 1
 			ElseIf mn.StartsWith("RET") Then
 				code += Trail16("11111")
@@ -308,7 +307,7 @@ Module Asm
 		Return code
 	End Function
 	Sub Main(args As String())
-		Console.WriteLine("xCPUAssembler by Disa" + vbNewLine)
+		Console.WriteLine(vbNewLine + "xCPUAssembler by Disa" + vbNewLine)
 		Try
 			If (args(0) = "-bin") Then
 				Dim d As Byte() = StrToBin(assemble(File.ReadAllText(args(2))))
@@ -319,9 +318,9 @@ Module Asm
 			ElseIf (args(0) = "-plain") Then
 				Console.WriteLine(assemble(File.ReadAllText(args(1))))
 			Else
-				Console.WriteLine("###Usage: <param> <file>" + vbNewLine + "###Params:" + vbNewLine &
-							"-bin <filename> - writes binary file:" + vbNewLine &
-							"-ram - prints in RAM Verilog format" + vbNewLine &
+				Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
+							"-bin <input filename> - writes binary file:" + vbNewLine &
+							"-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
 							"-plain - prints 0s and 1s")
 			End If
 			Console.WriteLine("Done.")
