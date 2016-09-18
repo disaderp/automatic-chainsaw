@@ -132,7 +132,7 @@ module CPU(
 	reg alustate;
 	
 	always @(posedge clk) begin : res
-		if (!reset) disable res;
+		if (reset) disable res;
 		ax <= 0;
 		bx <= 0;
 		cx <= 0;
@@ -191,19 +191,19 @@ module CPU(
 			end
 			oMOV1: begin //[adr],xx [adr]<=xx
 				case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
-					2'b00: ram[par1] <= ax;
-					2'b01: ram[par1] <= bx;
-					2'b10: ram[par1] <= cx;
-					2'b11: ram[par1] <= dx;
+					2'b00: ram[par1+bp] <= ax;
+					2'b01: ram[par1+bp] <= bx;
+					2'b10: ram[par1+bp] <= cx;
+					2'b11: ram[par1+bp] <= dx;
 				endcase
 				pc <= pc + 2;
 			end
 			oMOV2: begin //xx,[adr] xx<=[adr]
 				case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
-					2'b00: ax <= ram[par2];
-					2'b01: bx <= ram[par2];
-					2'b10: cx <= ram[par2];
-					2'b11: dx <= ram[par2];
+					2'b00: ax <= ram[par2+bp];
+					2'b01: bx <= ram[par2+bp];
+					2'b10: cx <= ram[par2+bp];
+					2'b11: dx <= ram[par2+bp];
 				endcase
 				pc <= pc + 2;
 			end
@@ -235,29 +235,29 @@ module CPU(
 			end
 			oLEA: begin //xx,[yy] xx<=[yx]
 				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ax <= ram[bx];
-					4'b0010: ax <= ram[cx];
-					4'b0011: ax <= ram[dx];
-					4'b0100: bx <= ram[ax];
-					4'b0110: bx <= ram[cx];
-					4'b0111: bx <= ram[dx];
-					4'b1000: cx <= ram[ax];
-					4'b1001: cx <= ram[bx];
-					4'b1011: cx <= ram[dx];
-					4'b1100: dx <= ram[ax];
-					4'b1101: dx <= ram[bx];
-					4'b1110: dx <= ram[cx];
+					4'b0001: ax <= ram[bx+bp];
+					4'b0010: ax <= ram[cx+bp];
+					4'b0011: ax <= ram[dx+bp];
+					4'b0100: bx <= ram[ax+bp];
+					4'b0110: bx <= ram[cx+bp];
+					4'b0111: bx <= ram[dx+bp];
+					4'b1000: cx <= ram[ax+bp];
+					4'b1001: cx <= ram[bx+bp];
+					4'b1011: cx <= ram[dx+bp];
+					4'b1100: dx <= ram[ax+bp];
+					4'b1101: dx <= ram[bx+bp];
+					4'b1110: dx <= ram[cx+bp];
 				endcase
 				pc <= pc + 1;
 			end
 			oPOP: begin
+				sp = sp - 1;
 				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-					2'b00: ax <= stack[sp];
-					2'b01: bx <= stack[sp];
-					2'b10: cx <= stack[sp];
-					2'b11: dx <= stack[sp];
+					2'b00: ax = stack[sp];
+					2'b01: bx = stack[sp];
+					2'b10: cx = stack[sp];
+					2'b11: dx = stack[sp];
 				endcase
-				sp <= sp - 1;
 				pc <= pc + 1;
 			end
 			oOUT: begin
@@ -696,21 +696,27 @@ module CPU(
 			end
 			oJC: begin
 				if (cf) pc <= par1 + bp - 1;
+				else pc <= pc + 1;
 			end
 			oJNC: begin
 				if (!cf) pc <= par1 + bp - 1;
+				else pc <= pc + 1;
 			end
 			oJZ: begin
 				if (zf) pc <= par1 + bp - 1;
+				else pc <= pc + 1;
 			end
 			oJNZ: begin
 				if (!zf) pc <= par1 + bp - 1;
+				else pc <= pc + 1;
 			end
 			oJO: begin
 				if (of) pc <= par1 + bp - 1;
+				else pc <= pc + 1;
 			end
 			oJNO: begin
 				if (!of) pc <= par1 + bp - 1;
+				else pc <= pc + 1;
 			end
 		endcase
 	end
