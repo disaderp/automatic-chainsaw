@@ -7,22 +7,20 @@ Module Asm
 		Next
 		Return str
 	End Function
-	'Function ReplaceFirst(original As String, oldValue As String, newValue As String) As String
-	'	Dim loc As Integer = original.IndexOf(oldValue)
-	'	If loc < 0 Then
-	'		Return original
-	'	End If
-	'	Return original.Remove(loc, oldValue.Length).Insert(loc, newValue)
-	'End Function
+	Function StrToBin(str As String) As Byte()
+		Dim nBytes As Integer = str.Length / 8
+		Dim bytesAsStrings = Enumerable.Range(0, nBytes).[Select](Function(i) str.Substring(8 * i, 8))
+		Dim bytes As Byte() = bytesAsStrings.[Select](Function(s) Convert.ToByte(s, 2)).ToArray()
+		Return bytes
+	End Function
+	Function toRAM(str As String) As String
+		Dim ram As String = ""
+		For i As Integer = 0 To (str.Length() / 16) - 1
+			ram += "ram[" & i & "] <= 16'b" + str.Substring(i * 16, 16) + ";" + vbNewLine
+		Next
+		Return ram
+	End Function
 
-	'Function AddTrailing2(num As String)
-	'	Dim out As String = ""
-	'	For i As Integer = num.Length To 1
-	'		out += "0"
-	'	Next
-	'	out += num
-	'	Return out
-	'End Function
 	Function assemble(ByVal asm As String) As String
 		Dim code As String = ""
 		Dim lines As String() = asm.Split(vbNewLine)
@@ -267,22 +265,22 @@ Module Asm
 				code += Trail16("100000") + "," + mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JC") Then
-				code += Trail16("100001,") + "," + +mn.Remove(0, 3) + ","
+				code += Trail16("100001") + "," + mn.Remove(0, 3) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JNC") Then
-				code += Trail16("100010,") + "," + +mn.Remove(0, 4) + ","
+				code += Trail16("100010") + "," + mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JZ") Then
-				code += Trail16("100011,") + "," + +mn.Remove(0, 3) + ","
+				code += Trail16("100011") + "," + mn.Remove(0, 3) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JNZ") Then
-				code += Trail16("100100,") + "," + +mn.Remove(0, 4) + ","
+				code += Trail16("100100") + "," + mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JO") Then
-				code += Trail16("100101,") + "," + +mn.Remove(0, 3) + ","
+				code += Trail16("100101") + "," + mn.Remove(0, 3) + ","
 				ic += 1
 			ElseIf mn.StartsWith("JNO") Then
-				code += Trail16("100110,") + "," + +mn.Remove(0, 4) + ","
+				code += Trail16("100110") + "," + mn.Remove(0, 4) + ","
 				ic += 1
 			ElseIf mn = "" Then
 				ic -= 1
@@ -310,8 +308,23 @@ Module Asm
 		Return code
 	End Function
 	Sub Main(args As String())
+		Console.WriteLine("xCPUAssembler by Disa" + vbNewLine)
 		Try
-			Console.WriteLine(assemble(File.ReadAllText(args(0))))
+			If (args(0) = "-bin") Then
+				Dim d As Byte() = StrToBin(assemble(File.ReadAllText(args(2))))
+				File.WriteAllBytes(args(1), d)
+			ElseIf (args(0) = "-ram") Then
+				Dim d As String = toRAM(assemble(File.ReadAllText(args(2))))
+				File.WriteAllText(args(1), d)
+			ElseIf (args(0) = "-plain") Then
+				Console.WriteLine(assemble(File.ReadAllText(args(1))))
+			Else
+				Console.WriteLine("###Usage: <param> <file>" + vbNewLine + "###Params:" + vbNewLine &
+							"-bin <filename> - writes binary file:" + vbNewLine &
+							"-ram - prints in RAM Verilog format" + vbNewLine &
+							"-plain - prints 0s and 1s")
+			End If
+			Console.WriteLine("Done.")
 		Catch ex As Exception
 			Console.WriteLine(ex.ToString)
 		End Try
