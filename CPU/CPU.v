@@ -1,4 +1,5 @@
-`include 'ALU.v'
+`include "ALU.v"
+`include "Buff.v"
 
 module CPU(
 	input clk,
@@ -108,7 +109,7 @@ module CPU(
 	wire [15:0] acc;
 	wire [15:0] c;
 	
-	alu alu0 (
+	dALU alu0 (
 		.clk (clk),
 		.a(ain),
 		.b(bin),
@@ -717,6 +718,10 @@ module CPU(
 				if (!of) pc <= par1 + bp - 1;
 				else pc <= pc + 1;
 			end
+			default: begin//unrecognized cmd//maybe gpu
+				//TOOD:send to gpu+par1
+				pc <= pc + 1;
+				end
 		endcase
 	end
 endmodule

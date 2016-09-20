@@ -1,0 +1,3 @@
+module Buff(
+	input clk,
+	

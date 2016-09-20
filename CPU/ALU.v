@@ -1,4 +1,4 @@
-module alu (
+module dALU (
 	input clk,
 	input [15:0] a,
 	input [15:0] b,
