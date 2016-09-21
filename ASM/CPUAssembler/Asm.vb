@@ -65,8 +65,38 @@ Module Asm
 					code += Trail16("11")
 				End If
 				ic += 2
+			ElseIf mn.StartsWith("MOV <") Then
+				code += Trail16("101010")
+				Dim params As String() = mn.Remove(0, 5).Split(",")
+				params(0) = params(0).Remove(params(0).Length - 1)
+				code += Trail16(params(0))
+				If params(1) = "AX" Then
+					code += Trail16("00")
+				ElseIf params(1) = "BX" Then
+					code += Trail16("01")
+				ElseIf params(1) = "CX" Then
+					code += Trail16("10")
+				ElseIf params(1) = "DX" Then
+					code += Trail16("11")
+				End If
+				ic += 2
 			ElseIf mn.Contains("[") And mn.Contains("MOV") Then
 				code += Trail16("110")
+				Dim params As String() = mn.Remove(0, 4).Split(",")
+				params(1) = params(1).Remove(params(1).Length - 1).Remove(0, 1)
+				If params(0) = "AX" Then
+					code += Trail16("00")
+				ElseIf params(0) = "BX" Then
+					code += Trail16("01")
+				ElseIf params(0) = "CX" Then
+					code += Trail16("10")
+				ElseIf params(0) = "DX" Then
+					code += Trail16("11")
+				End If
+				code += Trail16(params(1))
+				ic += 2
+			ElseIf mn.Contains("<") And mn.Contains("MOV") Then
+				code += Trail16("101011")
 				Dim params As String() = mn.Remove(0, 4).Split(",")
 				params(1) = params(1).Remove(params(1).Length - 1).Remove(0, 1)
 				If params(0) = "AX" Then

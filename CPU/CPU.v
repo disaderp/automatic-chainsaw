@@ -44,6 +44,8 @@ module CPU(
 	parameter oMOV2 = 16'h6;
 	parameter oMOV3 = 16'h7;
 	parameter oMOV4 = 16'h8;
+	parameter oMOV5 = 16'h2A;
+	parameter oMOV6 = 16'h2B;
 	parameter oLEA = 16'h27;
 	parameter oPOP = 16'h9;
 	parameter oOUT = 16'hA;
@@ -101,6 +103,7 @@ module CPU(
 	parameter xXOR = 8'h10;
 	parameter xTEST = 8'h11;
 	
+	//alumodule
 	reg [15:0] ain;
 	reg [15:0] bin;
 	reg [7:0] op;
@@ -121,13 +124,56 @@ module CPU(
 		.o_flag(o_flag),
 		.acc(acc),
 		.c(c)
-	);
+	);//alumodule
+	
+	//sdcardmodule
+	wire spiClk;
+	wire spiMiso;
+	wire spiMosi;
+	wire spiCS;
+	
+	wire clk25;
+	clock_divider div1(clk, c5);
+	clock_divider div2(c5, clk25);
+	
+	reg rd = 0;
+	reg wr = 0;
+	reg [7:0] din = 0;
+	wire [7:0] dout;
+	wire byte_available;
+	wire ready;
+	wire ready_for_next_byte;
+	reg [31:0] adr = 32'h00_00_00_00;
+	wire [4:0] state;
+	
+	assign SD_RESET = 0;
+	assign SD_DAT[1] = 1;
+	assign SD_DAT[2] = 1;
+	assign SD_DAT[3] = spiCS;
+	assign spiMiso = SD_DAT[0];
+	assign SD_CMD = spiMosi;
+	assign SD_SCK = spiClk;
+	
+	assign adr = bx;
+	
+	sd_controller sdcont0(.cs(spiCS), .mosi(spiMosi), .miso(spiMiso),
+			.sclk(spiClk), .rd(rd), .wr(wr), .reset(!reset),
+			.din(din), .dout(dout), .byte_available(byte_available),
+			.ready(ready), .address(adr), 
+			.ready_for_next_byte(ready_for_next_byte), .clk(clk25), 
+			.status(state));
+	//sdcardmodule
 	
 	reg [15:0] opcode;
 	reg [15:0] par1;
 	reg [15:0] par2;
 	reg [15:0] tmp;
 	reg alustate;
+	
+	always @(posedge clk25) begin : SD
+		if (!reset) disable SD;
+		
+	end
 	
 	always @(posedge clk) begin : res
 		if (reset) disable res;
@@ -143,6 +189,13 @@ module CPU(
 		cf <= 0;
 		zf <= 0;
 		of <= 0;
+		
+		bytes <= 0;
+		bytes_read <= 0;
+		din <= 0;
+		wr <= 0;
+		rd <= 0;
+		test_state <= STATE_INIT; 
 		
 		ram[0] <= oNOP;
 		ram[1] <= oMOV4;//int to reg
@@ -187,7 +240,7 @@ module CPU(
 			oCZF: begin
 				dx <= zf;
 			end
-			oMOV1: begin //[adr],xx [adr]<=xx
+			oMOV1: begin //[adr],xx [adr]<=xx //relative address
 				case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
 					2'b00: ram[par1+bp] <= ax;
 					2'b01: ram[par1+bp] <= bx;
@@ -196,12 +249,30 @@ module CPU(
 				endcase
 				pc <= pc + 2;
 			end
-			oMOV2: begin //xx,[adr] xx<=[adr]
+			oMOV2: begin //xx,[adr] xx<=[adr] //relative address
 				case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
 					2'b00: ax <= ram[par2+bp];
 					2'b01: bx <= ram[par2+bp];
 					2'b10: cx <= ram[par2+bp];
 					2'b11: dx <= ram[par2+bp];
+				endcase
+				pc <= pc + 2;
+			end
+			oMOV5: begin //<adr>,xx <adr><=xx //absolute address
+				case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
+					2'b00: ram[par1] <= ax;
+					2'b01: ram[par1] <= bx;
+					2'b10: ram[par1] <= cx;
+					2'b11: ram[par1] <= dx;
+				endcase
+				pc <= pc + 2;
+			end
+			oMOV6: begin //xx,<adr> xx<=<adr> //absolute address
+				case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
+					2'b00: ax <= ram[par2];
+					2'b01: bx <= ram[par2];
+					2'b10: cx <= ram[par2];
+					2'b11: dx <= ram[par2];
 				endcase
 				pc <= pc + 2;
 			end
