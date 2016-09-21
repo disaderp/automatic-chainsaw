@@ -1,5 +1,6 @@
 `include "ALU.v"
 `include "Buff.v"
+`include "SDCard.v"
 
 module CPU(
 	input clk,
