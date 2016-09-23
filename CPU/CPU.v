@@ -191,6 +191,7 @@ module CPU(
 		cf <= 0;
 		zf <= 0;
 		of <= 0;
+		gpuline <= 0;
 		
 		bytes <= 0;
 		bytes_read <= 0;
@@ -223,6 +224,7 @@ module CPU(
 	always @(posedge clk) begin : FSM
 		if (!reset) disable FSM;
 		flag <= 0;
+		gpuline <= 16'h0;
 		pc = pc + 1;
 		opcode = ram[pc];
 		par1 = ram[pc+1];
@@ -793,8 +795,14 @@ module CPU(
 				else pc <= pc + 1;
 			end
 			default: begin//unrecognized cmd//maybe gpu
-				//TOOD:send to gpu+par1
-				pc <= pc + 1;
+				if (!alustate) begin
+					pc <= pc - 1;
+					gpuline <= opcode;
+					alustate <= 1;
+				else begin
+					pc <= pc + 1;
+					gpuline <= par1;
+					alustate <= 0;
 				end
 		endcase
 	end
