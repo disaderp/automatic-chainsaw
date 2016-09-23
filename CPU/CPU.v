@@ -15,6 +15,8 @@ module CPU(
 	assign data = dx;
 	reg flag;
 	
+	reg [15:0] gpuline;//TODO: pilnowac 0
+	
 	//reg
 	reg [15:0] ax;
 	reg [15:0] bx;

@@ -1,5 +1,3 @@
-// jeszcze nie wiem jak to działa, będę musiał to jeszcze raz przenanalizowac i zrozumieć co napisałem XD
-
 module text(
 input clk,		//clock
 input clr,		//clear
@@ -7,7 +5,7 @@ input [9:0] pixh, 	//pixel localization
 input [9:0] pixv,	//pixel localization
 input [7:0} dat,	//data
 output out_vga, //vga output
-output reg [11:0] ascii, 	//idk
+output reg [11:0] asciiaddress, 	
 
 output reg dis_mem_en,		//enables display memory
 output reg font_mem_en		//enables font memory
@@ -21,25 +19,25 @@ always @ (posedge clk or negedge clr)
 begin
 	if (clr = 1)		//reset of all registers 
 		begin	
-		ascii <= 0;
+		asciiaddress <= 0;
 		line <= 0;
 		dis_mem_en <= 0;
 		font_mem_en <= 0;
 	end 
 		else 
 		begin
-			ascii <= 0;
+			asciiaddress <= 0;
 				case (pixh[2:0])
 					3'b110: begin
 					hp[11:0] <= { 6'd0, pixh[9:4] };
 					vp[11:0] <= { 6'd0, pixv[9:4] };
-					ascii[11:0] <= hp + vp * 40;
+					asciiaddress[11:0] <= hp + vp * 40;
 					dis_mem_en <=1;
 					font_mem_en <= 1;
 				end
 	
 				3'b111: begin
-				line <= ascii;
+				line <= dat;
 			end
 				3'b000: begin
 				dis_mem_en <= 0;

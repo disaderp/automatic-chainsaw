@@ -1,0 +1,9 @@
+Instruction - 		function 			- parameter
+00			-		noop				- n/a
+C0			-		text/graph			- 0 or 1
+C1			- literka na koniec bufora  - literka
+C2			- kasuj ostatnią literkę	- n/a
+C3			- przejdź do lini X			- x
+C4			- przejdź do kolumny y		- y
+C5			- kasuj	wszystko			- n/a
+C6			- przejdź do nowej linii	- n/a
