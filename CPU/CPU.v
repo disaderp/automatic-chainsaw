@@ -8,14 +8,15 @@ module CPU(
 	output [15:0] base,
 	output [15:0] data,
 	output flag,//r/w flag//TODO: inout buffer
-	input reset
+	input reset,
+	output gpuline
 	);
 	
 	assign base = bx;//TODO: inout buffer
 	assign data = dx;
 	reg flag;
 	
-	reg [15:0] gpuline;//TODO: pilnowac 0
+	reg [15:0] gpuline;
 	
 	//reg
 	reg [15:0] ax;
@@ -145,7 +146,7 @@ module CPU(
 	wire byte_available;
 	wire ready;
 	wire ready_for_next_byte;
-	reg [31:0] adr = 32'h00_00_00_00;
+	reg [15:0] adr;// = 32'h00_00_00_00;
 	wire [4:0] state;
 	
 	assign SD_RESET = 0;

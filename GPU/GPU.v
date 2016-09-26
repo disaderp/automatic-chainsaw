@@ -13,6 +13,8 @@ reg [15:0] param;
 reg [11:0] ram [7:0];
 reg [11:0] pointer;//=0
 
+reg [11:0] tmpx;//char //=0
+reg [11:0] tmpy;//line //=0
 reg nopsate;//inicjalizacja 0
 reg [15:0] nextcmd;
 //@todo: blok reset always//patrz cpu.v//zainicjum cmd=0;
@@ -35,26 +37,46 @@ always @(posedge clk) begin : main
 		16'hC1: begin
 			ram[pointer] <= param;
 			pointer <= pointer + 1;
+			tmpx <= tmpx + 1;
 			cmd <= 16'h0;
 		end
 		16'hC2: begin
-			//@TODO: ksaowanie i pointer wycofac
+			ram[pointer - 1] <= 8'h0;
+			pointer <= poiner - 1;
+			tmpx <= tmpx - 1;
 			cmd <= 16'h0;
 		end
 		16'hC3: begin
-			//@TODO: Disa
+			tmpy <= param;
+			pointer = (param << 5) + (param << 3) + tmpx;//Y*40 +x
 			cmd <= 16'h0;
 		end
 		16'hC4 begin
-			//@TODO: Disa
+			tmpx <= param;
+			pointer = (tmpy << 5) + (tmpy << 3) + param;//X*40 +y
 			cmd <= 16'h0;
 		end
 		16'hC5 begin
-			//kasuj wsyzskto
+			//if SYSTEMVERILOG
+			ram <= '{default:2'b00};
+			//else
+				//for (i=0; i<8; i=i+1) ram[i] <= 2'b00;
+			//endif
+			pointer <= 0;
+			tmpx <= 0;
+			tmpy <= 0;
 			cmd <= 16'h0;
 		end
 		16'hC6: begin
-			//@TODO: Disa
+			if(tmpy > 24) begin
+				pointer <= 0;
+				tmpx <= 0;
+				tmpy <= 0;
+			else begin
+				tmpx <= 0;
+				tmpy = tmpy + 1;
+				pointer = (tmpy << 5) + (tmpy << 3);//*40
+				end
 			cmd <= 16'h0;
 		end
 	
