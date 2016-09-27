@@ -154,6 +154,7 @@ module CPU(
 	wire ready_for_next_byte;
 	reg [15:0] adr;// = 32'h00_00_00_00;
 	wire [4:0] state;
+	reg flush;//set before power off
 	
 	reg [7:0] sdcard [511:0];//temp
 	reg [2:0] stat;
@@ -194,8 +195,17 @@ module CPU(
 				end
 			end
 			2: begin //occasional flush
-				
+				wr <= 1;
+				sdpointer <= 0;
+				stat <= 3;
 			end
+			3: begin //probably shutdown
+				if(ready_for_next_byte) begin
+					din <= sdcard[sdpointer];
+					sdpointer <= sdpointer + 1;
+				end
+			end
+		endcase
 	end
 	
 	always @(posedge clk) begin : res
@@ -221,6 +231,7 @@ module CPU(
 		rd <= 0;
 		stat <= 0;
 		sdpointer <= 0;
+		flush <= 0;
 		
 		ram[0] <= oNOP;
 		ram[1] <= oMOV4;//int to reg
