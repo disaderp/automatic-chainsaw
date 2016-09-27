@@ -129,11 +129,27 @@ module CPU(
 		.c(c)
 	);//alumodule
 	
+	reg [15:0] opcode;
+	reg [15:0] par1;
+	reg [15:0] par2;
+	reg [15:0] tmp;
+	reg alustate;
+	
 	//sdcardmodule
 	wire spiClk;
 	wire spiMiso;
 	wire spiMosi;
 	wire spiCS;
+	
+	reg [15:0] inbuf [10:0];
+	reg [15:0] obuf [10:0];
+	reg [10:0] ibufpointer;
+	reg [10:0] obufpointer;
+	reg [15:0] iadrbuf [10:0];
+	reg [15:0] oadrbuf [10:0];
+	reg [10:0] iadrbufpointer;
+	reg [10:0] oadrbufpointer;
+	reg [1:0] stat;
 	
 	wire clk25;
 	clock_divider div1(clk, c5);
@@ -148,6 +164,7 @@ module CPU(
 	wire ready_for_next_byte;
 	reg [15:0] adr;// = 32'h00_00_00_00;
 	wire [4:0] state;
+	reg [15:0] partdata;
 	
 	assign SD_RESET = 0;
 	assign SD_DAT[1] = 1;
@@ -157,8 +174,6 @@ module CPU(
 	assign SD_CMD = spiMosi;
 	assign SD_SCK = spiClk;
 	
-	assign adr = bx;
-	
 	sd_controller sdcont0(.cs(spiCS), .mosi(spiMosi), .miso(spiMiso),
 			.sclk(spiClk), .rd(rd), .wr(wr), .reset(!reset),
 			.din(din), .dout(dout), .byte_available(byte_available),
@@ -167,15 +182,50 @@ module CPU(
 			.status(state));
 	//sdcardmodule
 	
-	reg [15:0] opcode;
-	reg [15:0] par1;
-	reg [15:0] par2;
-	reg [15:0] tmp;
-	reg alustate;
-	
 	always @(posedge clk25) begin : SD
 		if (!reset) disable SD;
-		
+		if (obufpointer > 0) begin //data to read
+			if (stat == 0) begin //first phase, request read
+				adr <= oadrbuf[oadrbufpointer];
+				rd <= 1;
+				wr <= 0;
+				stat <= 1;
+			else begin //second phase, read data
+				if (byte_avaliable) begin
+					//rd <= 0; from ref
+					if (stat == 1) begin
+						partdata[15:8] <= dout;
+						stat <= 2;
+					else begin
+						partdata[7:0] = dout;
+						dx = partdata;
+						stat <= 0;
+						rd <= 0;
+						obufpointer <= obufpointer - 1;
+					end
+				end
+			end
+		else if (ibufpointer > 0) begin //data to write
+			if (stat == 0) begin //first phase, request write
+				adr <= iadrbuf[iadrbufpointer];
+				rd <= 0;
+				wr <= 1;
+				stat <= 1;
+			else begin //second phase, read data
+				if (byte_avaliable) begin
+					//rd <= 0; from ref
+					if (stat == 1) begin
+						partdata[15:8] <= din;
+						stat <= 2;
+					else begin
+						partdata[7:0] = din;
+						dx = partdata;
+						stat <= 0;
+						rd <= 0;
+						obufpointer <= obufpointer - 1;
+					end
+				end
+			end
 	end
 	
 	always @(posedge clk) begin : res
@@ -199,7 +249,11 @@ module CPU(
 		din <= 0;
 		wr <= 0;
 		rd <= 0;
-		test_state <= STATE_INIT; 
+		ibufpointer <= 0;
+		obufpointer <= 0;
+		iadrbufpointer <= 0;
+		oadrbufpointer <= 0;
+		stat <= 0;
 		
 		ram[0] <= oNOP;
 		ram[1] <= oMOV4;//int to reg
