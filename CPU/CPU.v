@@ -129,6 +129,10 @@ module CPU(
 		.c(c)
 	);//alumodule
 	
+	//keyboard
+	//@todo
+	//keyboard
+	
 	reg [15:0] opcode;
 	reg [15:0] par1;
 	reg [15:0] par2;
@@ -192,6 +196,7 @@ module CPU(
 				end
 				if (sdpointer == 511) begin
 					stat <= 2;
+					zf <= 1;//zero flag when done
 				end
 			end
 			2: begin //occasional flush
@@ -200,10 +205,17 @@ module CPU(
 				stat <= 3;
 			end
 			3: begin //probably shutdown
-				if(ready_for_next_byte) begin
+				if (ready_for_next_byte) begin
 					din <= sdcard[sdpointer];
 					sdpointer <= sdpointer + 1;
 				end
+				if (sdpointer == 511) begin
+					stat <= 4;
+				end
+			end
+			4: begin 
+				//ready to shutdown 
+				zf <= 1;//zero flag when done
 			end
 		endcase
 	end
@@ -368,11 +380,20 @@ module CPU(
 			end
 			oOUT: begin
 				//TODO: inout buffer
+				if (bx[15:13] == 0) begin//sdcard
+					dx <= sdcard[bx[12:0]];
+				end
 				$display("Address: %b, Data: %b", bx, dx);
 				flag <= 1;
 			end
 			oIN: begin
 				//TODO: inout buffer
+				if (bx[15:13] == 0) begin//sdcard
+					sdcard[bx[12:0]] <= dx;
+				end
+				if (bx[15:13] == 1) begin//keyboard
+					
+				end
 				dx <= in;
 			end
 			oXCH: begin

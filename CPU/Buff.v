@@ -43,16 +43,16 @@ end module
 
 module OutBuff(
 	input clk,
-	input [15:0] in,
-	output [15:0] out,
+	input [12:0] in,
+	output [12:0] out,
 	input writedone,
 	input clkdiv,
 	output outclk,
 	output toread);
 	
-	reg [15:0] out;
+	reg [12:0] out;
 	
-	reg [15:0] outbuf [100:0];
+	reg [12:0] outbuf [100:0];
 	
 	reg [15:0] counter = 0;
 	reg outclk;

@@ -1,0 +1,4 @@
+address[15:13]
+
+000 - sdcard
+001 - keyboard(ps/2)

@@ -39,6 +39,8 @@ Module Asm
 				context += 1
 				contable(context) = ic
 				ic -= 1
+			ElseIf mn.StartsWith("'") Then
+				ic -= 1
 			ElseIf mn.StartsWith("NOP") Then
 				code += Trail16("0")
 			ElseIf mn.StartsWith("SFC") Then
