@@ -141,16 +141,6 @@ module CPU(
 	wire spiMosi;
 	wire spiCS;
 	
-	reg [15:0] inbuf [10:0];
-	reg [15:0] obuf [10:0];
-	reg [10:0] ibufpointer;
-	reg [10:0] obufpointer;
-	reg [15:0] iadrbuf [10:0];
-	reg [15:0] oadrbuf [10:0];
-	reg [10:0] iadrbufpointer;
-	reg [10:0] oadrbufpointer;
-	reg [1:0] stat;
-	
 	wire clk25;
 	clock_divider div1(clk, c5);
 	clock_divider div2(c5, clk25);
@@ -164,7 +154,10 @@ module CPU(
 	wire ready_for_next_byte;
 	reg [15:0] adr;// = 32'h00_00_00_00;
 	wire [4:0] state;
-	reg [15:0] partdata;
+	
+	reg [7:0] sdcard [511:0];//temp
+	reg [2:0] stat;
+	reg [8:0] sdpointer;
 	
 	assign SD_RESET = 0;
 	assign SD_DAT[1] = 1;
@@ -184,47 +177,24 @@ module CPU(
 	
 	always @(posedge clk25) begin : SD
 		if (!reset) disable SD;
-		if (obufpointer > 0) begin //data to read
-			if (stat == 0) begin //first phase, request read
-				adr <= oadrbuf[oadrbufpointer];
+		adr <= 0;//temp only 512bytes
+		case (stat)
+			0: begin//load all data
 				rd <= 1;
-				wr <= 0;
 				stat <= 1;
-			else begin //second phase, read data
-				if (byte_avaliable) begin
-					//rd <= 0; from ref
-					if (stat == 1) begin
-						partdata[15:8] <= dout;
-						stat <= 2;
-					else begin
-						partdata[7:0] = dout;
-						dx = partdata;
-						stat <= 0;
-						rd <= 0;
-						obufpointer <= obufpointer - 1;
-					end
+			end
+			1: begin //start loading
+				rd <= 0;
+				if (byte_available) begin
+					sdcard[sdpointer] <= dout;
+					sdpointer <= sdpointer + 1;
+				end
+				if (sdpointer == 511) begin
+					stat <= 2;
 				end
 			end
-		else if (ibufpointer > 0) begin //data to write
-			if (stat == 0) begin //first phase, request write
-				adr <= iadrbuf[iadrbufpointer];
-				rd <= 0;
-				wr <= 1;
-				stat <= 1;
-			else begin //second phase, read data
-				if (byte_avaliable) begin
-					//rd <= 0; from ref
-					if (stat == 1) begin
-						partdata[15:8] <= din;
-						stat <= 2;
-					else begin
-						partdata[7:0] = din;
-						dx = partdata;
-						stat <= 0;
-						rd <= 0;
-						obufpointer <= obufpointer - 1;
-					end
-				end
+			2: begin //occasional flush
+				
 			end
 	end
 	
@@ -249,11 +219,8 @@ module CPU(
 		din <= 0;
 		wr <= 0;
 		rd <= 0;
-		ibufpointer <= 0;
-		obufpointer <= 0;
-		iadrbufpointer <= 0;
-		oadrbufpointer <= 0;
 		stat <= 0;
+		sdpointer <= 0;
 		
 		ram[0] <= oNOP;
 		ram[1] <= oMOV4;//int to reg
