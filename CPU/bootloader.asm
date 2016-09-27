@@ -25,5 +25,32 @@ X01101110
 X11000001
 X01100111
 
-'init 512*4 loop
-MOV 
+'wait until sdcard load is complete
+.wait
+JNZ .wait
+
+'OSbootsector in first 100
+'MOV DX,(100)
+'CX start sector of OS
+'DX data from sdcard
+'AX tmp address
+MOV CX,(1100100)
+MOV BX,(0)
+.loadall
+IN
+LEA [CX],DX
+MOV DX,CX
+MOV AX,(1)
+ADD
+MOV CX,AX
+MOV DX,BX
+MOV AX,(1)
+ADD
+MOV BX,DX
+MOV DX,(1100100)
+'TEST if 100
+TEST BX,DX
+JNZ .loadall
+
+'loaded
+JMP [1100100]
