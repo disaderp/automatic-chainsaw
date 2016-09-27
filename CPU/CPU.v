@@ -129,6 +129,12 @@ module CPU(
 		.c(c)
 	);//alumodule
 	
+	reg [15:0] opcode;
+	reg [15:0] par1;
+	reg [15:0] par2;
+	reg [15:0] tmp;
+	reg alustate;
+	
 	//sdcardmodule
 	wire spiClk;
 	wire spiMiso;
@@ -148,6 +154,11 @@ module CPU(
 	wire ready_for_next_byte;
 	reg [15:0] adr;// = 32'h00_00_00_00;
 	wire [4:0] state;
+	reg flush;//set before power off
+	
+	reg [7:0] sdcard [511:0];//temp
+	reg [2:0] stat;
+	reg [8:0] sdpointer;
 	
 	assign SD_RESET = 0;
 	assign SD_DAT[1] = 1;
@@ -157,8 +168,6 @@ module CPU(
 	assign SD_CMD = spiMosi;
 	assign SD_SCK = spiClk;
 	
-	assign adr = bx;
-	
 	sd_controller sdcont0(.cs(spiCS), .mosi(spiMosi), .miso(spiMiso),
 			.sclk(spiClk), .rd(rd), .wr(wr), .reset(!reset),
 			.din(din), .dout(dout), .byte_available(byte_available),
@@ -167,15 +176,36 @@ module CPU(
 			.status(state));
 	//sdcardmodule
 	
-	reg [15:0] opcode;
-	reg [15:0] par1;
-	reg [15:0] par2;
-	reg [15:0] tmp;
-	reg alustate;
-	
 	always @(posedge clk25) begin : SD
 		if (!reset) disable SD;
-		
+		adr <= 0;//temp only 512bytes
+		case (stat)
+			0: begin//load all data
+				rd <= 1;
+				stat <= 1;
+			end
+			1: begin //start loading
+				rd <= 0;
+				if (byte_available) begin
+					sdcard[sdpointer] <= dout;
+					sdpointer <= sdpointer + 1;
+				end
+				if (sdpointer == 511) begin
+					stat <= 2;
+				end
+			end
+			2: begin //occasional flush
+				wr <= 1;
+				sdpointer <= 0;
+				stat <= 3;
+			end
+			3: begin //probably shutdown
+				if(ready_for_next_byte) begin
+					din <= sdcard[sdpointer];
+					sdpointer <= sdpointer + 1;
+				end
+			end
+		endcase
 	end
 	
 	always @(posedge clk) begin : res
@@ -199,7 +229,9 @@ module CPU(
 		din <= 0;
 		wr <= 0;
 		rd <= 0;
-		test_state <= STATE_INIT; 
+		stat <= 0;
+		sdpointer <= 0;
+		flush <= 0;
 		
 		ram[0] <= oNOP;
 		ram[1] <= oMOV4;//int to reg
