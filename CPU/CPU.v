@@ -49,7 +49,8 @@ module CPU(
 	parameter oMOV4 = 16'h8;
 	parameter oMOV5 = 16'h2A;
 	parameter oMOV6 = 16'h2B;
-	parameter oLEA = 16'h27;
+	parameter oLEA1 = 16'h27;
+	parameter oLEA2 = 16'h2C;
 	parameter oPOP = 16'h9;
 	parameter oOUT = 16'hA;
 	parameter oIN = 16'h28;
@@ -129,6 +130,16 @@ module CPU(
 		.c(c)
 	);//alumodule
 	
+	//keyboard
+	//@todo
+	//keyboard
+	
+	reg [15:0] opcode;
+	reg [15:0] par1;
+	reg [15:0] par2;
+	reg [15:0] tmp;
+	reg alustate;
+	
 	//sdcardmodule
 	wire spiClk;
 	wire spiMiso;
@@ -148,6 +159,11 @@ module CPU(
 	wire ready_for_next_byte;
 	reg [15:0] adr;// = 32'h00_00_00_00;
 	wire [4:0] state;
+	reg flush;//set before power off
+	
+	reg [7:0] sdcard [511:0];//temp
+	reg [2:0] stat;
+	reg [8:0] sdpointer;
 	
 	assign SD_RESET = 0;
 	assign SD_DAT[1] = 1;
@@ -157,8 +173,6 @@ module CPU(
 	assign SD_CMD = spiMosi;
 	assign SD_SCK = spiClk;
 	
-	assign adr = bx;
-	
 	sd_controller sdcont0(.cs(spiCS), .mosi(spiMosi), .miso(spiMiso),
 			.sclk(spiClk), .rd(rd), .wr(wr), .reset(!reset),
 			.din(din), .dout(dout), .byte_available(byte_available),
@@ -167,15 +181,44 @@ module CPU(
 			.status(state));
 	//sdcardmodule
 	
-	reg [15:0] opcode;
-	reg [15:0] par1;
-	reg [15:0] par2;
-	reg [15:0] tmp;
-	reg alustate;
-	
 	always @(posedge clk25) begin : SD
 		if (!reset) disable SD;
-		
+		adr <= 0;//temp only 512bytes
+		case (stat)
+			0: begin//load all data
+				rd <= 1;
+				stat <= 1;
+			end
+			1: begin //start loading
+				rd <= 0;
+				if (byte_available) begin
+					sdcard[sdpointer] <= dout;
+					sdpointer <= sdpointer + 1;
+				end
+				if (sdpointer == 511) begin
+					stat <= 2;
+					zf <= 1;//zero flag when done
+				end
+			end
+			2: begin //occasional flush
+				wr <= 1;
+				sdpointer <= 0;
+				stat <= 3;
+			end
+			3: begin //probably shutdown
+				if (ready_for_next_byte) begin
+					din <= sdcard[sdpointer];
+					sdpointer <= sdpointer + 1;
+				end
+				if (sdpointer == 511) begin
+					stat <= 4;
+				end
+			end
+			4: begin 
+				//ready to shutdown 
+				zf <= 1;//zero flag when done
+			end
+		endcase
 	end
 	
 	always @(posedge clk) begin : res
@@ -199,27 +242,64 @@ module CPU(
 		din <= 0;
 		wr <= 0;
 		rd <= 0;
-		test_state <= STATE_INIT; 
+		stat <= 0;
+		sdpointer <= 0;
+		flush <= 0;
 		
-		ram[0] <= oNOP;
-		ram[1] <= oMOV4;//int to reg
-		ram[2] <= 2'b01;//bx
-		ram[3] <= 16'd1;//port 1
-		ram[4] <= oMOV4;//int to reg
-		ram[5] <= 2'b11;//dx
-		ram[6] <= 16'd1;//data=10
-		ram[7] <= oMOV4;//int to reg
-		ram[8] <= 2'b00;//ax
-		ram[9] <= 16'd0;//ax=11
-		ram[10] <= oSUB;//add with carry//2clock cycles
-		ram[11] <= oMOV3;//reg to reg
-		ram[12] <= 4'b1100;//dx = ax
-		ram[13] <= oOUT;
-		ram[14] <= oADD;//add without carry//1clock cycle
-		ram[15] <= oMOV3;//reg to reg
-		ram[16] <= 4'b1100;//dx=ax
-		ram[17] <= oOUT;
-		ram[18] <= oNOP;
+		//bootloader
+		ram[0] <= 16'b0000000000000000;
+		ram[1] <= 16'b0000000011000000;
+		ram[2] <= 16'b0000000000000000;
+		ram[3] <= 16'b0000000011000001;
+		ram[4] <= 16'b0000000001101100;
+		ram[5] <= 16'b0000000011000001;
+		ram[6] <= 16'b0000000001101111;
+		ram[7] <= 16'b0000000011000001;
+		ram[8] <= 16'b0000000001100001;
+		ram[9] <= 16'b0000000011000001;
+		ram[10] <= 16'b0000000001100100;
+		ram[11] <= 16'b0000000011000001;
+		ram[12] <= 16'b0000000001101001;
+		ram[13] <= 16'b0000000011000001;
+		ram[14] <= 16'b0000000001101110;
+		ram[15] <= 16'b0000000011000001;
+		ram[16] <= 16'b0000000001100111;
+		ram[17] <= 16'b0000000000100100;
+		ram[18] <= 16'b0000000000010001;
+		ram[19] <= 16'b0000000000001000;
+		ram[20] <= 16'b0000000000000010;
+		ram[21] <= 16'b0000000001100100;
+		ram[22] <= 16'b0000000000001000;
+		ram[23] <= 16'b0000000000000001;
+		ram[24] <= 16'b0000000000000000;
+		ram[25] <= 16'b0000000000101000;
+		ram[26] <= 16'b0000000000101100;
+		ram[27] <= 16'b0000000000001011;
+		ram[28] <= 16'b0000000000000111;
+		ram[29] <= 16'b0000000000001110;
+		ram[30] <= 16'b0000000000001000;
+		ram[31] <= 16'b0000000000000000;
+		ram[32] <= 16'b0000000000000001;
+		ram[33] <= 16'b0000000000001100;
+		ram[34] <= 16'b0000000000000111;
+		ram[35] <= 16'b0000000000001000;
+		ram[36] <= 16'b0000000000000111;
+		ram[37] <= 16'b0000000000001101;
+		ram[38] <= 16'b0000000000001000;
+		ram[39] <= 16'b0000000000000000;
+		ram[40] <= 16'b0000000000000001;
+		ram[41] <= 16'b0000000000001100;
+		ram[42] <= 16'b0000000000000111;
+		ram[43] <= 16'b0000000000000111;
+		ram[44] <= 16'b0000000000001000;
+		ram[45] <= 16'b0000000000000011;
+		ram[46] <= 16'b0000000001100100;
+		ram[47] <= 16'b0000000000011100;
+		ram[48] <= 16'b0000000000000011;
+		ram[49] <= 16'b0000000000100100;
+		ram[50] <= 16'b0000000000011001;
+		ram[51] <= 16'b0000000000100000;
+		ram[52] <= 16'b0000000001100100;
 	end
 	
 	always @(posedge clk) begin : FSM
@@ -307,7 +387,7 @@ module CPU(
 				endcase
 				pc <= pc + 2;
 			end
-			oLEA: begin //xx,[yy] xx<=[yx]
+			oLEA1: begin //xx,[yy] xx<=[yx]
 				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
 					4'b0001: ax <= ram[bx+bp];
 					4'b0010: ax <= ram[cx+bp];
@@ -324,6 +404,23 @@ module CPU(
 				endcase
 				pc <= pc + 1;
 			end
+			oLEA2: begin //[xx],yy [xx]<=yy
+				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+					4'b0001: ram[ax+bp] <= bx;
+					4'b0010: ram[ax+bp] <= cx;
+					4'b0011: ram[ax+bp] <= dx;
+					4'b0100: ram[bx+bp] <= ax;
+					4'b0110: ram[bx+bp] <= cx;
+					4'b0111: ram[bx+bp] <= dx;
+					4'b1000: ram[cx+bp] <= ax;
+					4'b1001: ram[cx+bp] <= bx;
+					4'b1011: ram[cx+bp] <= dx;
+					4'b1100: ram[dx+bp] <= ax;
+					4'b1101: ram[dx+bp] <= bx;
+					4'b1110: ram[dx+bp] <= cx;
+				endcase
+				pc <= pc + 1;
+			end
 			oPOP: begin
 				sp = sp - 1;
 				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -336,11 +433,20 @@ module CPU(
 			end
 			oOUT: begin
 				//TODO: inout buffer
+				if (bx[15:13] == 0) begin//sdcard
+					sdcard[bx[12:0]] <= dx;
+				end
 				$display("Address: %b, Data: %b", bx, dx);
 				flag <= 1;
 			end
 			oIN: begin
 				//TODO: inout buffer
+				if (bx[15:13] == 0) begin//sdcard
+					dx <= sdcard[bx[12:0]];
+				end
+				if (bx[15:13] == 1) begin//keyboard
+					
+				end
 				dx <= in;
 			end
 			oXCH: begin

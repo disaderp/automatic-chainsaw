@@ -39,6 +39,12 @@ Module Asm
 				context += 1
 				contable(context) = ic
 				ic -= 1
+			ElseIf mn.StartsWith("'") Then
+				ic -= 1
+			ElseIf mn.StartsWith("X") Then
+				code += Trail16(mn.Substring(1))
+			ElseIf mn = "" Then
+				ic -= 1
 			ElseIf mn.StartsWith("NOP") Then
 				code += Trail16("0")
 			ElseIf mn.StartsWith("SFC") Then
@@ -128,6 +134,30 @@ Module Asm
 			ElseIf mn.StartsWith("MOV") Then
 				code += Trail16("111")
 				Dim params As String() = mn.Remove(0, 4).Split(",")
+				Dim regs As String
+				If params(0) = "AX" Then
+					regs = "00"
+				ElseIf params(0) = "BX" Then
+					regs = "01"
+				ElseIf params(0) = "CX" Then
+					regs = "10"
+				ElseIf params(0) = "DX" Then
+					regs = "11"
+				End If
+				If params(1) = "AX" Then
+					regs = Trail16(regs + "00")
+				ElseIf params(1) = "BX" Then
+					regs = Trail16(regs + "01")
+				ElseIf params(1) = "CX" Then
+					regs = Trail16(regs + "10")
+				ElseIf params(1) = "DX" Then
+					regs = Trail16(regs + "11")
+				End If
+				code += regs
+				ic += 1
+			ElseIf mn.StartsWith("LEA [") Then
+				code += Trail16("101100")
+				Dim params As String() = mn.Remove(0, 5).Replace("]", "").Split(",")
 				Dim regs As String
 				If params(0) = "AX" Then
 					regs = "00"
@@ -297,6 +327,10 @@ Module Asm
 			ElseIf mn.StartsWith("RET") Then
 				code += Trail16("11111")
 				context -= 1
+			ElseIf mn.StartsWith("JMP [") Then
+				code += Trail16("100000")
+				code += Trail16(mn.Remove(0, 5).Replace("]", ""))
+				ic += 1
 			ElseIf mn.StartsWith("JMP") Then
 				code += Trail16("100000") + "," + mn.Remove(0, 4) + ","
 				ic += 1
@@ -345,7 +379,12 @@ Module Asm
 	Sub Main(args As String())
 		Console.WriteLine(vbNewLine + "xCPUAssembler by Disa" + vbNewLine)
 		Try
-			If (args(0) = "-bin") Then
+			If args.Count() = 0 Then
+				Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
+							"-bin <input filename> - writes binary file:" + vbNewLine &
+							"-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
+							"-plain - prints 0s and 1s")
+			ElseIf (args(0) = "-bin") Then
 				Dim d As Byte() = StrToBin(assemble(File.ReadAllText(args(2))))
 				File.WriteAllBytes(args(1), d)
 			ElseIf (args(0) = "-ram") Then
