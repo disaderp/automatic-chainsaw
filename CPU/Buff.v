@@ -1,15 +1,17 @@
 module InBuff(
 	input clk,
-	input [15:0] in,
-	output [15:0] out,
-	input readdone,
+	input [WIDTH-1:0] in,
+	output [WIDTH-1:0] out,
+	input read,
 	input clkdiv,
 	output outclk,
 	output toread);
 	
-	reg [15:0] out;
+	parameter WIDTH = 16;
 	
-	reg [15:0] inbuf [100:0];
+	reg [WIDTH-1:0] out;
+	
+	reg [WIDTH-1:0] inbuf [20:0];
 	
 	reg [15:0] counter = 0;
 	reg outclk;
@@ -23,63 +25,75 @@ module InBuff(
 		if (counter > clkdiv) begin
 			outclk <= !outclk;
 			counter <= 0;
-			inbuf[bufpointer + 1] <= in;
-			bufpointer <= bufpointer + 1;
+			if (in != 0) begin
+				for(i=1;i<21;i=i+1)//probably very slow
+					inbuf[i] <= inbuf[i-1];
+				end
+				inbuf[0] <= in;
+				bufpointer <= bufpointer + 1;
+			end
 		end
 		if (!oldread) begin
-			if (readdone) begin
+			if (read) begin
 				if(bufpointer > 0) begin
-					out = inbuf[bufpointer];
+					out = inbuf[bufpointer - 1];
 					bufpointer = bufpointer - 1;
 					oldread = 1;
 				end
 			end
-			if (!readdone) begin
-				oldread <= 0;
-			end
+		end
+		if (!read) begin
+			oldread <= 0;
 		end
 	end
 end module
 
 module OutBuff(
 	input clk,
-	input [12:0] in,
-	output [12:0] out,
+	input [WIDTH-1:0] in,
+	output [WIDTH-1:0] out,
 	input writedone,
 	input clkdiv,
 	output outclk,
-	output toread);
+	output towrite);
 	
-	reg [12:0] out;
+	parameter WIDTH = 13;
 	
-	reg [12:0] outbuf [100:0];
+	reg [WIDTH-1:0] out;
+	
+	reg [WIDTH-1:0] outbuf [20:0];
 	
 	reg [15:0] counter = 0;
 	reg outclk;
 	reg oldwrite = 0;
 	reg [6:0] bufpointer = 0;
 	
-	assign towrite = (bufpointer < 90);
+	assign towrite = (bufpointer < 8'd19);
 	
 	
 	always @(posedge clk) begin
 		if (counter > clkdiv) begin
 			outclk <= !outclk;
 			counter <= 0;
-			out <= outbuf[bufpointer + 1]
-			bufpointer <= bufpointer + 1;
+			if (bufpointer > 0) begin
+				out <= outbuf[bufpointer - 1];
+				bufpointer <= bufpointer - 1;
+			end
 		end
 		if (!oldwrite) begin
 			if (writedone) begin
 				if(bufpointer > 0) begin
-					in = inbuf[bufpointer];
-					bufpointer = bufpointer - 1;
+					for(i=1;i<21;i=i+1)//probably very slow
+						outbuf[i] <= outbuf[i-1];
+					end
+					outbuf[0] <= in;
+					bufpointer = bufpointer + 1;
 					oldwrite = 1;
 				end
 			end
-			if (!writedone) begin
-				oldwrite <= 0;
-			end
+		end
+		if (!writedone) begin
+			oldwrite <= 0;
 		end
 	end
 end module

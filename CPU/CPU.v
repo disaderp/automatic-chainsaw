@@ -131,7 +131,10 @@ module CPU(
 	);//alumodule
 	
 	//keyboard
-	//@todo
+	wire KINPIN;//assign to PS/2 output
+	
+	
+	keyboard0 #(1) InBuff(.clk(clk),.in(KINPIN),.out(keydata),.readdone(kreaddone),.clkdiv(10'd1000),.outclk(),.toread(ktoread);
 	//keyboard
 	
 	reg [15:0] opcode;
@@ -195,26 +198,26 @@ module CPU(
 					sdcard[sdpointer] <= dout;
 					sdpointer <= sdpointer + 1;
 				end
-				if (sdpointer == 511) begin
+				if (sdpointer == 9'd511) begin
 					stat <= 2;
 					zf <= 1;//zero flag when done
 				end
 			end
-			2: begin //occasional flush
+			3'd2: begin //occasional flush
 				wr <= 1;
 				sdpointer <= 0;
-				stat <= 3;
+				stat <= 3'd3;
 			end
-			3: begin //probably shutdown
+			3'd3: begin //probably shutdown
 				if (ready_for_next_byte) begin
 					din <= sdcard[sdpointer];
 					sdpointer <= sdpointer + 1;
 				end
-				if (sdpointer == 511) begin
-					stat <= 4;
+				if (sdpointer == 9'd511) begin
+					stat <= 3'd4;
 				end
 			end
-			4: begin 
+			3'd4: begin 
 				//ready to shutdown 
 				zf <= 1;//zero flag when done
 			end
