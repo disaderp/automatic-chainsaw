@@ -4,17 +4,9 @@
 
 module CPU(
 	input clk,
-	input [15:0] in,
-	output [15:0] base,
-	output [15:0] data,
-	output flag,//r/w flag//TODO: inout buffer
 	input reset,
-	output gpuline
+	output [15:0] gpuline
 	);
-	
-	assign base = bx;//TODO: inout buffer
-	assign data = dx;
-	reg flag;
 	
 	reg [15:0] gpuline;
 	
@@ -132,9 +124,11 @@ module CPU(
 	
 	//keyboard
 	wire KINPIN;//assign to PS/2 output
+	wire keydata;
+	reg kread;
+	wire ktoread;
 	
-	
-	keyboard0 #(1) InBuff(.clk(clk),.in(KINPIN),.out(keydata),.readdone(kreaddone),.clkdiv(10'd1000),.outclk(),.toread(ktoread);
+	keyboard0 #(1) InBuff(.clk(clk),.in(KINPIN),.out(keydata),.read(kread),.clkdiv(10'd1000),.outclk(),.toread(ktoread);
 	//keyboard
 	
 	reg [15:0] opcode;
@@ -249,6 +243,8 @@ module CPU(
 		sdpointer <= 0;
 		flush <= 0;
 		
+		kread <= 0;
+		
 		//bootloader
 		ram[0] <= 16'b0000000000000000;
 		ram[1] <= 16'b0000000011000000;
@@ -307,7 +303,11 @@ module CPU(
 	
 	always @(posedge clk) begin : FSM
 		if (!reset) disable FSM;
-		flag <= 0;
+		
+		if (kread) begin
+			kread <= 0;
+			dx <= keydata;
+		end
 		gpuline <= 16'h0;
 		pc = pc + 1;
 		opcode = ram[pc];
@@ -435,20 +435,22 @@ module CPU(
 				pc <= pc + 1;
 			end
 			oOUT: begin
-				//TODO: inout buffer
 				if (bx[15:13] == 0) begin//sdcard
 					sdcard[bx[12:0]] <= dx;
 				end
 				$display("Address: %b, Data: %b", bx, dx);
-				flag <= 1;
 			end
 			oIN: begin
-				//TODO: inout buffer
 				if (bx[15:13] == 0) begin//sdcard
 					dx <= sdcard[bx[12:0]];
 				end
 				if (bx[15:13] == 1) begin//keyboard
-					
+					if (!ktoread) begin
+						zf <= 1;//no data to read zf=0
+					else begin
+						zf <= 0;
+						kread <= 1;
+					end
 				end
 				dx <= in;
 			end
