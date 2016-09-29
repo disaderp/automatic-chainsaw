@@ -181,9 +181,57 @@ Module Asm
 				End If
 				code += regs
 				ic += 1
-			ElseIf mn.StartsWith("LEA") Then
+			ElseIf mn.StartsWith("LEA <") Then
+				code += Trail16("110000")
+				Dim params As String() = mn.Remove(0, 5).Replace(">", "").Split(",")
+				Dim regs As String
+				If params(0) = "AX" Then
+					regs = "00"
+				ElseIf params(0) = "BX" Then
+					regs = "01"
+				ElseIf params(0) = "CX" Then
+					regs = "10"
+				ElseIf params(0) = "DX" Then
+					regs = "11"
+				End If
+				If params(1) = "AX" Then
+					regs = Trail16(regs + "00")
+				ElseIf params(1) = "BX" Then
+					regs = Trail16(regs + "01")
+				ElseIf params(1) = "CX" Then
+					regs = Trail16(regs + "10")
+				ElseIf params(1) = "DX" Then
+					regs = Trail16(regs + "11")
+				End If
+				code += regs
+				ic += 1
+			ElseIf mn.StartsWith("LEA") And mn.Contains("[") Then
 				code += Trail16("100111")
-				Dim params As String() = mn.Remove(0, 4).Split(",")
+				Dim params As String() = mn.Remove(0, 4).Replace("[", "").Replace("]", "").Split(",")
+				Dim regs As String
+				If params(0) = "AX" Then
+					regs = "00"
+				ElseIf params(0) = "BX" Then
+					regs = "01"
+				ElseIf params(0) = "CX" Then
+					regs = "10"
+				ElseIf params(0) = "DX" Then
+					regs = "11"
+				End If
+				If params(1) = "AX" Then
+					regs = Trail16(regs + "00")
+				ElseIf params(1) = "BX" Then
+					regs = Trail16(regs + "01")
+				ElseIf params(1) = "CX" Then
+					regs = Trail16(regs + "10")
+				ElseIf params(1) = "DX" Then
+					regs = Trail16(regs + "11")
+				End If
+				code += regs
+				ic += 1
+			ElseIf mn.StartsWith("LEA") And mn.Contains("<") Then
+				code += Trail16("101111")
+				Dim params As String() = mn.Remove(0, 4).Replace("<", "").Replace(">", "").Split(",")
 				Dim regs As String
 				If params(0) = "AX" Then
 					regs = "00"
@@ -649,6 +697,10 @@ Module Asm
 			ElseIf mn.StartsWith("JMP [") Then
 				code += Trail16("100000")
 				code += Trail16(mn.Remove(0, 5).Replace("]", ""))
+				ic += 1
+			ElseIf mn.StartsWith("JMP <") Then
+				code += Trail16("110001")
+				code += Trail16(mn.Remove(0, 5).Replace(">", ""))
 				ic += 1
 			ElseIf mn.StartsWith("JMP") Then
 				code += Trail16("100000") + "," + mn.Remove(0, 4) + ","
