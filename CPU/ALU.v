@@ -26,15 +26,6 @@ module dALU (
 	parameter xDIV6 = 8'h8;
 	parameter xCMP = 8'h9;
 	
-	parameter xAND = 8'hA;
-	parameter xNEG = 8'hB;
-	parameter xNOT = 8'hC;
-	parameter xOR = 8'hD;
-	parameter xSHL = 8'hE;
-	parameter xSHR = 8'hF;
-	parameter xXOR = 8'h10;
-	parameter xTEST = 8'h11;
-	
 	always @(posedge clk) begin
 		case (op)
 			xADD: begin {c_flag, acc} = {a[15], a} + {b[15], b}; o_flag = c_flag ^ acc[15]; z_flag = acc[15:0] == 0;end
@@ -50,15 +41,6 @@ module dALU (
 				if (a<b) begin z_flag = 0; c_flag = 1; o_flag = 0; end
 				if (a>b) begin z_flag = 0; c_flag = 0; o_flag = 1; end
 			end
-			
-			xAND: acc = a & b;
-			xNEG: acc = ~a;
-			xNOT: acc = !a;
-			xOR: acc = a | b;
-			xSHL: acc = a << 1;
-			xSHR: acc = a >> 1;
-			xXOR: acc = a ^ b;
-			xTEST: z_flag = (a == b);
 		endcase
 	end
 endmodule
