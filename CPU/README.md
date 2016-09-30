@@ -2,6 +2,8 @@
 
 *maintainer: @disaderp*
 
+A 16-bit RISC CPU architecture.
+
 ## registers
 
 - `AX`, `BX`, `CX`, `DX` - general purpose 16-bit registers
