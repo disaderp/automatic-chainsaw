@@ -4,16 +4,33 @@ input clr,		//clear
 input [9:0] pixh, 	//pixel localization
 input [9:0] pixv,	//pixel localization
 input [7:0} dat,	//data
+input vsync,
+input hsync,
+input pinv,
+input pixh,
+input dis_en,
 output out_vga, //vga output
 output reg [11:0] asciiaddress, 	
 
 output reg dis_mem_en,		//enables display memory
 output reg font_mem_en		//enables font memory
 );
-
+//zainicjalowac VGA, podpisac sygnaly
 reg [8:0] line;		//sth
 reg [11:0] hp;		//sth else
 reg [11:0] vp;		//sth else2
+
+
+VGA z0 (
+		.clk (clk),
+		.clr (clr),
+		.dat (dat),
+		.vsync (vsync),
+		.hsync (hsync),
+		.pixv (pixv),
+		.pixh (pixh),
+		.dis_en (dis_en)
+		);
 
 always @ (posedge clk or negedge clr)
 begin

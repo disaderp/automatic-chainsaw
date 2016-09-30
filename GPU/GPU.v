@@ -13,7 +13,6 @@ output font_mem_en,
 output asciiadress,
 output hsync,
 output vsync,
-output dis_en,
 output out
 //@todo: wypisac wszystkie inputy i outputy z nizszych modulow)
 );
@@ -30,16 +29,7 @@ TXT d0 (
 		.font_mem_en (font_mem_en),
 		.dis_mem_en (dis_mem_en)
 		);
-VGA z0 (
-		.clk (clk),
-		.clr (clr),
-		.dat (dat),
-		.vsync (vsync),
-		.hsync (hsync),
-		.pixv (pixv),
-		.pixh (pixh),
-		.dis_en (dis_en)
-		);
+
 font_rom x0 (
 		.adress (adress),
 		.out (out)
