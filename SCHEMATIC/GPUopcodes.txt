@@ -1,8 +1,8 @@
 Instruction - 		function 			- parameter
 00			-		noop				- n/a
 C0			-		text/graph			- 0 or 1
-C1			- sign to the end of buffor - sign
-C2			- delete last sign			- n/a
+C1			- char to the end of buffer - char
+C2			- delete last char			- n/a
 C3			- go to line X				- x
 C4			- go to row y				- y
 C5			- delete all				- n/a

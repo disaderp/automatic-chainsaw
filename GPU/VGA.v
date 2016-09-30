@@ -1,13 +1,9 @@
 module vga
 (
-	input clk,    //clock
-	input clr,    //clear
-	input dat,    //data input
-	output hsync,    //horizontal sync
-	output vsync,    //vertical sync
+	input clk,	//clock
+	input clr,	//clear
 	output pixv,	//pixel vertical location
-	output pixh,	//pixel horizontal location
-	output dis_en	//enables the display
+	output pixh	//pixel horizontal location
 	
 );
 	parameter hpix=1056;    //horizontal pixel count
@@ -18,7 +14,7 @@ module vga
 	parameter vsp=4;        //vertical sync pulse
 	parameter vbp=23;       //vertical back porch
 	parameter vfp=627;      //vertical front porch
-    
+	
 reg [9:0] hcounter;     //horizontal counter
 reg [9:0] vcounter;     //vertical counter
 
@@ -51,7 +47,6 @@ always @(posedge clk or posedge clr)
 		begin
 			if (hcounter >= 256 && hcounter < hpix)
 			begin
-			dis_en <= 1;
 			pixh <= hcounter - 10'd256;
 			pixv <= vcounter - 10'd27;
 		end
