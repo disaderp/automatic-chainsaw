@@ -82,8 +82,8 @@ always @(posedge clk) begin : main
 		16'hC1: begin
 			ram[pointer] <= param;
 			pointer <= pointer + 1;
-			if(tmpx > 38) begin//0..39
-				if(tmpy > 23) //0..24
+			if(tmpx > 12'd38) begin//0..39
+				if(tmpy > 12'd23) //0..24
 					tmpy <= 0;
 				else tmpy <= tmpy + 1;
 				tmpx <= 0;
@@ -121,7 +121,7 @@ always @(posedge clk) begin : main
 			cmd <= 16'h0;
 		end
 		16'hC6: begin
-			if(tmpy > 23) begin//0..24
+			if(tmpy > 12'd23) begin//0..24
 				pointer <= 0;//not the best solution
 				tmpx <= 0;
 				tmpy <= 0;

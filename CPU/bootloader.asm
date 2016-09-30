@@ -30,27 +30,21 @@ X01100111
 JNZ .wait
 
 'OSbootsector in first 100
-'MOV DX,(100)
 'CX start sector of OS
 'DX data from sdcard
 'AX tmp address
 MOV CX,(1100100)
 MOV BX,(0)
+MOV AX,(1)
 .loadall
 IN
-LEA [CX],DX
-MOV DX,CX
-MOV AX,(1)
-ADD
-MOV CX,AX
-MOV DX,BX
-MOV AX,(1)
-ADD
-MOV BX,DX
-MOV DX,(1100100)
+LEA <CX>,DX
+ADD CX,AX
+ADD BX,AX
 'TEST if 100
+MOV DX,(1100100)
 TEST BX,DX
 JNZ .loadall
 
 'loaded
-JMP [1100100]
+JMP <1100100>

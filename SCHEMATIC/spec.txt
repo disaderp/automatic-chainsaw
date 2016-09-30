@@ -1,8 +1,8 @@
 REGISTERS
 AX, BX, CX, DX - 16bit registers
-SP - 16bit stack pointer, not accessible
-PC - 16bit program counter, not accesssible
-BP - 16bit base pointer, not accessible
+SP - 16bit stack pointer, not accessible explicitly
+PC - 16bit program counter
+BP - 16bit base pointer
 
 FLAGS
 CF - carry flag
