@@ -75,7 +75,8 @@ module CPU(
 	parameter oINT = 16'h1D;
 	parameter oCALL = 16'h1E;
 	parameter oRET = 16'h1F;
-	parameter oJMP = 16'h20;
+	parameter oJMP1 = 16'h20;
+	parameter oJMP2 = 16'h31;
 	parameter oJC = 16'h21;
 	parameter oJNC = 16'h22;
 	parameter oJZ = 16'h23;
