@@ -6,7 +6,7 @@ output [7:0] out);
 reg [7:0] font_rom [11:0];
 reg [7:0] out;
 
-font_rom[0] <= ;
+font_rom[0] <= ;//@TODO: ADD FONT
 
 always @(posedge clk) begin
 	out <= font_rom[address];

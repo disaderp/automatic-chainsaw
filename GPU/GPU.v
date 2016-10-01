@@ -2,7 +2,6 @@ module GPU(
 input clk,
 input [15:0] cpuline,
 input clr
-//@todo: wypisac wszystkie inputy i outputy z nizszych modulow)
 );
 
 TXT d0 (
@@ -12,13 +11,18 @@ TXT d0 (
 		.char_line_dat (dat),
 		.asciiadress (asciiadress),
 		.font_mem_en (font_mem_en),
-		.dis_mem_en (dis_mem_en)
+		.dis_mem_en (dis_mem_en),
+		.pix_x(pix_x),
+		.pix_y(pix_y)
 		);
 
 font_rom x0 (
-		.adress (adress),
+		.clk (font_mem_en),
+		.adress ({ascii[6:0], pix_y[3:0], !pix_x[3]}),
 		.out (out)
 		);
+		
+
 
 assign dat = out;
 
@@ -30,19 +34,20 @@ reg [11:0] tmpx;//char //=0
 reg [11:0] tmpy;//line //=0
 reg nopsate;//inicjalizacja 0
 reg [15:0] nextcmd;
-//@todo: blok reset always//patrz cpu.v//zainicjum cmd=0;
+
+reg [7:0] ascii;
 always @ (posedge clk) begin: clr
-	if (clr) disable clr
-	dis_mem_en <= 0;
-	font_mem_en <= 0;
-	asciiadress <=0;
-	dis_en <= 0;
-	adress <=0;
-	out <=0;
+	if (clr) disable clr;
+	//@TODO: REAL REG INITIALIZATION
 	end
-	
+
+always @ (posedge dis_mem_en) begin : dismem
+	if (!clr) disable dismem;
+	ascii <= ram[pointer];
+end
+
 always @(posedge clk) begin : main
-//@todo: disaable
+	if (!clr) disable main;
 	case (cmd) begin
 		16'h0: begin
 			if (!nopstate) begin
@@ -56,7 +61,6 @@ always @(posedge clk) begin : main
 		end
 		16'hC0: begin
 			//@TODO: zerowanie wszyzstkiego znowu oprzuz niektorych rezcyz wiadomo jakis
-			cpuline<=0;
 		end
 		16'hC1: begin
 			ram[pointer] <= param;

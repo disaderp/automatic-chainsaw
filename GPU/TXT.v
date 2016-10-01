@@ -5,13 +5,14 @@ input [7:0} char_line_dat,	//data
 output out_vga, //vga output
 output reg [11:0] asciiaddress, 
 output reg dis_mem_en,		//enables display memory
-output reg font_mem_en		//enables font memory
+output reg font_mem_en,		//enables font memory
+output pix_x,
+output pix_y
 );
 
 reg [8:0] line;		//sth
 reg [11:0] hp;		//sth else
 reg [11:0] vp;		//sth else2
-
 
 VGA z0 (
 		.clk (clk),
@@ -19,6 +20,8 @@ VGA z0 (
 		.pixv (pixv),
 		.pixh (pixh)
 		);
+assign pix_x = pixh;
+assign pix_y = pixv;
 
 always @ (posedge clk or negedge clr)
 begin

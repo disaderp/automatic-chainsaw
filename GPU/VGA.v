@@ -2,8 +2,8 @@ module vga
 (
 	input clk,	//clock
 	input clr,	//clear
-	output pixv,	//pixel vertical location
-	output pixh	//pixel horizontal location
+	output reg[9:0] pixv,	//pixel vertical location
+	output reg[9:0] pixh	//pixel horizontal location
 	
 );
 	parameter hpix=1056;    //horizontal pixel count
