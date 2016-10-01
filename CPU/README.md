@@ -2,7 +2,7 @@
 
 *maintainer: [@disaderp](https://github.com/disaderp)*
 
-A 16-bit RISC CPU created in Verilog.
+A custom architecture 16-bit RISC CPU created in Verilog.
 
 ## registers
 
