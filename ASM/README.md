@@ -1,6 +1,6 @@
-# assembler
+# ChainsawAssembler
 
-*maintainer: @disaderp*
+*maintainer: [@disaderp](https://github.com/disaderp)*
 
 Assembler for the machine code.
 

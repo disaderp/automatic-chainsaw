@@ -1,6 +1,6 @@
-# GPU
+# ChainsawGPU
 
-*maintainer: @Vanderpool0312*
+*maintainer: [@Vanderpool0312](https://github.com/Vanderpool0312)*
 
 ## opcodes
 
@@ -17,8 +17,8 @@
 
 ## output
 
-VGA.
+VGA
 
 ## resolution
 
-800x600.
+800x600 60Hz

@@ -1,8 +1,8 @@
-# CPU
+# ChainsawCPU
 
-*maintainer: @disaderp*
+*maintainer: [@disaderp](https://github.com/disaderp)*
 
-A 16-bit RISC CPU architecture.
+A 16-bit RISC CPU created in Verilog.
 
 ## registers
 
@@ -16,3 +16,7 @@ A 16-bit RISC CPU architecture.
 - `CF` - carry flag
 - `ZF` - zero flag
 - `OF` - overflow flag
+
+## opcodes
+
+- See a [complete list of opcodes](https://github.com/disaderp/automatic-chainsaw/blob/master/SCHEMATIC/op.txt).
