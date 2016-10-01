@@ -29,16 +29,23 @@ assign dat = out;
 reg [15:0] cmd;
 reg [15:0] param;
 reg [11:0] ram [7:0];
-reg [11:0] pointer;//=0
-reg [11:0] tmpx;//char //=0
-reg [11:0] tmpy;//line //=0
-reg nopsate;//inicjalizacja 0
+reg [11:0] pointer;
+reg [11:0] tmpx;
+reg [11:0] tmpy;
+reg nopsate;
 reg [15:0] nextcmd;
 
 reg [7:0] ascii;
 always @ (posedge clk) begin: clr
 	if (clr) disable clr;
-	//@TODO: REAL REG INITIALIZATION
+	cmd <= 0;
+	param <= 0;
+	pointer <= 0;
+	tmpx <= 0;
+	tmpy <=0;
+	nopstate <= 0;
+	nextcmd <= 0;
+	ascii <= 0;
 	end
 
 always @ (posedge dis_mem_en) begin : dismem
@@ -60,7 +67,18 @@ always @(posedge clk) begin : main
 			end
 		end
 		16'hC0: begin
-			//@TODO: zerowanie wszyzstkiego znowu oprzuz niektorych rezcyz wiadomo jakis
+			if (param == 0) begin
+				//if SYSTEMVERILOG
+				ram <= '{default:2'b00};
+				//else
+					//for (i=0; i<8; i=i+1) ram[i] <= 2'b00;
+				//endif
+				pointer <=0;
+				tmpy <=0;
+				tmpx <=0;
+			else begin
+				//graphical mode
+			end
 		end
 		16'hC1: begin
 			ram[pointer] <= param;
