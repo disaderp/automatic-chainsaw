@@ -975,6 +975,17 @@ module CPU(
 				if (!of) pc <= par1 + bp - 1;
 				else pc <= pc + 1;
 			end
+			16'hBF: begin //putchar from mem
+				if (!alustate) begin
+					pc <= pc - 1;
+					gpuline <= opcode;
+					alustate <= 1;
+				else begin
+					pc <= pc + 1;
+					gpuline <= ram[par1 + bp];
+					alustate <= 0;
+				end
+			end
 			default: begin//unrecognized cmd//maybe gpu
 				if (!alustate) begin
 					pc <= pc - 1;

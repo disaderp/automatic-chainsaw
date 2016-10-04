@@ -43,6 +43,8 @@ Module Asm
 				ic -= 1
 			ElseIf mn.StartsWith("X") Then
 				code += Trail16(mn.Substring(1))
+			ElseIf mn.StartsWith("X[") Then
+				code += Trail16(mn.Substring(2).Replace("]", ""))
 			ElseIf mn.StartsWith("NOP") Then
 				code += Trail16("0")
 			ElseIf mn.StartsWith("SFC") Then
