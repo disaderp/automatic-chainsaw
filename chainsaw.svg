@@ -15,7 +15,10 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="chainsaw.svg">
+   sodipodi:docname="chainsaw.svg"
+   inkscape:export-filename="/home/og/git/automatic-chainsaw/chainsaw.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4" />
   <sodipodi:namedview
@@ -37,7 +40,8 @@
      inkscape:window-height="1025"
      inkscape:window-x="0"
      inkscape:window-y="1080"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     showguides="false" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -55,27 +59,47 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-796.36216)">
-    <rect
+    <path
+       sodipodi:type="star"
        style="opacity:1;fill:#00a300;fill-opacity:1;stroke:none;stroke-width:40;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect4136"
-       x="0"
-       y="796.36218"
-       width="256"
-       height="256" />
+       id="path4175"
+       sodipodi:sides="30"
+       sodipodi:cx="128"
+       sodipodi:cy="924.36218"
+       sodipodi:r1="119.49615"
+       sodipodi:r2="106.49584"
+       sodipodi:arg1="-0.52359878"
+       sodipodi:arg2="-0.46848936"
+       inkscape:flatsided="false"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="m 231.4867,864.61411 -8.46563,11.66105 18.62652,11.16068 -10.70511,9.64613 15.89905,14.78946 -12.47671,7.20962 12.47671,17.77188 -13.70303,4.45802 8.50909,19.97757 -14.33047,1.51158 4.16958,21.31016 -14.33159,-1.50093 -0.35217,21.71137 -13.70634,-4.44782 -4.85853,21.16372 -12.48207,-7.2003 -9.15254,19.691 -10.71227,-9.6381 -13.04654,17.3579 -8.4743,-11.6548 -16.37035,14.266 -5.86595,-13.162 -18.9787,10.5508 -3.00123,-14.094 -20.757581,6.3742 -0.0054,-14.4099 -21.629256,1.9192 2.990762,-14.0962 -21.555632,-2.6197 5.856169,-13.16633 L 24.513301,984.11026 32.978934,972.4492 14.352411,961.28852 25.057519,951.64239 9.1584653,936.85293 21.635184,929.64331 9.1584652,911.87143 22.861502,907.41342 14.35241,887.43584 l 14.330467,-1.51158 -4.169576,-21.31015 14.331586,1.50092 0.352169,-21.71138 13.706347,4.44783 4.858524,-21.16371 12.482074,7.20034 9.152537,-19.69109 10.712275,9.63817 13.046537,-17.35788 8.4743,11.65476 L 128,804.86604 l 5.86595,13.16198 18.9787,-10.55071 3.00123,14.09396 20.75758,-6.37425 0.005,14.40997 21.62925,-1.91922 -2.99076,14.09619 21.55563,2.61969 -5.85617,13.16634 z" />
+    <circle
+       style="opacity:1;fill:#009400;fill-opacity:1;stroke:none;stroke-width:40;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="circle4181"
+       cx="128"
+       cy="924.36218"
+       r="97.331741" />
+    <circle
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:40;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path4177"
+       cx="128"
+       cy="924.36218"
+       r="90" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Clear Sans Medium';-inkscape-font-specification:'Clear Sans Medium, Medium';letter-spacing:-1px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
-       x="17.96875"
-       y="1031.7567"
+       style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Clear Sans Medium';-inkscape-font-specification:'Clear Sans Medium, Medium';letter-spacing:-1px;word-spacing:0px;fill:#00a300;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+       x="46.861328"
+       y="938.60046"
        id="text4138"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan4140"
-         x="17.96875"
-         y="1031.7567"><tspan
-           style="-inkscape-font-specification:'Clear Sans';font-family:'Clear Sans';font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;letter-spacing:-1.5px"
+         x="46.861328"
+         y="938.60046"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Clear Sans';-inkscape-font-specification:'Clear Sans';letter-spacing:-1.5px;fill:#00a300;fill-opacity:1;"
            id="tspan4144">chain</tspan><tspan
-           style="-inkscape-font-specification:'Clear Sans Bold';font-family:'Clear Sans';font-weight:bold;font-style:normal;font-stretch:normal;font-variant:normal"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-family:'Clear Sans';-inkscape-font-specification:'Clear Sans Bold';fill:#00a300;fill-opacity:1;"
            id="tspan4142">saw</tspan></tspan></text>
   </g>
 </svg>
