@@ -2,13 +2,29 @@ fastcall void print(char x) {
 	asm("X10111111");
 	asm("X[" + &x + "]");
 }
-void printf(char *text, int length){
+void printf_l(char *text, int length){
 	int i;
 	for(i = 0; i<length; i++){
-		print(*x);
-		x++;
+		print(*text);
+		text++;
 	}
 }
+void printf(char *text){
+	int i =0;
+	while (*text != 0){
+		print(*text);
+		text++;
+	}
+}
+
+void delchar() {
+	asm("X11000010");
+}
+
+void newline() {
+	asm("X11000110");
+}
+
 void initGPU(int mode) {
 	if(mode == 0) {//textmode
 		asm("X11000000");
@@ -19,7 +35,7 @@ void initGPU(int mode) {
 		//not implemented
 	}
 }
-void scan(char x) {
+char scan() {
 	asm("MOV BX,(0010000000000000)");
 	asm("IN");
 	asm("CZF");
