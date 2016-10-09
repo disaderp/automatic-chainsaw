@@ -1,4 +1,5 @@
-# Project Chainsaw
+# Project Chainsaw 
+![logo](https://github.com/disaderp/automatic-chainsaw/raw/master/chainsaw.png)
 
 A custom 16-bit computer
 
