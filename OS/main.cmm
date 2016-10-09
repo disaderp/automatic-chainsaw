@@ -1,20 +1,26 @@
 #include "HAL.h"
 #include "FUNC.h"
+#include "OPER.h"
 
 #define enter 13
 #define backspace 8
 #define max_buffer_size 63 // + 1
+#define function_name_lenght 6
 
 void main ()
 {
 initGPU(0);
+//WELCOME MESSAGE
+print_const("Welcome to Brain_OS 0.1a");
 
-char c_msg[24] = "Welcome to BrainOS 0.1a";
-printf(c_msg);
+//BASIC VARIABLES
 char c_user_buffer[64];
+c_user_buffer[max_buffer_size] = 0;
+//
 int p_user_buffer = 0;
 bool b_isEnterPressed = false;
 
+// MAIN SYSTEM LOOP
 while (1){
 	//Get key pressed by user
 	char c_temp = scan();
@@ -43,12 +49,17 @@ while (1){
 		}
 		else{
 			newline();
-			c_user_buffer[max_buffer_size +1] = 0;
+			c_user_buffer[max_buffer_size] = 0;
 			break;
 		}
 		
 	}
 	// Check if buffer contains function
-	
+	// Only 6 first characters contains function name. The rest is either parameters, null or gibberish. 
+
+	//TODO (CREATE FUNCTION CHECKER)
+		if (char_compare_l (c_user_buffer, "helpme",function_name_lenght)){
+		//TODO (CREATE PARAMETER CHECKER AND RELAY)
+	}
 }
 }
