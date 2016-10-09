@@ -5,12 +5,16 @@ output [7:0] out);
 
 reg [7:0] font_rom [11:0];
 reg [7:0] out;
+reg x = 0;
 
 //Source file: Untitled.raw
 //Size: 65536 bytes
 
 //Output file: Untitled.raw.dat
 //ASCII 0x00 ' '
+always @(posedge clk) begin : once
+if (x) disable once;
+x <= 1;
 font_rom[0] <= 8'b00000000;
 font_rom[1] <= 8'b00000000;
 font_rom[2] <= 8'b00000000;
@@ -4234,7 +4238,7 @@ font_rom[4092] <= 8'b00000000;
 font_rom[4093] <= 8'b00000000;
 font_rom[4094] <= 8'b00000000;
 font_rom[4095] <= 8'b00000000;
-
+end
 
 always @(posedge clk) begin
 	out <= font_rom[address];
