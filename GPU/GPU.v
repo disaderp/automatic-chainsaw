@@ -1,3 +1,5 @@
+`include "txt.v"
+`include "font_rom.v"
 module GPU(
 input clk,
 input [15:0] cpuline,

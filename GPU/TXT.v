@@ -1,8 +1,8 @@
 module text(
 input clk,		//clock
 input clr,		//clear
-input [7:0} char_line_dat,	//data
-output out_vga, //vga output
+input [7:0] char_line_dat,	//data
+output reg out_vga, //vga output
 output reg [11:0] asciiaddress, 
 output reg dis_mem_en,		//enables display memory
 output reg font_mem_en,		//enables font memory
@@ -25,7 +25,7 @@ assign pix_y = pixv;
 
 always @ (posedge clk or negedge clr)
 begin
-	if (clr = 1)		//reset of all registers 
+	if (clr == 1)		//reset of all registers 
 		begin
 		asciiaddress <= 0;
 		line <= 0;
@@ -50,13 +50,14 @@ begin
 				3'b000: begin
 				dis_mem_en <= 0;
 				font_mem_en <=0;
+				end
 		endcase
 	end
 end
 
 always @ (posedge clk)
 begin
-	case (pixh[2:0)
+	case (pixh[2:0])
 	3'b000: out_vga <= line[7];
 	3'b001: out_vga <= line[6];
 	3'b010: out_vga <= line[5];
