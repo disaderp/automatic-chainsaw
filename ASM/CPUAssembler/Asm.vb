@@ -696,6 +696,36 @@ Module Asm
 			ElseIf mn.StartsWith("RET") Then
 				code += Trail16("11111")
 				context -= 1
+			ElseIf mn.StartsWith("JMP [" & mn.Contains("X")) Then
+				code += Trail16("110010")
+				Dim params As String = mn.Remove(0, 5).Replace("]", "")
+				Dim regs As String
+				If params = "AX" Then
+					regs = Trail16(regs + "00")
+				ElseIf params = "BX" Then
+					regs = Trail16(regs + "01")
+				ElseIf params = "CX" Then
+					regs = Trail16(regs + "10")
+				ElseIf params = "DX" Then
+					regs = Trail16(regs + "11")
+				End If
+				code += regs
+				ic += 1
+			ElseIf mn.StartsWith("JMP <" & mn.Contains("X")) Then
+				code += Trail16("110011")
+				Dim params As String = mn.Remove(0, 5).Replace("]", "")
+				Dim regs As String
+				If params = "AX" Then
+					regs = Trail16(regs + "00")
+				ElseIf params = "BX" Then
+					regs = Trail16(regs + "01")
+				ElseIf params = "CX" Then
+					regs = Trail16(regs + "10")
+				ElseIf params = "DX" Then
+					regs = Trail16(regs + "11")
+				End If
+				code += regs
+				ic += 1
 			ElseIf mn.StartsWith("JMP [") Then
 				code += Trail16("100000")
 				code += Trail16(mn.Remove(0, 5).Replace("]", ""))

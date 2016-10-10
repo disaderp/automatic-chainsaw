@@ -1,0 +1,72 @@
+if(exp) {
+	instr1;
+}
+
+MOV AX,expvalue
+TEST AX,0
+JZ .outif<uniqueid>
+//instr1;
+.outif<uniqueid>
+
+
+
+if(exp) {
+	instr1;
+}else{
+	instr2;
+}
+
+MOV AX,expvalue
+TEST AX,0
+JZ .outif<uniqueid>
+//instr1;
+JMP .endif<uniqueid>
+.outif<uniqueid>
+//instr2;
+.endif<uniqueid>
+
+
+
+while(exp) {
+	instr1;
+}
+
+.while<uniqueid>
+MOV AX,expvalue
+TEST AX,0
+JZ .endwhile<uniqueid>
+//instr1;
+JMP .while<uniqueid>
+.endwhile<uniqueid>
+
+
+
+int func_x (int x, int y){
+	x = x+y;
+	return x;
+}
+...
+func_x(10,11);
+
+.func_x
+POP AX //x
+POP BX //y
+ADD AX,BX
+POP DX //ret pointer
+PUSH AX
+JMP [DX]
+...
+CPC
+PUSH DX
+PUSH y
+PUSH x //rev order
+JMP .func_x
+
+
+
+print_const("hello world");
+
+//for i = 0 to text.length
+X11000001
+X<ASCII CODE OF CHAR IN BINARY>
+//endfor

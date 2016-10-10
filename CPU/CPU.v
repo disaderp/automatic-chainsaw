@@ -77,6 +77,8 @@ module CPU(
 	parameter oRET = 16'h1F;
 	parameter oJMP1 = 16'h20;
 	parameter oJMP2 = 16'h31;
+	parameter oJMP3 = 16'h32;
+	parameter oJMP4 = 16'h33;
 	parameter oJC = 16'h21;
 	parameter oJNC = 16'h22;
 	parameter oJZ = 16'h23;
@@ -950,6 +952,22 @@ module CPU(
 			end
 			oJMP2: begin
 				pc <= par1 - 1;
+			end
+			oJMP3: begin
+				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+					2'b00: pc <= ax + bp - 1;
+					2'b01: pc <= bx + bp - 1;
+					2'b10: pc <= cx + bp - 1;
+					2'b11: pc <= dx + bp - 1;
+				endcase
+			end
+			oJMP4: begin
+				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+					2'b00: pc <= ax - 1;
+					2'b01: pc <= bx - 1;
+					2'b10: pc <= cx - 1;
+					2'b11: pc <= dx - 1;
+				endcase
 			end
 			oJC: begin
 				if (cf) pc <= par1 + bp - 1;
