@@ -40,7 +40,7 @@ JMP .while<uniqueid>
 .endwhile<uniqueid>
 
 
-
+//test
 int func_x (int x, int y){
 	x = x+y;
 	return x;
@@ -70,3 +70,30 @@ print_const("hello world");
 X11000001
 X<ASCII CODE OF CHAR IN BINARY>
 //endfor
+
+
+//universalway
+int func_x (int x, int y){
+	x = x+y;
+	return x;
+}
+...
+func_x(10,11);
+
+.func_x
+POP AX //x
+MOV [<local x address>],AX
+POP BX //y
+MOV [<local y address>],BX//in case needed later, (needed when used more than 4 params)
+ADD AX,BX
+POP DX //ret pointer
+PUSH AX
+JMP [DX]
+...
+CPC
+PUSH DX
+MOV DX,[<main y address>]
+PUSH DX
+MOV DX,[<main x address>] //rev order
+PUSH DX
+JMP .func_x
