@@ -690,6 +690,10 @@ Module Asm
 				code += Trail16("11101")
 				code += Trail16(mn.Remove(0, 4))
 				ic += 1
+			ElseIf mn.StartsWith("CALL [") Then
+				code += Trail16("11110")
+				code += Trail16(mn.Substring(6).Replace("]", ""))
+				ic += 1
 			ElseIf mn.StartsWith("CALL") Then
 				code += Trail16("11110") + "," + mn.Remove(0, 5) + ","
 				ic += 1

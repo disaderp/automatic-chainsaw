@@ -47,4 +47,4 @@ TEST BX,DX
 JNZ .loadall
 
 'loaded
-JMP <1100100>
+CALL [1100100]
