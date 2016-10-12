@@ -4,17 +4,11 @@ module dALU (
 	input [15:0] b,
 	input [7:0] op,
 	input cf,
-	output c_flag,
-	output z_flag,
-	output o_flag,
-	output [15:0] acc,
-	output [15:0] c);
-	
-	reg c_flag;
-	reg [15:0] c;
-	reg [15:0] acc;
-	reg o_flag;
-	reg z_flag;
+	output reg c_flag,
+	output reg z_flag,
+	output reg o_flag,
+	output reg [15:0] acc,
+	output reg [15:0] c);
 	
 	parameter xADD = 8'h1;
 	parameter xADC = 8'h2;

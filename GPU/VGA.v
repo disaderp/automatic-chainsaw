@@ -1,4 +1,4 @@
-module vga
+module VGA
 (
 	input clk,	//clock
 	input clr,	//clear
@@ -20,37 +20,31 @@ reg [9:0] vcounter;     //vertical counter
 
 //only triggered on signal transitions or edges
 //posedge = falling edge = rising edge and negedge
-always @(posedge clk or posedge clr)  
-	begin
-		if (clr == 1)   //reset requirement
-		begin
+always @(posedge clk) begin
+	if (clr == 1) begin //reset requirement
 			hcounter <= 0;
 			vcounter <= 0;
-		end
-	else
-	begin
-		//counts until end of the line 
+	end else begin //counts until end of the line 
 		if (hcounter < hpix - 1)
-		hcounter <= hcounter +1;
-	else
-	//end of the line = horizontal counter reset + vertical counter increase
-	//if vertical counter is at the end = reset of both counters
-    begin
-		hcounter <= 0;
-			if (vcounter < vpix -1)
-			vcounter <= vcounter +1;
-	else 
-		vcounter <=0;
-			end
+			hcounter <= hcounter +1;
+		else begin
+			//end of the line = horizontal counter reset + vertical counter increase
+			//if vertical counter is at the end = reset of both counters
+			hcounter <= 0;
+			if (vcounter < vpix - 1)
+				vcounter <= vcounter +1;
+			else 
+				vcounter <=0;
 		end
-		if (vcounter >= vbp+vsp && vcounter < vfp)
-		begin
-			if (hcounter >= 256 && hcounter < hpix)
-			begin
+	end
+	if (vcounter >= vbp+vsp && vcounter < vfp) begin
+		if (hcounter >= 256 && hcounter < hpix) begin
 			pixh <= hcounter - 10'd256;
 			pixv <= vcounter - 10'd27;
 		end
 	end
+end
+
 //synchronization pulses generation
 assign hsync = (hcounter < hsp) ? 0:1;    //horizontal sync pulse gen
 assign vsync = (vcounter < vsp) ? 0:1;    //vertical sync pulse gen

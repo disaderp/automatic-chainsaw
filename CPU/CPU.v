@@ -1,14 +1,9 @@
-`include "ALU.v"
-`include "Buff.v"
-`include "SDCard.v"
-
 module CPU(
 	input clk,
 	input reset,
-	output [15:0] gpuline
+	output reg [15:0] gpuline
 	);
 	
-	reg [15:0] gpuline;
 	
 	//reg
 	reg [15:0] ax;
@@ -97,14 +92,6 @@ module CPU(
 	parameter xDIV6 = 8'h8;
 	parameter xCMP = 8'h9;
 
-	parameter xAND = 8'hA;
-	parameter xNEG = 8'hB;
-	parameter xNOT = 8'hC;
-	parameter xOR = 8'hD;
-	parameter xSHL = 8'hE;
-	parameter xSHR = 8'hF;
-	parameter xXOR = 8'h10;
-	parameter xTEST = 8'h11;
 	
 	//alumodule
 	reg [15:0] ain;
@@ -135,7 +122,7 @@ module CPU(
 	reg kread;
 	wire ktoread;
 	
-	keyboard0 #(1) InBuff(.clk(clk),.in(KINPIN),.out(keydata),.read(kread),.clkdiv(10'd1000),.outclk(),.toread(ktoread);
+	InBuff #(.WIDTH(1)) keyboard0(.clk(clk),.in(KINPIN),.out(keydata),.read(kread),.clkdiv(10'd1000),.outclk(),.toread(ktoread));
 	//keyboard
 	
 	reg [15:0] opcode;
@@ -235,14 +222,14 @@ module CPU(
 		pc <= 0;
 		bp <= 0;
 		alustate <= 0;
-		flag <= 0;//TODO: inout buffer
+		//flag <= 0;//TODO: inout buffer
 		cf <= 0;
 		zf <= 0;
 		of <= 0;
 		gpuline <= 0;
 		
-		bytes <= 0;
-		bytes_read <= 0;
+		//bytes <= 0;
+		//bytes_read <= 0;
 		din <= 0;
 		wr <= 0;
 		rd <= 0;
@@ -428,7 +415,7 @@ module CPU(
 				endcase
 				pc <= pc + 1;
 			end
-			oLEA3 begin //xx,<yy> xx<=<yx>
+			oLEA3: begin //xx,<yy> xx<=<yx>
 				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
 					4'b0001: ax <= ram[bx];
 					4'b0010: ax <= ram[cx];
@@ -485,6 +472,7 @@ module CPU(
 				if (bx[15:13] == 1) begin//keyboard
 					if (!ktoread) begin
 						zf <= 1;//no data to read zf=0
+					end
 					else begin
 						zf <= 0;
 						kread <= 1;
@@ -998,6 +986,7 @@ module CPU(
 					pc <= pc - 1;
 					gpuline <= opcode;
 					alustate <= 1;
+				end
 				else begin
 					pc <= pc + 1;
 					gpuline <= ram[par1 + bp];
@@ -1009,11 +998,13 @@ module CPU(
 					pc <= pc - 1;
 					gpuline <= opcode;
 					alustate <= 1;
+				end
 				else begin
 					pc <= pc + 1;
 					gpuline <= par1;
 					alustate <= 0;
 				end
+			end
 		endcase
 	end
 endmodule

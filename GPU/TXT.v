@@ -1,4 +1,4 @@
-module text(
+module TXT(
 input clk,		//clock
 input clr,		//clear
 input [7:0] char_line_dat,	//data
@@ -13,7 +13,8 @@ output pix_y
 reg [8:0] line;		//sth
 reg [11:0] hp;		//sth else
 reg [11:0] vp;		//sth else2
-
+wire [9:0] pixv;	//pixel vertical location
+wire [9:0] pixh;
 VGA z0 (
 		.clk (clk),
 		.clr (clr),

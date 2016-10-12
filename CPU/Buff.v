@@ -1,20 +1,17 @@
-module InBuff(
+module InBuff #(parameter WIDTH = 16)(
 	input clk,
 	input [WIDTH-1:0] in,
-	output [WIDTH-1:0] out,
+	output reg [WIDTH-1:0] out,
 	input read,
 	input clkdiv,
-	output outclk,
+	output reg outclk,
 	output toread);
 	
-	parameter WIDTH = 16;
 	
-	reg [WIDTH-1:0] out;
 	
 	reg [WIDTH-1:0] inbuf [20:0];
-	
+	reg [6:0] i;
 	reg [15:0] counter = 0;
-	reg outclk;
 	reg oldread = 0;
 	reg [6:0] bufpointer = 0;
 	
@@ -26,7 +23,7 @@ module InBuff(
 			outclk <= !outclk;
 			counter <= 0;
 			if (in != 0) begin
-				for(i=1;i<21;i=i+1)//probably very slow
+				for(i=1;i<21;i=i+1) begin//probably very slow
 					inbuf[i] <= inbuf[i-1];
 				end
 				inbuf[0] <= in;
@@ -46,25 +43,22 @@ module InBuff(
 			oldread <= 0;
 		end
 	end
-end module
-
-module OutBuff(
+endmodule
+module OutBuff #(parameter WIDTH = 13)(
 	input clk,
 	input [WIDTH-1:0] in,
-	output [WIDTH-1:0] out,
+	output reg [WIDTH-1:0] out,
 	input writedone,
 	input clkdiv,
-	output outclk,
+	output reg outclk,
 	output towrite);
 	
-	parameter WIDTH = 13;
 	
-	reg [WIDTH-1:0] out;
+    reg [6:0] i;
 	
 	reg [WIDTH-1:0] outbuf [20:0];
 	
 	reg [15:0] counter = 0;
-	reg outclk;
 	reg oldwrite = 0;
 	reg [6:0] bufpointer = 0;
 	
@@ -83,7 +77,7 @@ module OutBuff(
 		if (!oldwrite) begin
 			if (writedone) begin
 				if(bufpointer > 0) begin
-					for(i=1;i<21;i=i+1)//probably very slow
+					for(i=1;i<21;i=i+1) begin//probably very slow
 						outbuf[i] <= outbuf[i-1];
 					end
 					outbuf[0] <= in;
@@ -96,4 +90,4 @@ module OutBuff(
 			oldwrite <= 0;
 		end
 	end
-end module
+endmodule

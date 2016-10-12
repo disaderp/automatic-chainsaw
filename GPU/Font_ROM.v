@@ -1,10 +1,9 @@
 module font_rom(
 input clk,
 input [11:0] address,
-output [7:0] out);
+output reg [7:0] out);
 
-reg [7:0] font_rom [11:0];
-reg [7:0] out;
+reg [7:0] font_rom [4095:0];
 reg x = 0;
 
 //Source file: Untitled.raw
