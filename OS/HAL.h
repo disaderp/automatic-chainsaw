@@ -59,3 +59,13 @@ void writebyte(int address, char data) {
 	asm("MOV DX,[" + &data + "]");
 	asm("OUT");
 }
+
+void shutdown(){
+	asm("MOV BX,(0100000000000000)");
+	asm("OUT");
+	asm("MOV AX,(1)");
+	asm(".waitforshutdown");
+	asm("NOP");
+	asm("JNZ .waitforshutdown");
+	//done, display message that comouter can be shutdown
+}

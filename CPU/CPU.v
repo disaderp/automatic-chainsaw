@@ -191,10 +191,13 @@ module CPU(
 					zf <= 1;//zero flag when done
 				end
 			end
-			3'd2: begin //occasional flush
-				wr <= 1;
-				sdpointer <= 0;
-				stat <= 3'd3;
+			3'd2: begin //wait for flush
+				if(flush) begin
+					wr <= 1;
+					sdpointer <= 0;
+					stat <= 3'd3;
+					zf <= 0;
+				end
 			end
 			3'd3: begin //probably shutdown
 				if (ready_for_next_byte) begin
@@ -462,6 +465,9 @@ module CPU(
 			oOUT: begin
 				if (bx[15:13] == 0) begin//sdcard
 					sdcard[bx[12:0]] <= dx;
+				end
+				if (bx[15:13] == 2) begin//sdcard shutdown
+					flush <= 1;
 				end
 				$display("Address: %b, Data: %b", bx, dx);
 			end
