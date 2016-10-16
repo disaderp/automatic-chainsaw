@@ -1,5 +1,5 @@
 # Project Chainsaw 
-![logo](https://rawgit.com/disaderp/automatic-chainsaw/master/SCHEMATIC/chainsaw.svg)
+![logo](http://rawgit.com/disaderp/automatic-chainsaw/master/SCHEMATIC/chainsaw.svg)
 
 A custom 16-bit computer
 
