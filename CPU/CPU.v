@@ -1,10 +1,8 @@
 module CPU(
-	input clk,
-	input reset,
-	output reg [15:0] gpuline
+	input reset
 	);
 	
-	
+	wire clk;
 	//reg
 	reg [15:0] ax;
 	reg [15:0] bx;
@@ -13,6 +11,8 @@ module CPU(
 	reg [15:0] sp;//stackpointer
 	reg [15:0] bp;//basepointer
 	reg [15:0] pc;//programcounter
+	
+	reg [15:0] gpuline;
 	
 	//flg
 	reg cf;//carry

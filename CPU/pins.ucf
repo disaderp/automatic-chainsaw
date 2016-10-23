@@ -1,0 +1,7 @@
+NET "clk" LOC = "";
+NET "gpuline<16>" LOC = "";
+NET "KINPIN" LOC = "";
+NET "SD_RESET" LOC = "";
+NET "SD_DAT<4>" LOC = "";
+NET "SD_CMD" LOC = "";
+NET "SD_SCK" LOC = "";
