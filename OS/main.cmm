@@ -18,48 +18,68 @@ char c_user_buffer[64];
 c_user_buffer[max_buffer_size] = 0;
 //
 int p_user_buffer = 0;
-bool b_isEnterPressed = false;
+//bool b_isEnterPressed = false;
 
 // MAIN SYSTEM LOOP
 while (1){
 	//Get key pressed by user
+	print_const(">");
+	while (1){
 	char c_temp = scan();
-	while (c_temp != 0){
-		if (c_temp == enter){
-			b_isEnterPressed = true;
-			c_user_buffer[p_user_buffer] = 0;
-			p_user_buffer = 0;
-			newline();
-			break;
-		}
-		
-		if (c_temp == backspace){
-			if (p_user_buffer != 0){
-				p_user_buffer = p_user_buffer - 1;
-				delchar();
+		if (c_temp != 0){
+			if (c_temp == enter){
+				//b_isEnterPressed = true;
+				c_user_buffer[p_user_buffer] = 0;
+				p_user_buffer = 0;
+				newline();
 				break;
 			}
+			
+			if (c_temp == backspace){
+				if (p_user_buffer != 0){
+					p_user_buffer = p_user_buffer - 1;
+					delchar();
+					continue;
+				}
+			}
+			
+			c_user_buffer[p_user_buffer] = c_temp;
+			print(c_temp);
+			
+			if (p_user_buffer < max_buffer_size) {
+				p_user_buffer = p_user_buffer + 1;
+			}
+			else{
+				newline();
+				c_user_buffer[max_buffer_size] = 0;
+				break;
+			}
+	
 		}
-		
-		c_user_buffer[p_user_buffer] = c_temp;
-		print(c_temp);
-		
-		if (p_user_buffer < max_buffer_size) {
-			p_user_buffer = p_user_buffer + 1;
-		}
-		else{
-			newline();
-			c_user_buffer[max_buffer_size] = 0;
-			break;
-		}
-		
 	}
 	// Check if buffer contains function
-	// Only 6 first characters contains function name. The rest is either parameters, null or gibberish. 
+	// First characters contains function name. The rest is either parameters, null or gibberish. 
 
 	//TODO (CREATE FUNCTION CHECKER)
-		if (char_compare_l (c_user_buffer, "helpme",function_name_lenght)){
+		if (char_compare_l (c_user_buffer, "helpme",6)){
 		//TODO (CREATE PARAMETER CHECKER AND RELAY)
 	}
+	else if (char_compare_l (c_user_buffer, "exec",4)){
+		
+	}
+	else if (char_compare_l (c_user_buffer, "shutdown",8)){
+		
+	}
+	else if (char_compare_l (c_user_buffer, "login",5)){
+		
+	}
+	else if (char_compare_l (c_user_buffer, "logout",6)){
+		
+	}
+	else if (char_compare_l (c_user_buffer, "ragequit",8)){
+		
+	}
+	
+	//b_isEnterPressed = false;
 }
 }
