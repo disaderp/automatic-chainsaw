@@ -466,9 +466,6 @@ module CPU(
 				if (bx[15:13] == 0) begin//sdcard
 					sdcard[bx[12:0]] <= dx;
 				end
-				if (bx[15:13] == 2) begin//sdcard shutdown
-					flush <= 1;
-				end
 				$display("Address: %b, Data: %b", bx, dx);
 			end
 			oIN: begin
@@ -923,11 +920,16 @@ module CPU(
 			end
 			
 			oINT: begin//absolute address
+				if (par1 == 16h'1) begin
+					zf <= 0;
+					flush <= 1;
+				end else begin
 				stack[sp] <= bp;
 				stack[sp+1] <= pc + 1;
 				sp <= sp + 2;
 				pc <= par1 - 1;
 				bp <= par1;
+				end
 			end
 			oCALL: begin//relative address
 				stack[sp] <= bp;

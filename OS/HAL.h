@@ -61,9 +61,7 @@ void writebyte(int address, char data) {
 }
 
 void shutdown(){
-	asm("MOV BX,(0100000000000000)");
-	asm("OUT");
-	asm("MOV AX,(1)");
+	asm("INT 1");
 	asm(".waitforshutdown");
 	asm("NOP");
 	asm("JNZ .waitforshutdown");
