@@ -4,13 +4,6 @@
 
 Compiler for a (not in a strict sense) subset of C.
 
-## building
-
-Prerequisites:
-
-- Linux: CMake, GNU make, GCC
-- Windows: CMake, MSVC
-
 ## syntactics
 
 ```c
