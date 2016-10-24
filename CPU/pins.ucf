@@ -1,7 +1,26 @@
-NET "clk" LOC = "";
-NET "gpuline<16>" LOC = "";
-NET "KINPIN" LOC = "";
-NET "SD_RESET" LOC = "";
-NET "SD_DAT<4>" LOC = "";
-NET "SD_CMD" LOC = "";
-NET "SD_SCK" LOC = "";
+NET "clk" LOC = "P123";
+
+NET "gpuline[15]" LOC = "P102";
+NET "gpuline[13]" LOC = "P101";
+NET "gpuline[12]" LOC = "P100";
+NET "gpuline[11]" LOC = "P99";
+NET "gpuline[10]" LOC = "P98";
+NET "gpuline[9]" LOC = "P97";
+NET "gpuline[8]" LOC = "P95";
+NET "gpuline[7]" LOC = "P94";
+NET "gpuline[6]" LOC = "P93";
+NET "gpuline[5]" LOC = "P92";
+NET "gpuline[4]" LOC = "P88";
+NET "gpuline[3]" LOC = "P87";
+NET "gpuline[2]" LOC = "P85";
+NET "gpuline[1]" LOC = "P84";
+NET "gpuline[0]" LOC = "P83";
+
+NET "KINPIN" LOC = "P119";
+NET "SD_RESET" LOC = "P118";
+NET "SD_DAT[3]" LOC = "P117";
+NET "SD_DAT[2]" LOC = "P116";
+NET "SD_DAT[1]" LOC = "P115";
+NET "SD_DAT[0]" LOC = "P114";
+NET "SD_CMD" LOC = "P113";
+NET "SD_SCK" LOC = "P112";

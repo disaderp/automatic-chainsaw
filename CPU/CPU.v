@@ -153,9 +153,10 @@ module CPU(
 	reg flush;//set before power off
 	
 	reg [7:0] sdcard [511:0];//temp
-	reg [2:0] stat;
+	reg [2:0] stat = 0;
 	reg [8:0] sdpointer;
 	
+	wire SD_DAT [3:0];
 	assign SD_RESET = 0;
 	assign SD_DAT[1] = 1;
 	assign SD_DAT[2] = 1;
@@ -177,6 +178,11 @@ module CPU(
 		adr <= 0;//temp only 512bytes
 		case (stat)
 			0: begin//load all data
+				din <= 0;
+				wr <= 0;
+				sdpointer <= 0;
+				flush <= 0;
+				
 				rd <= 1;
 				stat <= 1;
 			end
@@ -188,7 +194,7 @@ module CPU(
 				end
 				if (sdpointer == 9'd511) begin
 					stat <= 2;
-					zf <= 1;//zero flag when done
+					//zf <= 1;//zero flag when done
 				end
 			end
 			3'd2: begin //wait for flush
@@ -196,7 +202,7 @@ module CPU(
 					wr <= 1;
 					sdpointer <= 0;
 					stat <= 3'd3;
-					zf <= 0;
+					//zf <= 0;
 				end
 			end
 			3'd3: begin //probably shutdown
@@ -210,7 +216,7 @@ module CPU(
 			end
 			3'd4: begin 
 				//ready to shutdown 
-				zf <= 1;//zero flag when done
+				//zf <= 1;//zero flag when done@TODO: diff flag
 			end
 		endcase
 	end
@@ -222,23 +228,13 @@ module CPU(
 			cx <= 0;
 			dx <= 0;
 			sp <= 0;
-			pc <= 0;
+			pc = 0;
 			bp <= 0;
 			alustate <= 0;
-			//flag <= 0;//TODO: inout buffer
 			cf <= 0;
 			zf <= 0;
 			of <= 0;
 			gpuline <= 0;
-			
-			//bytes <= 0;
-			//bytes_read <= 0;
-			din <= 0;
-			wr <= 0;
-			rd <= 0;
-			stat <= 0;
-			sdpointer <= 0;
-			flush <= 0;
 			
 			kread <= 0;
 			
@@ -451,13 +447,13 @@ module CPU(
 				pc <= pc + 1;
 			end
 			oPOP: begin
-				sp = sp - 1;
 				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-					2'b00: ax = stack[sp];
-					2'b01: bx = stack[sp];
-					2'b10: cx = stack[sp];
-					2'b11: dx = stack[sp];
+					2'b00: ax <= stack[sp-1];
+					2'b01: bx <= stack[sp-1];
+					2'b10: cx <= stack[sp-1];
+					2'b11: dx <= stack[sp-1];
 				endcase
+				sp <= sp - 1;
 				pc <= pc + 1;
 			end
 			oOUT: begin
@@ -482,18 +478,18 @@ module CPU(
 			end
 			oXCH: begin
 				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: begin tmp = ax; ax = bx; bx = tmp; end
-					4'b0010: begin tmp = ax; ax = cx; cx = tmp; end
-					4'b0011: begin tmp = ax; ax = dx; dx = tmp; end
-					4'b0100: begin tmp = bx; bx = ax; ax = tmp; end
-					4'b0110: begin tmp = bx; bx = cx; cx = tmp; end
-					4'b0111: begin tmp = bx; bx = dx; dx = tmp; end
-					4'b1000: begin tmp = cx; cx = ax; ax = tmp; end
-					4'b1001: begin tmp = cx; cx = bx; bx = tmp; end
-					4'b1011: begin tmp = cx; cx = dx; dx = tmp; end
-					4'b1100: begin tmp = dx; dx = ax; ax = tmp; end
-					4'b1101: begin tmp = dx; dx = bx; bx = tmp; end
-					4'b1110: begin tmp = dx; dx = cx; cx = tmp; end
+					4'b0001: begin ax <= bx; bx <= ax; end
+					4'b0010: begin ax <= cx; cx <= ax; end
+					4'b0011: begin ax <= dx; dx <= ax; end
+					4'b0100: begin bx <= ax; ax <= bx; end
+					4'b0110: begin bx <= cx; cx <= bx; end
+					4'b0111: begin bx <= dx; dx <= bx; end
+					4'b1000: begin cx <= ax; ax <= cx; end
+					4'b1001: begin cx <= bx; bx <= cx; end
+					4'b1011: begin cx <= dx; dx <= cx; end
+					4'b1100: begin dx <= ax; ax <= dx; end
+					4'b1101: begin dx <= bx; bx <= dx; end
+					4'b1110: begin dx <= cx; cx <= dx; end
 				endcase
 				pc <= pc + 1;
 			end
@@ -918,7 +914,7 @@ module CPU(
 			end
 			
 			oINT: begin//absolute address
-				if (par1 == 16h'1) begin
+				if (par1 == 16'h1) begin
 					zf <= 0;
 					flush <= 1;
 				end else begin
