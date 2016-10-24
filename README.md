@@ -1,5 +1,6 @@
 # Project Chainsaw 
 ![logo](http://rawgit.com/disaderp/automatic-chainsaw/master/SCHEMATIC/chainsaw.svg)
+*logo created by [@winek](https://github.com/winek)*
 
 A custom 16-bit computer
 
