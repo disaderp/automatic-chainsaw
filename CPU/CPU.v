@@ -1,27 +1,33 @@
 module CPU(
-	input reset
+	input clk,
+	input KINPIN,
+	inout SD_DAT [3:0],
+	output SD_SCK,
+	output SD_CMD,
+	output reg [15:0] gpuline
 	);
 	
+	reg reset = 0;
 	wire clk;
 	//reg
-	reg [15:0] ax;
-	reg [15:0] bx;
-	reg [15:0] cx;
-	reg [15:0] dx;
-	reg [15:0] sp;//stackpointer
-	reg [15:0] bp;//basepointer
-	reg [15:0] pc;//programcounter
+	reg [15:0] ax = 0;
+	reg [15:0] bx = 0;
+	reg [15:0] cx = 0;
+	reg [15:0] dx = 0;
+	reg [15:0] sp = 0;//stackpointer
+	reg [15:0] bp = 0;//basepointer
+	reg [15:0] pc = 0;//programcounter
 	
-	reg [15:0] gpuline;
+	//reg [15:0] gpuline;
 	
 	//flg
-	reg cf;//carry
-	reg zf;//zero
-	reg of;//overflow
+	reg cf = 0;//carry
+	reg zf = 0;//zero
+	reg of = 0;//overflow
 	
 	//stack, ram
-	reg [15:0] stack[400:0];
-	reg [15:0] ram[2047:0];//ram+programmemory
+	reg [15:0] stack[100:0];
+	reg [15:0] ram[50:0];//ram+programmemory
 	
 	//op
 	parameter oNOP = 16'h0;
@@ -117,9 +123,9 @@ module CPU(
 	);//alumodule
 	
 	//keyboard
-	wire KINPIN;//assign to PS/2 output
+	//wire KINPIN;//assign to PS/2 output
 	wire keydata;
-	reg kread;
+	reg kread = 0;
 	wire ktoread;
 	
 	InBuff #(.WIDTH(1)) keyboard0(.clk(clk),.in(KINPIN),.out(keydata),.read(kread),.clkdiv(10'd1000),.outclk(),.toread(ktoread));
@@ -148,13 +154,13 @@ module CPU(
 	wire byte_available;
 	wire ready;
 	wire ready_for_next_byte;
-	reg [15:0] adr;// = 32'h00_00_00_00;
+	reg [15:0] adr = 0;// = 32'h00_00_00_00;
 	wire [4:0] state;
-	reg flush;//set before power off
+	reg flush = 0;//set before power off
 	
 	reg [7:0] sdcard [511:0];//temp
 	reg [2:0] stat = 0;
-	reg [8:0] sdpointer;
+	reg [8:0] sdpointer = 0;
 	
 	wire SD_DAT [3:0];
 	assign SD_RESET = 0;
@@ -173,23 +179,71 @@ module CPU(
 			.status(state));
 	//sdcardmodule
 	
+	//bootloader
+	initial begin
+	ram[0] <= 16'b0000000000000000;
+	ram[1] <= 16'b0000000011000000;
+	ram[2] <= 16'b0000000000000000;
+	ram[3] <= 16'b0000000011000001;
+	ram[4] <= 16'b0000000001101100;
+	ram[5] <= 16'b0000000011000001;
+	ram[6] <= 16'b0000000001101111;
+	ram[7] <= 16'b0000000011000001;
+	ram[8] <= 16'b0000000001100001;
+	ram[9] <= 16'b0000000011000001;
+	ram[10] <= 16'b0000000001100100;
+	ram[11] <= 16'b0000000011000001;
+	ram[12] <= 16'b0000000001101001;
+	ram[13] <= 16'b0000000011000001;
+	ram[14] <= 16'b0000000001101110;
+	ram[15] <= 16'b0000000011000001;
+	ram[16] <= 16'b0000000001100111;
+	ram[17] <= 16'b0000000000100100;
+	ram[18] <= 16'b0000000000010001;
+	ram[19] <= 16'b0000000000001000;
+	ram[20] <= 16'b0000000000000010;
+	ram[21] <= 16'b0000000001100100;
+	ram[22] <= 16'b0000000000001000;
+	ram[23] <= 16'b0000000000000001;
+	ram[24] <= 16'b0000000000000000;
+	ram[25] <= 16'b0000000000001000;
+	ram[26] <= 16'b0000000000000000;
+	ram[27] <= 16'b0000000000000001;
+	ram[28] <= 16'b0000000000101000;
+	ram[29] <= 16'b0000000000110000;
+	ram[30] <= 16'b0000000000001011;
+	ram[31] <= 16'b0000000000001100;
+	ram[32] <= 16'b0000000000001000;
+	ram[33] <= 16'b0000000000001100;
+	ram[34] <= 16'b0000000000000100;
+	ram[35] <= 16'b0000000000001000;
+	ram[36] <= 16'b0000000000000011;
+	ram[37] <= 16'b0000000001100100;
+	ram[38] <= 16'b0000000000011100;
+	ram[39] <= 16'b0000000000000111;
+	ram[40] <= 16'b0000000000100100;
+	ram[41] <= 16'b0000000000011100;
+	ram[42] <= 16'b0000000000110001;
+	ram[43] <= 16'b0000000001100100;
+	end
+	
+	
 	always @(posedge clk25) begin : SD
-		if (!reset) disable SD;
+		//if (!reset) disable SD;
 		adr <= 0;//temp only 512bytes
 		case (stat)
 			0: begin//load all data
 				din <= 0;
 				wr <= 0;
 				sdpointer <= 0;
-				flush <= 0;
 				
 				rd <= 1;
 				stat <= 1;
 			end
 			1: begin //start loading
 				rd <= 0;
+				sdcard[sdpointer] <= dout;
 				if (byte_available) begin
-					sdcard[sdpointer] <= dout;
 					sdpointer <= sdpointer + 1;
 				end
 				if (sdpointer == 9'd511) begin
@@ -222,69 +276,6 @@ module CPU(
 	end
 	
 	always @(posedge clk) begin : FSM
-		if (!reset) begin
-			ax <= 0;
-			bx <= 0;
-			cx <= 0;
-			dx <= 0;
-			sp <= 0;
-			pc = 0;
-			bp <= 0;
-			alustate <= 0;
-			cf <= 0;
-			zf <= 0;
-			of <= 0;
-			gpuline <= 0;
-			
-			kread <= 0;
-			
-			//bootloader
-			ram[0] <= 16'b0000000000000000;
-			ram[1] <= 16'b0000000011000000;
-			ram[2] <= 16'b0000000000000000;
-			ram[3] <= 16'b0000000011000001;
-			ram[4] <= 16'b0000000001101100;
-			ram[5] <= 16'b0000000011000001;
-			ram[6] <= 16'b0000000001101111;
-			ram[7] <= 16'b0000000011000001;
-			ram[8] <= 16'b0000000001100001;
-			ram[9] <= 16'b0000000011000001;
-			ram[10] <= 16'b0000000001100100;
-			ram[11] <= 16'b0000000011000001;
-			ram[12] <= 16'b0000000001101001;
-			ram[13] <= 16'b0000000011000001;
-			ram[14] <= 16'b0000000001101110;
-			ram[15] <= 16'b0000000011000001;
-			ram[16] <= 16'b0000000001100111;
-			ram[17] <= 16'b0000000000100100;
-			ram[18] <= 16'b0000000000010001;
-			ram[19] <= 16'b0000000000001000;
-			ram[20] <= 16'b0000000000000010;
-			ram[21] <= 16'b0000000001100100;
-			ram[22] <= 16'b0000000000001000;
-			ram[23] <= 16'b0000000000000001;
-			ram[24] <= 16'b0000000000000000;
-			ram[25] <= 16'b0000000000001000;
-			ram[26] <= 16'b0000000000000000;
-			ram[27] <= 16'b0000000000000001;
-			ram[28] <= 16'b0000000000101000;
-			ram[29] <= 16'b0000000000110000;
-			ram[30] <= 16'b0000000000001011;
-			ram[31] <= 16'b0000000000001100;
-			ram[32] <= 16'b0000000000001000;
-			ram[33] <= 16'b0000000000001100;
-			ram[34] <= 16'b0000000000000100;
-			ram[35] <= 16'b0000000000001000;
-			ram[36] <= 16'b0000000000000011;
-			ram[37] <= 16'b0000000001100100;
-			ram[38] <= 16'b0000000000011100;
-			ram[39] <= 16'b0000000000000111;
-			ram[40] <= 16'b0000000000100100;
-			ram[41] <= 16'b0000000000011100;
-			ram[42] <= 16'b0000000000110001;
-			ram[43] <= 16'b0000000001100100;
-		end
-		
 		if (kread) begin
 			kread <= 0;
 			dx <= keydata;
