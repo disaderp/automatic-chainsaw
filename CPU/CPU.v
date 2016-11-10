@@ -1,7 +1,7 @@
 module CPU(
 	input clk,
 	input KINPIN,
-	inout SD_DAT [3:0],
+	//inout SD_DAT [3:0],
 	output SD_SCK,
 	output SD_CMD,
 	output reg [15:0] gpuline
@@ -131,11 +131,11 @@ module CPU(
 	InBuff #(.WIDTH(1)) keyboard0(.clk(clk),.in(KINPIN),.out(keydata),.read(kread),.clkdiv(10'd1000),.outclk(),.toread(ktoread));
 	//keyboard
 	
-	reg [15:0] opcode;
-	reg [15:0] par1;
-	reg [15:0] par2;
-	reg [15:0] tmp;
-	reg alustate;
+	reg [15:0] opcode = 0;
+	reg [15:0] par1 = 0;
+	reg [15:0] par2 = 0;
+	reg [15:0] tmp = 0;
+	reg alustate = 0;
 	
 	//sdcardmodule
 	wire spiClk;
@@ -225,6 +225,9 @@ module CPU(
 	ram[41] <= 16'b0000000000011100;
 	ram[42] <= 16'b0000000000110001;
 	ram[43] <= 16'b0000000001100100;
+	
+	//(SIM)DONOTREMOVE//
+	
 	end
 	
 	
@@ -984,6 +987,7 @@ module CPU(
 					pc <= pc + 1;
 					gpuline <= ram[par1 + bp];
 					alustate <= 0;
+					$display("%s", ram[par1 + bp]);
 				end
 			end
 			default: begin//unrecognized cmd//maybe gpu

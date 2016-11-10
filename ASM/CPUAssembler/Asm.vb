@@ -806,8 +806,10 @@ Module Asm
 							"-plain - prints 0s and 1s")
 			End If
 			Console.WriteLine("Done.")
+			Environment.Exit(0)
 		Catch ex As Exception
-			Console.WriteLine(ex.ToString)
+			Console.Error.WriteLine(ex.ToString)
+			Environment.Exit(1)
 		End Try
 	End Sub
 
