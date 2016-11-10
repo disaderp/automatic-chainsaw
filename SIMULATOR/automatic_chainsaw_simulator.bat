@@ -24,6 +24,7 @@ rem no compiler yet
 %CC_PATH% %1 -a %TMP_PATH%\program.asm 1>nul
 IF %ERRORLEVEL% NEQ 0 GOTO error
 %ASM_PATH% -ram %TMP_PATH%\ram.v %TMP_PATH%\program.asm 1>nul
+IF %ERRORLEVEL% NEQ 0 GOTO error
 SearchReplace %CPU_FILES%CPU.v //(SIM)DONOTREMOVE// %TMP_PATH%\ram.v %TMP_PATH%\CPU_modified.v
 %IVERILOG_PATH%iverilog -Wall -g2012 -s testbench -o %TMP_PATH%\compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%Buff.v %CPU_FILES%SDCard.v %TMP_PATH%\CPU_modified.v testbench.v 2>nul
 IF %ERRORLEVEL% NEQ 0 GOTO error
