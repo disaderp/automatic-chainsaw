@@ -1,8 +1,8 @@
 # automatic-chainsaw Simulator
 
-*maintainer: [@disaderp](https://github.com/disaderp)*
+*maintainer: [@disaderp](https://github.com/disaderp) / [@winek](https://github.com/winek) (Linux launcher)*
 
-Simulator for automatic-chainsaw computer, working on Windows
+Simulator for automatic-chainsaw computer.
 
 ## features
 
@@ -19,11 +19,12 @@ Depending on the input filetype, it will:
 Open `automatic_chainsaw_simulator.bat` and edit paths if you are using custom directories.
 If you have default paths from repository, you do not have to modify anything.
 
-Download Icarus Verilog simulator, Windows binaries are avaliable [here](http://bleyer.org/icarus/). Make sure to use version above 0.9
+Download Icarus Verilog simulator, Windows binaries are avaliable [here](http://bleyer.org/icarus/). Make sure to use version above 0.9. On Debian/Ubuntu, use `sudo apt install verilog`, on Arch Linux use `pacman -S iverilog`.
 
 ## usage
 
-open `cmd.exe` and type: `automatic_chainsaw_simulator FILE`
+- Windows: open `cmd.exe` and type: `automatic_chainsaw_simulator FILE`
+- Linux: `bash automatic_chainsaw_simulator.sh FILE`
 
 ## requirements && outputting
 
