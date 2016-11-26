@@ -1,11 +1,3 @@
-function typeSize(type) {
-  switch (type.name) {
-    case 'int':
-      return 0x2;
-    case 'char':
-      return 0x1;
-  }
-}
 
 const out = [];
 const dataEntries = [];
@@ -47,7 +39,11 @@ function dumpBinary(bytes) {
     .filter(b => b < 0x100)
     .map(b => '0'.repeat(8 - b.toString(2).length) + b.toString(2))
     .join('\nX');
-  else return '???';
+  else throw new Error(`dumpBinary(): unexpected type ${typeof bytes}`);
+}
+
+function zeros(count) {
+  return '\0'.repeat(count);
 }
 
 function label(name) {
@@ -74,24 +70,11 @@ function mem(name, address) {
   m[name] = { type: 'memory',  };
 }
 
-// PROGRAM
-// =======
+function getAssembly() {
+  return out.join('\n') + dataEntries.map(function (datum) {
+    return `.${datum.name}\n` +
+           `X${dumpBinary(datum.bytes)}`;
+  }).join('\n')
+}
 
-op.nop();
-op.mov(r.ax, L.msg);
-op.mov(r.ax, 0);
-op.mov(r.ax, m(0xb8000));
-op.xor(r.ax, r.ax);
-label("hang");
-op.jmp(l.hang);
-mem("vga", 0xb8000);
-data("msg", 0x10, "AAAAAAAAA\x00");
-data("len", 2, 10);
-
-out.forEach(function (line) {
-  console.log(line);
-});
-dataEntries.forEach(function (datum) {
-  console.log(`.${datum.name}`);
-  console.log(`X${dumpBinary(datum.bytes)}`);
-});
+Object.assign(exports, { op, m, l, L, r, mem, label, data, getAssembly, dumpBinary });
