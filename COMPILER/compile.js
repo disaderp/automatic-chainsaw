@@ -74,9 +74,23 @@ const statementHandlers = {
 	op.jmp(".while" + statement.id);
 	label(".endwhile" + statement.id);
   },
-  FunctionCallStatement(func) {
+  AssignmentStatement(statement) {
+	if(statement.leftHandSide.type == "int" || statement.leftHandSide.type == "char"){
+		handlers[statement.rigthHandSide.kind](statement.rigthHandSide);//write to ax
+		op.mov(l.(statement.leftHandSize.name), r.ax);
+	}else{
+		throw new Error("not implemented");
+	}
+  },
+  ReturnStatement(statement) {
 	
   },
+  FunctionDefinition(statement) {
+  
+  },
+  ExpressionStatement(statement) {
+  
+  }
 }
 
 function visit(statements) {
