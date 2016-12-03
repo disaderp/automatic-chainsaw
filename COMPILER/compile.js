@@ -83,12 +83,42 @@ const statementHandlers = {
     }
   },
   ReturnStatement(statement, { callingConvention }) {
-
+	if(callingConvention == "fastcall") {
+		handlers[statement.kind](statement);//write to ax
+		op.pop(r.dx);
+		op.jmp(r.dx);
+	}else{
+		handlers[statement.kind](statement);//write to ax
+		op.pop(r.dx);
+		op.push(r.ax);
+		op.jmp(r.dx);
+	}
   },
   FunctionDefinition(statement) {
+	label(".func" + statement.name);
+	if(statement.convention == "fastcall") {
+		//todo: for all arguments(max 4
+		data(name, typeSize(type), r.ax);//then bx, cx,dx
+		//eval instrtuctions
+	}else{
+		throw new Error("todo");
+	}
   },
   ExpressionStatement(statement) {
-
+	if(statement.type == FunctionCall) {
+		op.cpc();
+		op.push(r.dx);
+		if(statement.FunctionCall.convention == "fastcall"){
+			//for all args //max 4
+			op.mov(r.ax, l[args[i]]);//then bx,cx,dx
+		}else{
+			//for all args REV ORDER!!
+			op.mov(r.dx, l[args[i]]);
+			op.push(r.dx);
+		}
+		op.jmp(".func" + statement.FunctionCall.name);
+	}
+	
   }
 }
 
