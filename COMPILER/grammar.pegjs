@@ -39,7 +39,6 @@ Statement "statement"
   / ReturnStatement
   / Comment { }
   / FunctionDefinition
-  / FunctionCallStatement
   / ExpressionStatement
   / CompoundStatement
 
@@ -59,11 +58,8 @@ ConditionalLoopStatement "while"
 ElseStatement "else"
   = "else" _ statement:Statement { return statement; }
 
-FunctionCallStatement "function call"
-  = call:FunctionCall { return call; }
-
 FunctionCall "function call"
-  = name:Identifier _ "(" _ args:ActualParameters _ ")" _ StatementTerminator {
+  = name:Identifier _ "(" _ args:ActualParameters _ ")" _ {
       return Node('FunctionCall', {
         name,
         args,
@@ -79,7 +75,7 @@ ActualParameters
     / _ { return []; }
 
 ExpressionStatement "expression statement"
-  = Expression _ StatementTerminator
+  = expression:Expression _ StatementTerminator { return Node('ExpressionStatement', { expression }); }
 
 CompoundStatement "compound statement"
   = _ "{" _ inner:Statement * _ "}" _ { return inner.length ? inner : Node('EmptyStatement'); }
@@ -144,7 +140,8 @@ Expression
       return Node('UnaryOperator', { operand, operator });
     }
     / "(" _ expression:Expression _ ")" { return expression; }
-    / TerminalExpression
+    / expression:FunctionCall { return expression; }
+    / expression:TerminalExpression { return expression; }
 
 BinaryOperator "binary operator"
   = "+"
