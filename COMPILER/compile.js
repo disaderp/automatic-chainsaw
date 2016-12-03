@@ -34,24 +34,20 @@ try {
   console.log(`failed to parse input: ${e.message}`);
 }
 
-dump(program);
+//dump(program);
 
 /* for a given type, return its size in data section */
 function typeSize(type) {
-  // FIXME: ignores modifiers (pointer, array)
-  switch (type.name) {
-    case 'int':
-      return 0x2;
-    case 'char':
-      return 0x1;
-    default:
-      throw new TypeError(`type ${type.name} not implemented`);
-  }
+  if(type.modifiers.length > 0){
+	if(type.modifiers[0].kind == 'ArrayTypeModifier'){
+		return (type.modifiers[0].capacity) * 2
+	}
+  }else return 2;//for int and char//16bites == 1* X000000000
 }
 
 const statementHandlers = {
   VariableDeclaration({ type, name, initial }) {
-    data(name, typeSize(type), initial.value !== null ? initial.value : zeros(typeSize(type)));
+    data(name, typeSize(type), initial !== null ? initial.value : zeros(typeSize(type)));
   },
   ConditionalStatement(statement) {
     statement.id = randomHash();
@@ -97,15 +93,25 @@ const statementHandlers = {
   FunctionDefinition(statement) {
 	label(".func" + statement.name);
 	if(statement.convention == "fastcall") {
-		//todo: for all arguments(max 4
-		data(name, typeSize(type), r.ax);//then bx, cx,dx
-		//eval instrtuctions
+		if(statement.args.length > 4) { throw new Error("too many args for fastcall");}
+		reg = 'AX';
+		for(i = 0; statement.args.length - 1; i++){
+			data(statement.args[i].name, typeSize(statement.args[i].type.name), reg);
+			switch(reg){
+			case 'AX': reg='BX';break;
+			case 'BX': reg='CX';break;
+			case 'CX': reg='DX';break;
+			}
+		}
+		if (statement.statement.kind != null) {
+			handlers[statement.statement.kind](statement.statement);
+		}
 	}else{
 		throw new Error("todo");
 	}
   },
   ExpressionStatement(statement) {
-	if(statement.type == FunctionCall) {
+	if(statement.expression.kind == 'FunctionCall') {
 		if(statement.FunctionCall.name == "print_const") {
 			for (i = 0 ; statement.FunctionCall.args[0].length; i++) {
 				dumpBinary(b11000001);
@@ -130,10 +136,12 @@ const statementHandlers = {
 
 function visit(statements, tag) {
   statements.forEach(function (st) {
+  try{
     if (!statementHandlers.hasOwnProperty(st.kind)) {
       throw new Error(`statement ${st.kind} not implemented`);
     }
     statementHandlers[st.kind](st, tag);
+  }catch(e){ console.log("ERROR: TYPE: " + e + " CODE: " + dump(st) + "END ERROR \n");}
   });
 }
 
