@@ -71,12 +71,8 @@ const statementHandlers = {
     label(".endwhile" + statement.id);
   },
   AssignmentStatement(statement) {
-    if(statement.leftHandSide.type == "int" || statement.leftHandSide.type == "char"){
-      handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
-      op.mov(l[statement.leftHandSide.name], r.ax);
-    }else{
-      throw new Error("not implemented");
-    }
+    handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
+    op.mov(l[statement.leftHandSide], r.ax);
   },
   ReturnStatement(statement, { callingConvention }) {
 	if(callingConvention == "fastcall") {
@@ -95,7 +91,7 @@ const statementHandlers = {
 	if(statement.convention == "fastcall") {
 		if(statement.args.length > 4) { throw new Error("too many args for fastcall");}
 		reg = 'AX';
-		for(i = 0; statement.args.length - 1; i++){
+		for(i = 0;i > statement.args.length - 1; i++){
 			data(statement.args[i].name, typeSize(statement.args[i].type.name), reg);
 			switch(reg){
 			case 'AX': reg='BX';break;
@@ -107,28 +103,43 @@ const statementHandlers = {
 			handlers[statement.statement.kind](statement.statement);
 		}
 	}else{
-		throw new Error("todo");
+		for(i = 0;i > statement.args.length - 1; i++){
+			op.pop(r.dx);
+			data(statement.args[i].name, typeSize(statement.args[i].type.name), r.dx);
+		}
+		if (statement.statement.kind != null) {
+			handlers[statement.statement.kind](statement.statement);
+		}
 	}
   },
   ExpressionStatement(statement) {
 	if(statement.expression.kind == 'FunctionCall') {
-		if(statement.FunctionCall.name == "print_const") {
-			for (i = 0 ; statement.FunctionCall.args[0].length; i++) {
+		if(statement.expression.name == "print_const") {
+			for (i = 0 ; statement.expression.args[0].value.length; i++) {
 				dumpBinary(b11000001);
-				dumpBinary(statement.FunctionCall.args[0][i]);
+				dumpBinary(statement.expression.args[0].value[i]);
 			}
 		}
 		op.cpc();
 		op.push(r.dx);
-		if(statement.FunctionCall.convention == "fastcall"){
-			//for all args //max 4
-			op.mov(r.ax, l[args[i]]);//then bx,cx,dx
+		if(statement.expression.convention == "fastcall"){
+			if(statement.expression.args.length > 4) { throw new Error("too many args for fastcall");}
+			reg = 'AX';
+			for(i = 0;i > statement.expression.args.length - 1 ; i++){
+				op.mov(reg, l[statement.expression.args[i].value]);
+				switch(reg){
+					case 'AX': reg='BX';break;
+					case 'BX': reg='CX';break;
+					case 'CX': reg='DX';break;
+				}
+			}
 		}else{
-			//for all args REV ORDER!!
-			op.mov(r.dx, l[args[i]]);
-			op.push(r.dx);
+			for(i = statement.expression.args.length - 1;i < 0  ; i--){
+				op.mov(r.dx, l[statement.expression.args[i].value]);
+				op.push(r.dx);
+			}
 		}
-		op.jmp(".func" + statement.FunctionCall.name);
+		op.jmp(".func" + statement.expression.name);
 	}
 	
   }
