@@ -9,6 +9,7 @@ try {
 
 const { op, m, l, L, r, mem, label, data, getAssembly, zeros } = require('./gen');
 
+const util = require('util');
 const cli = require('meow')(`
   Usage:
     compile INPUT [-o OUTPUT]
@@ -33,7 +34,7 @@ try {
   console.log(`failed to parse input: ${e.message}`);
 }
 
-console.dir(program);
+dump(program);
 
 /* for a given type, return its size in data section */
 function typeSize(type) {
@@ -74,12 +75,17 @@ function visit(statements) {
   });
 }
 
-try { visit(program); }
-catch (e) {
+try {
+  visit(program);
+} catch (e) {
   console.log('translation error, but printing what we already have');
   console.log(getAssembly());
 }
 
 function randomHash() {
   return '.'.repeat(5).split('').map(x => String.fromCharCode(Math.floor(Math.random() * 25) + 97)).join('');
+}
+
+function dump(value) {
+  console.log(util.inspect(value, false, null));
 }
