@@ -55,55 +55,54 @@ const statementHandlers = {
   },
   ConditionalStatement(statement) {
     statement.id = randomHash();
-	handlers[statement.predicate.kind](statement.predicate);//write to ax
-	op.test(r.ax, 0);
-	op.jz(".elseif" + statement.id);
-	handlers[statement.statement.kind](statement.statement);
-	op.jmp(".endif" + statement.id);
-	label(".elseif" + statement.id);
-	handlers[statement.elseStatement.kind](statement.elseStatement);
-	label(".endif" + statement.id);
+    handlers[statement.predicate.kind](statement.predicate);//write to ax
+    op.test(r.ax, 0);
+    op.jz(".elseif" + statement.id);
+    handlers[statement.statement.kind](statement.statement);
+    op.jmp(".endif" + statement.id);
+    label(".elseif" + statement.id);
+    handlers[statement.elseStatement.kind](statement.elseStatement);
+    label(".endif" + statement.id);
   },
-   ConditionalLoopStatement(statement) {
-	statement.id = randomHash();
-	label(".while" + statement.id;
-	handlers[statement.predicate.kind](statement.predicate);//write to ax
-	op.test(r.ax, 0);
-	op.jz(".endwhile" + statement.id);
-	handlers[statement.statement.kind](statement.statement);
-	op.jmp(".while" + statement.id);
-	label(".endwhile" + statement.id);
+  ConditionalLoopStatement(statement) {
+    statement.id = randomHash();
+    label(".while" + statement.id);
+    handlers[statement.predicate.kind](statement.predicate);//write to ax
+    op.test(r.ax, 0);
+    op.jz(".endwhile" + statement.id);
+    handlers[statement.statement.kind](statement.statement);
+    op.jmp(".while" + statement.id);
+    label(".endwhile" + statement.id);
   },
   AssignmentStatement(statement) {
-	if(statement.leftHandSide.type == "int" || statement.leftHandSide.type == "char"){
-		handlers[statement.rigthHandSide.kind](statement.rigthHandSide);//write to ax
-		op.mov(l.(statement.leftHandSize.name), r.ax);
-	}else{
-		throw new Error("not implemented");
-	}
+    if(statement.leftHandSide.type == "int" || statement.leftHandSide.type == "char"){
+      handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
+      op.mov(l[statement.leftHandSide.name], r.ax);
+    }else{
+      throw new Error("not implemented");
+    }
   },
-  ReturnStatement(statement) {
-	
+  ReturnStatement(statement, { callingConvention }) {
+
   },
   FunctionDefinition(statement) {
-  
   },
   ExpressionStatement(statement) {
-  
+
   }
 }
 
-function visit(statements) {
+function visit(statements, tag) {
   statements.forEach(function (st) {
     if (!statementHandlers.hasOwnProperty(st.kind)) {
       throw new Error(`statement ${st.kind} not implemented`);
     }
-    statementHandlers[st.kind](st);
+    statementHandlers[st.kind](st, tag);
   });
 }
 
 try {
-  visit(program);
+  visit(program, {});
 } catch (e) {
   console.log('translation error, but printing what we already have');
   console.log(getAssembly());
