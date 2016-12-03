@@ -106,6 +106,12 @@ const statementHandlers = {
   },
   ExpressionStatement(statement) {
 	if(statement.type == FunctionCall) {
+		if(statement.FunctionCall.name == "print_const") {
+			for (i = 0 ; statement.FunctionCall.args[0].length; i++) {
+				dumpBinary(b11000001);
+				dumpBinary(statement.FunctionCall.args[0][i]);
+			}
+		}
 		op.cpc();
 		op.push(r.dx);
 		if(statement.FunctionCall.convention == "fastcall"){
