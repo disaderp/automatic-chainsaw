@@ -52,6 +52,17 @@ const statementHandlers = {
   VariableDeclaration({ type, name, initial }) {
     data(name, typeSize(type), initial.value !== null ? initial.value : zeros(typeSize(type)));
   },
+  ConditionalStatement(statement) {
+    statement.id = randomHash();
+	handlers[statement.predicate.kind](statement.predicate);//write to ax
+	op.test(r.ax, 0);
+	op.jz(".elseif" + statement.id);
+	handlers[statement.statement.kind](statement.statement);
+	op.jmp(".endif" + statement.id);
+	label(".elseif" + statement.id);
+	handlers[statement.elseStatement.kind](statement.elseStatement);
+	label(".endif" + statement.id);
+  },
 }
 
 function visit(statements) {
@@ -67,4 +78,8 @@ try { visit(program); }
 catch (e) {
   console.log('translation error, but printing what we already have');
   console.log(getAssembly());
+}
+
+function randomHash() {
+  return '.'.repeat(5).split('').map(x => String.fromCharCode(Math.floor(Math.random() * 25) + 97)).join('');
 }
