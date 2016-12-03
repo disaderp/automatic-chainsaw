@@ -63,6 +63,19 @@ const statementHandlers = {
 	handlers[statement.elseStatement.kind](statement.elseStatement);
 	label(".endif" + statement.id);
   },
+   ConditionalLoopStatement(statement) {
+	statement.id = randomHash();
+	label(".while" + statement.id;
+	handlers[statement.predicate.kind](statement.predicate);//write to ax
+	op.test(r.ax, 0);
+	op.jz(".endwhile" + statement.id);
+	handlers[statement.statement.kind](statement.statement);
+	op.jmp(".while" + statement.id);
+	label(".endwhile" + statement.id);
+  },
+  FunctionCallStatement(func) {
+	
+  },
 }
 
 function visit(statements) {
