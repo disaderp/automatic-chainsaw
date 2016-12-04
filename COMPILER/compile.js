@@ -71,8 +71,15 @@ const statementHandlers = {
     label(".endwhile" + statement.id);
   },
   AssignmentStatement(statement) {
-    handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
-    op.mov(l[statement.leftHandSide], r.ax);
+	if(statement.rightHandSide.kind == null) {
+		op.mov(r.ax, l[statement.rightHandSide]);
+		op.mov(l[statement.leftHandSide], r.ax);
+	}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
+		op.mov(l[statement.leftHandSide], statement.rightHandSide.value);
+	} else {
+		handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
+		op.mov(l[statement.leftHandSide], r.ax);
+	}
   },
   ReturnStatement(statement, { callingConvention }) {
 	if(callingConvention == "fastcall") {
@@ -140,6 +147,39 @@ const statementHandlers = {
 			}
 		}
 		op.jmp(".func" + statement.expression.name);
+	}
+  },
+  BinaryOperator(statement){
+	if(statement.leftHandSide.kind == null){
+		op.mov(r.dx, l[statement.leftHandSize]);
+		op.push(r.dx);
+	}else if(statement.leftHandSide.kind == 'Integer' || statement.leftHandSide.kind == 'Char'){
+		op.mov(r.dx, statement.leftHandSide.value);
+		op.push(r.dx);
+	} else {
+		handlers[statement.leftHandSide.kind](statement.leftHandSide);//write to ax
+		op.push(r.ax);
+	}
+	
+	if(statement.rightHandSide.kind == null){
+		op.mov(r.dx, l[statement.rightHandSize]);
+	}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
+		op.mov(r.dx, statement.rightHandSide.value);
+	} else {
+		handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
+		op.mov(r.dx, r.ax);
+	}
+	
+	op.pop(r.ax);
+	switch(statement.operator){
+		case '+': op.add(r.ax, r.dx, 0); break;
+		case '-': op.sub(r.ax, r.dx, 0); break;
+		case '*': op.mul8(r.ax, r.dx); break;
+		case '/': op.div8(r.ax, r.dx); break;
+		case '&': op.and(r.ax, r.dx); break;
+		case '|': op.or(r.ax, r.dx); break;
+		case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label(".testexit" + statement.id); break;
+		default: throw new Error('not implemented operator');
 	}
 	
   }
