@@ -38,10 +38,11 @@ try {
 
 /* for a given type, return its size in data section */
 function typeSize(type) {
-  if(type.modifiers.length > 0){
-	if(type.modifiers[0].kind == 'ArrayTypeModifier'){
-		return (type.modifiers[0].capacity) * 2
-	}
+  if(type.modifiers[0] != null){
+		if(type.modifiers[0].kind == 'ArrayTypeModifier'){
+			return (type.modifiers[0].capacity) * 2
+		}
+		return 2;//POINTERTYPE
   }else return 2;//for int and char//16bites == 1* X000000000
 }
 
@@ -98,9 +99,8 @@ const statementHandlers = {
 	if(statement.convention == "fastcall") {
 		if(statement.args.length > 4) { throw new Error("too many args for fastcall");}
 		reg = 'AX';
-		dump(statement.args);
 		for(i = 0;i < statement.args.length; i++){
-			data(statement.args[i].name, typeSize(statement.args[i].type.name), reg);
+			data(statement.args[i].name, typeSize(statement.args[i].type), reg);
 			switch(reg){
 			case 'AX': reg='BX';break;
 			case 'BX': reg='CX';break;
@@ -115,7 +115,7 @@ const statementHandlers = {
 	}else{
 		for(i = 0;i < statement.args.length - 1; i++){
 			op.pop(r.dx);
-			data(statement.args[i].name, typeSize(statement.args[i].type.name), r.dx);
+			data(statement.args[i].name, typeSize(statement.args[i].type), r.dx);
 		}
 		if (statement.statement.kind != null) {
 			statementHandlers[statement.statement.kind](statement.statement);
@@ -153,7 +153,7 @@ const statementHandlers = {
 			for(i = statement.expression.args.length - 1;i >= 0; i--){
 				if(statement.expression.args[i].kind == null) {
 					op.lea(r.dx, l[statement.expression.args[i]]);
-				}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
+				}else if(statement.expression.args[i].kind == 'Integer' || statement.expression.args[i].kind == 'Char'){
 					op.mov(r.dx, statement.expression.args[i]);
 				} else {
 					statementHandlers[statement.expression.args[i].kind](statement.expression.args[i]);//write to ax
@@ -208,7 +208,7 @@ function visit(statements, tag) {
       throw new Error(`statement ${st.kind} not implemented`);
     }
     statementHandlers[st.kind](st, tag);
-  }catch(e){ console.log("ERROR: TYPE: " + e + " CODE: " + dump(st) + "END ERROR \n");}
+  }catch(e){ console.log("ERROR: TYPE: " + e.stack + " CODE: " + dump(st) + "END ERROR \n");}
   });
 }
 
