@@ -98,7 +98,8 @@ const statementHandlers = {
 	if(statement.convention == "fastcall") {
 		if(statement.args.length > 4) { throw new Error("too many args for fastcall");}
 		reg = 'AX';
-		for(i = 0;i > statement.args.length - 1; i++){
+		dump(statement.args);
+		for(i = 0;i < statement.args.length; i++){
 			data(statement.args[i].name, typeSize(statement.args[i].type.name), reg);
 			switch(reg){
 			case 'AX': reg='BX';break;
@@ -106,11 +107,13 @@ const statementHandlers = {
 			case 'CX': reg='DX';break;
 			}
 		}
+		for(i = 0;i < statement.statement.length - 1; i++){
 		if (statement.statement.kind != null) {
 			statementHandlers[statement.statement.kind](statement.statement);
 		}
+		}
 	}else{
-		for(i = 0;i > statement.args.length - 1; i++){
+		for(i = 0;i < statement.args.length - 1; i++){
 			op.pop(r.dx);
 			data(statement.args[i].name, typeSize(statement.args[i].type.name), r.dx);
 		}
@@ -122,7 +125,7 @@ const statementHandlers = {
   ExpressionStatement(statement) {
 	if(statement.expression.kind == 'FunctionCall') {
 		if(statement.expression.name == "print_const") {
-			for (i = 0 ; statement.expression.args[0].value.length; i++) {
+			for (i = 0 ;i < statement.expression.args[0].value.length; i++) {
 				dumpBinary(b11000001);
 				dumpBinary(statement.expression.args[0].value[i]);
 			}
@@ -132,8 +135,14 @@ const statementHandlers = {
 		if(statement.expression.convention == "fastcall"){
 			if(statement.expression.args.length > 4) { throw new Error("too many args for fastcall");}
 			reg = 'AX';
-			for(i = 0;i > statement.expression.args.length - 1 ; i++){
-				op.lea(reg, l[statement.expression.args[i].value]);
+			for(i = 0;i < statement.expression.args.length - 1 ; i++){
+				if(statement.expression.args[i].kind == null) {
+					op.lea(reg, l[statement.expression.args[i]]);
+				}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
+					op.mov(reg, statement.expression.args[i]);
+				} else {
+					throw new Error("do not use expression in fastcall function call");
+				}
 				switch(reg){
 					case 'AX': reg='BX';break;
 					case 'BX': reg='CX';break;
@@ -141,8 +150,15 @@ const statementHandlers = {
 				}
 			}
 		}else{
-			for(i = statement.expression.args.length - 1;i < 0  ; i--){
-				op.lea(r.dx, l[statement.expression.args[i].value]);
+			for(i = statement.expression.args.length - 1;i >= 0; i--){
+				if(statement.expression.args[i].kind == null) {
+					op.lea(r.dx, l[statement.expression.args[i]]);
+				}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
+					op.mov(r.dx, statement.expression.args[i]);
+				} else {
+					statementHandlers[statement.expression.args[i].kind](statement.expression.args[i]);//write to ax
+					op.mov(r.dx, r.ax);
+				}
 				op.push(r.dx);
 			}
 		}

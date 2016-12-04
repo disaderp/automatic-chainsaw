@@ -24,5 +24,5 @@ int f(char *s, int flags) {
     print_const("fatal");
   return (~0);
 }
-f("derp", (b & (~mask)));
-f(3);
+f(a, 1);
+write(3);

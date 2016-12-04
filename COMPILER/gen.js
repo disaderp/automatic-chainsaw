@@ -71,7 +71,7 @@ function mem(name, address) {
 }
 
 function getAssembly() {
-  return out.join('\n') + dataEntries.map(function (datum) {
+  return out.join('\n') + '\n' + dataEntries.map(function (datum) {
     return `.${datum.name}\n` +
            `X${dumpBinary(datum.bytes)}`;
   }).join('\n')
