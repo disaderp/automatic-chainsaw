@@ -160,7 +160,7 @@ const statementHandlers = {
 		statementHandlers[statement.leftOperand.kind](statement.leftOperand);//write to ax
 		op.push(r.ax);
 	}
-	
+
 	if(statement.rightOperand.kind == null){
 		op.mov(r.dx, l[statement.rightOperand]);
 	}else if(statement.rightOperand.kind == 'Integer' || statement.rightOperand.kind == 'Char'){
@@ -169,7 +169,7 @@ const statementHandlers = {
 		statementHandlers[statement.rightOperand.kind](statement.rightOperand);//write to ax
 		op.mov(r.dx, r.ax);
 	}
-	
+
 	op.pop(r.ax);
 	switch(statement.operator){
 		case '+': op.add(r.ax, r.dx, 0); break;
@@ -181,7 +181,7 @@ const statementHandlers = {
 		case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label(".testexit" + statement.id); break;
 		default: throw new Error('not implemented operator');
 	}
-	
+
   }
 }
 
@@ -200,8 +200,8 @@ try {
   visit(program, {});
 } catch (e) {
   console.log('translation error, but printing what we already have');
-  console.log(getAssembly());
 }
+console.log(getAssembly());
 
 function randomHash() {
   return '.'.repeat(5).split('').map(x => String.fromCharCode(Math.floor(Math.random() * 25) + 97)).join('');
