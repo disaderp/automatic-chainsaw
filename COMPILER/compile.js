@@ -51,22 +51,22 @@ const statementHandlers = {
   },
   ConditionalStatement(statement) {
     statement.id = randomHash();
-    handlers[statement.predicate.kind](statement.predicate);//write to ax
+    statementHandlers[statement.predicate.kind](statement.predicate);//write to ax
     op.test(r.ax, 0);
     op.jz(".elseif" + statement.id);
-    handlers[statement.statement.kind](statement.statement);
+    statementHandlers[statement.statement.kind](statement.statement);
     op.jmp(".endif" + statement.id);
     label(".elseif" + statement.id);
-    handlers[statement.elseStatement.kind](statement.elseStatement);
+    statementHandlers[statement.elseStatement.kind](statement.elseStatement);
     label(".endif" + statement.id);
   },
   ConditionalLoopStatement(statement) {
     statement.id = randomHash();
     label(".while" + statement.id);
-    handlers[statement.predicate.kind](statement.predicate);//write to ax
+    statementHandlers[statement.predicate.kind](statement.predicate);//write to ax
     op.test(r.ax, 0);
     op.jz(".endwhile" + statement.id);
-    handlers[statement.statement.kind](statement.statement);
+    statementHandlers[statement.statement.kind](statement.statement);
     op.jmp(".while" + statement.id);
     label(".endwhile" + statement.id);
   },
@@ -77,17 +77,17 @@ const statementHandlers = {
 	}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
 		op.mov(l[statement.leftHandSide], statement.rightHandSide.value);
 	} else {
-		handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
+		statementHandlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
 		op.mov(l[statement.leftHandSide], r.ax);
 	}
   },
   ReturnStatement(statement, { callingConvention }) {
 	if(callingConvention == "fastcall") {
-		handlers[statement.kind](statement);//write to ax
+		statementHandlers[statement.kind](statement);//write to ax
 		op.pop(r.dx);
 		op.jmp(r.dx);
 	}else{
-		handlers[statement.kind](statement);//write to ax
+		statementHandlers[statement.kind](statement);//write to ax
 		op.pop(r.dx);
 		op.push(r.ax);
 		op.jmp(r.dx);
@@ -107,7 +107,7 @@ const statementHandlers = {
 			}
 		}
 		if (statement.statement.kind != null) {
-			handlers[statement.statement.kind](statement.statement);
+			statementHandlers[statement.statement.kind](statement.statement);
 		}
 	}else{
 		for(i = 0;i > statement.args.length - 1; i++){
@@ -115,7 +115,7 @@ const statementHandlers = {
 			data(statement.args[i].name, typeSize(statement.args[i].type.name), r.dx);
 		}
 		if (statement.statement.kind != null) {
-			handlers[statement.statement.kind](statement.statement);
+			statementHandlers[statement.statement.kind](statement.statement);
 		}
 	}
   },
@@ -150,23 +150,23 @@ const statementHandlers = {
 	}
   },
   BinaryOperator(statement){
-	if(statement.leftHandSide.kind == null){
-		op.mov(r.dx, l[statement.leftHandSize]);
+	if(statement.leftOperand.kind == null){
+		op.mov(r.dx, l[statement.leftOperand]);
 		op.push(r.dx);
-	}else if(statement.leftHandSide.kind == 'Integer' || statement.leftHandSide.kind == 'Char'){
-		op.mov(r.dx, statement.leftHandSide.value);
+	}else if(statement.leftOperand.kind == 'Integer' || statement.leftOperand.kind == 'Char'){
+		op.mov(r.dx, statement.leftOperand.value);
 		op.push(r.dx);
 	} else {
-		handlers[statement.leftHandSide.kind](statement.leftHandSide);//write to ax
+		statementHandlers[statement.leftOperand.kind](statement.leftOperand);//write to ax
 		op.push(r.ax);
 	}
 	
-	if(statement.rightHandSide.kind == null){
-		op.mov(r.dx, l[statement.rightHandSize]);
-	}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
-		op.mov(r.dx, statement.rightHandSide.value);
+	if(statement.rightOperand.kind == null){
+		op.mov(r.dx, l[statement.rightOperand]);
+	}else if(statement.rightOperand.kind == 'Integer' || statement.rightOperand.kind == 'Char'){
+		op.mov(r.dx, statement.rightOperand.value);
 	} else {
-		handlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
+		statementHandlers[statement.rightOperand.kind](statement.rightOperand);//write to ax
 		op.mov(r.dx, r.ax);
 	}
 	
