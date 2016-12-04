@@ -56,23 +56,23 @@ const statementHandlers = {
     op.jz(".elseif" + statement.id);
     statementHandlers[statement.statement.kind](statement.statement);
     op.jmp(".endif" + statement.id);
-    label(".elseif" + statement.id);
+    label("elseif" + statement.id);
     statementHandlers[statement.elseStatement.kind](statement.elseStatement);
-    label(".endif" + statement.id);
+    label("endif" + statement.id);
   },
   ConditionalLoopStatement(statement) {
     statement.id = randomHash();
-    label(".while" + statement.id);
+    label("while" + statement.id);
     statementHandlers[statement.predicate.kind](statement.predicate);//write to ax
     op.test(r.ax, 0);
     op.jz(".endwhile" + statement.id);
     statementHandlers[statement.statement.kind](statement.statement);
     op.jmp(".while" + statement.id);
-    label(".endwhile" + statement.id);
+    label("endwhile" + statement.id);
   },
   AssignmentStatement(statement) {
 	if(statement.rightHandSide.kind == null) {
-		op.mov(r.ax, l[statement.rightHandSide]);
+		op.lea(r.ax, l[statement.rightHandSide]);
 		op.mov(l[statement.leftHandSide], r.ax);
 	}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
 		op.mov(l[statement.leftHandSide], statement.rightHandSide.value);
@@ -94,7 +94,7 @@ const statementHandlers = {
 	}
   },
   FunctionDefinition(statement) {
-	label(".func" + statement.name);
+	label("func" + statement.name);
 	if(statement.convention == "fastcall") {
 		if(statement.args.length > 4) { throw new Error("too many args for fastcall");}
 		reg = 'AX';
@@ -133,7 +133,7 @@ const statementHandlers = {
 			if(statement.expression.args.length > 4) { throw new Error("too many args for fastcall");}
 			reg = 'AX';
 			for(i = 0;i > statement.expression.args.length - 1 ; i++){
-				op.mov(reg, l[statement.expression.args[i].value]);
+				op.lea(reg, l[statement.expression.args[i].value]);
 				switch(reg){
 					case 'AX': reg='BX';break;
 					case 'BX': reg='CX';break;
@@ -142,7 +142,7 @@ const statementHandlers = {
 			}
 		}else{
 			for(i = statement.expression.args.length - 1;i < 0  ; i--){
-				op.mov(r.dx, l[statement.expression.args[i].value]);
+				op.lea(r.dx, l[statement.expression.args[i].value]);
 				op.push(r.dx);
 			}
 		}
@@ -151,7 +151,7 @@ const statementHandlers = {
   },
   BinaryOperator(statement){
 	if(statement.leftOperand.kind == null){
-		op.mov(r.dx, l[statement.leftOperand]);
+		op.lea(r.dx, l[statement.leftOperand]);
 		op.push(r.dx);
 	}else if(statement.leftOperand.kind == 'Integer' || statement.leftOperand.kind == 'Char'){
 		op.mov(r.dx, statement.leftOperand.value);
@@ -162,7 +162,7 @@ const statementHandlers = {
 	}
 
 	if(statement.rightOperand.kind == null){
-		op.mov(r.dx, l[statement.rightOperand]);
+		op.lea(r.dx, l[statement.rightOperand]);
 	}else if(statement.rightOperand.kind == 'Integer' || statement.rightOperand.kind == 'Char'){
 		op.mov(r.dx, statement.rightOperand.value);
 	} else {
@@ -178,7 +178,7 @@ const statementHandlers = {
 		case '/': op.div8(r.ax, r.dx); break;
 		case '&': op.and(r.ax, r.dx); break;
 		case '|': op.or(r.ax, r.dx); break;
-		case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label(".testexit" + statement.id); break;
+		case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		default: throw new Error('not implemented operator');
 	}
 
