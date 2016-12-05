@@ -7,7 +7,7 @@ try {
   process.exit(1);
 }
 
-const { op, m, l, L, r, mem, label, data, getAssembly, zeros, dumpBinary } = require('./gen');
+const { db, op, m, l, L, r, mem, label, data, getAssembly, zeros, dumpBinary } = require('./gen');
 
 const util = require('util');
 const cli = require('meow')(`
@@ -57,7 +57,7 @@ const statementHandlers = {
   },
   ConditionalStatement(statement) {
     statement.id = randomHash();
-    
+
 	if(statement.predicate.kind == null) {
 		op.lea(r.ax, l[statement.predicate]);
 	}else if(statement.predicate.kind == 'Integer' || statement.predicate.kind == 'Char'){
@@ -65,7 +65,7 @@ const statementHandlers = {
 	} else {
 		statementHandlers[statement.predicate.kind](statement.predicate);
 	}
-	
+
 	op.mov(r.cx, 0);
     op.test(r.ax, r.cx);
     op.jz(".elseif" + statement.id);
@@ -86,7 +86,7 @@ const statementHandlers = {
   ConditionalLoopStatement(statement) {
     statement.id = randomHash();
     label("while" + statement.id);
-	
+
     if(statement.predicate.kind == null) {
 		op.lea(r.ax, l[statement.predicate]);
 	}else if(statement.predicate.kind == 'Integer' || statement.predicate.kind == 'Char'){
@@ -94,7 +94,7 @@ const statementHandlers = {
 	} else {
 		statementHandlers[statement.predicate.kind](statement.predicate);
 	}
-	
+
     op.mov(r.cx, 0);
     op.test(r.ax, r.cx);
     op.jz(".endwhile" + statement.id);
@@ -255,7 +255,7 @@ const statementHandlers = {
 		statementHandlers[statement.operand.kind](statement.operand);//write to ax
 		op.push(r.ax);
 	}
-	
+
 	switch(statement.operator){
 		case '!': op.not(r.ax); break;
 		case '~': op.neg(r.ax); break;

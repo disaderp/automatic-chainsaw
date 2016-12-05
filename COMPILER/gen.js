@@ -42,6 +42,10 @@ function dumpBinary(bytes) {
   else console.log(`dumpBinary(): unexpected type ${typeof bytes}`);
 }
 
+function db(what) {
+  out.push(`X${dumpBinary(what)}`);
+}
+
 function zeros(count) {
   return '\0'.repeat(count);
 }
@@ -77,4 +81,4 @@ function getAssembly() {
   }).join('\n')
 }
 
-Object.assign(exports, { op, m, l, L, r, mem, label, data, getAssembly, dumpBinary, zeros });
+Object.assign(exports, { db, op, m, l, L, r, mem, label, data, getAssembly, dumpBinary, zeros });
