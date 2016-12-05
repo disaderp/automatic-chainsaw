@@ -34,16 +34,16 @@ try {
   console.log(`failed to parse input: ${e.message}`);
 }
 
-//dump(program);
+dump(program);
 
 /* for a given type, return its size in data section */
 function typeSize(type) {
   if(type.modifiers[0] != null){
 		if(type.modifiers[0].kind == 'ArrayTypeModifier'){
-			return (type.modifiers[0].capacity) * 2
+			return (type.modifiers[0].capacity) * 1
 		}
-		return 2;//POINTERTYPE
-  }else return 2;//for int and char//16bites == 1* X000000000
+		return 1;//POINTERTYPE
+  }else return 1;//for int and char//16bites == 1* X000000000
 }
 
 const statementHandlers = {
@@ -55,10 +55,18 @@ const statementHandlers = {
     statementHandlers[statement.predicate.kind](statement.predicate);//write to ax
     op.test(r.ax, 0);
     op.jz(".elseif" + statement.id);
-    statementHandlers[statement.statement.kind](statement.statement);
+    for(i = 0; i< statement.statement.length;i++){
+		if (statement.statement[i].kind != null) {
+			statementHandlers[statement.statement[i].kind](statement.statement[i]);
+		}
+	}
     op.jmp(".endif" + statement.id);
     label("elseif" + statement.id);
-    statementHandlers[statement.elseStatement.kind](statement.elseStatement);
+    for(i = 0; i< statement.elseStatement.length;i++){
+		if (statement.elsestatement[i].kind != null) {
+			statementHandlers[statement.elseStatement[i].kind](statement.elseStatement[i]);
+		}
+	}
     label("endif" + statement.id);
   },
   ConditionalLoopStatement(statement) {
@@ -67,7 +75,11 @@ const statementHandlers = {
     statementHandlers[statement.predicate.kind](statement.predicate);//write to ax
     op.test(r.ax, 0);
     op.jz(".endwhile" + statement.id);
-    statementHandlers[statement.statement.kind](statement.statement);
+	for(i = 0; i< statement.statement.length;i++){
+		if (statement.statement[i].kind != null) {
+			statementHandlers[statement.statement[i].kind](statement.statement[i]);
+		}
+	}
     op.jmp(".while" + statement.id);
     label("endwhile" + statement.id);
   },
@@ -83,16 +95,18 @@ const statementHandlers = {
 	}
   },
   ReturnStatement(statement, { callingConvention }) {
-	if(callingConvention == "fastcall") {
-		statementHandlers[statement.kind](statement);//write to ax
-		op.pop(r.dx);
-		op.jmp(r.dx);
-	}else{
-		statementHandlers[statement.kind](statement);//write to ax
-		op.pop(r.dx);
-		op.push(r.ax);
-		op.jmp(r.dx);
+	if(statement.expression.kind == null) {
+		op.lea(r.ax, l[statement.expression]);
+	}else if(statement.expression.kind == 'Integer' || statement.expression.kind == 'Char'){
+		op.mov(r.ax, statement.rightHandSide.value);
+	} else {
+		statementHandlers[statement.expression.kind](statement.expression);//write to ax
 	}
+	op.pop(r.dx);
+	if(callingConvention != "fastcall") {
+		op.push(r.ax);
+	}
+	op.jmp(r.dx);
   },
   FunctionDefinition(statement) {
 	label("func" + statement.name);
@@ -100,25 +114,29 @@ const statementHandlers = {
 		if(statement.args.length > 4) { throw new Error("too many args for fastcall");}
 		reg = 'AX';
 		for(i = 0;i < statement.args.length; i++){
-			data(statement.args[i].name, typeSize(statement.args[i].type), reg);
+			data(statement.args[i].name, typeSize(statement.args[i].type), zeros(typeSize(statement.args[i].type)));
+			op.mov(l[statement.args[i].name], reg);
 			switch(reg){
 			case 'AX': reg='BX';break;
 			case 'BX': reg='CX';break;
 			case 'CX': reg='DX';break;
 			}
 		}
-		for(i = 0;i < statement.statement.length - 1; i++){
-		if (statement.statement.kind != null) {
-			statementHandlers[statement.statement.kind](statement.statement);
-		}
+		for(i = 0;i < statement.statement.length; i++){
+			if (statement.statement[i].kind != null) {
+				statementHandlers[statement.statement[i].kind](statement.statement[i]);
+			}
 		}
 	}else{
-		for(i = 0;i < statement.args.length - 1; i++){
+		for(i = 0;i < statement.args.length; i++){
 			op.pop(r.dx);
-			data(statement.args[i].name, typeSize(statement.args[i].type), r.dx);
+			data(statement.args[i].name, typeSize(statement.args[i].type), zeros(typeSize(statement.args[i].type)));
+			op.mov(l[statement.args[i].name], r.dx);
 		}
-		if (statement.statement.kind != null) {
-			statementHandlers[statement.statement.kind](statement.statement);
+		for(i = 0;i < statement.statement.length; i++){
+			if (statement.statement[i].kind != null) {
+				statementHandlers[statement.statement[i].kind](statement.statement[i]);
+			}
 		}
 	}
   },
@@ -203,20 +221,20 @@ const statementHandlers = {
 
 function visit(statements, tag) {
   statements.forEach(function (st) {
-  try{
+  //try{
     if (!statementHandlers.hasOwnProperty(st.kind)) {
       throw new Error(`statement ${st.kind} not implemented`);
     }
     statementHandlers[st.kind](st, tag);
-  }catch(e){ console.log("ERROR: TYPE: " + e.stack + " CODE: " + dump(st) + "END ERROR \n");}
+  //}catch(e){ console.log("ERROR: TYPE: " + e.stack + " CODE: " + dump(st) + "END ERROR \n");}
   });
 }
 
-try {
+//try {
   visit(program, {});
-} catch (e) {
+//} catch (e) {
   console.log('translation error, but printing what we already have');
-}
+//}
 console.log(getAssembly());
 
 function randomHash() {

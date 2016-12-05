@@ -39,7 +39,7 @@ function dumpBinary(bytes) {
     .filter(b => b < 0x100)
     .map(b => '0'.repeat(8 - b.toString(2).length) + b.toString(2))
     .join('\nX');
-  else console.log("throw new Error(`dumpBinary(): unexpected type ${typeof bytes}`)");
+  else console.log(`dumpBinary(): unexpected type ${typeof bytes}`);
 }
 
 function zeros(count) {
