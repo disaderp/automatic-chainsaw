@@ -26,4 +26,5 @@ int f(char *s, int flags) {
   return (0);
 }
 f(a, 1);
+a = (!a);
 write(3);

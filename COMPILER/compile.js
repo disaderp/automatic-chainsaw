@@ -168,7 +168,7 @@ const statementHandlers = {
 	if(statement.expression.kind == 'FunctionCall') {
 		if(statement.expression.name == "print_const") {
 			for (let i = 0 ;i < statement.expression.args[0].value.length; i++) {
-				dumpBinary("11000001");
+				dumpBinary(0b11000001);
 				dumpBinary(statement.expression.args[0].value[i]);
 			}
 			return;
@@ -246,9 +246,25 @@ const statementHandlers = {
 	}
 
   },
-  LeftUnaryOperator (statement){
+  UnaryOperator (statement){
+	if(statement.operand.kind == null){
+		op.lea(r.ax, l[statement.operand]);
+	}else if(statement.operand.kind == 'Integer' || statement.operand.kind == 'Char'){
+		op.mov(r.ax, statement.operand.value);
+	} else {
+		statementHandlers[statement.operand.kind](statement.operand);//write to ax
+		op.push(r.ax);
+	}
 	
-	
+	switch(statement.operator){
+		case '!': op.not(r.ax); break;
+		case '~': op.neg(r.ax); break;
+		case '-': op.neg(r.ax); break;
+		case '+': break;
+		case '*': op.lea(r.ax, r.ax); break;
+		case '&': break;
+		default: throw new Error('not implemented operator');
+	}
   }
 }
 
