@@ -10,7 +10,7 @@ A custom 16-bit computer
 |ChainsawGPU|GPU created in Verilog|[@Vanderpool0312](https://github.com/Vanderpool0312)|![completion](https://img.shields.io/badge/completion-100%25-brightgreen.svg?maxAge=3600)|
 |ChainsawASM|Assembler for the machine code|[@disaderp](https://github.com/disaderp)|![completion](https://img.shields.io/badge/completion-100%25-brightgreen.svg?maxAge=3600)|
 |ChainsawOS|Operating System for Chainsaw|[@Martinus-1453](https://github.com/Martinus-1453)|![completion](https://img.shields.io/badge/completion-75%25-yellow.svg?maxAge=3600)|
-|ChainsawC--|Compiler for a subset of C for Chainsaw|[@winek](https://github.com/disaderp)|![completion](https://img.shields.io/badge/completion-80%25-yellow.svg?maxAge=3600)|
+|ChainsawC--|Compiler for a subset of C for Chainsaw|[@winek](https://github.com/disaderp)|![completion](https://img.shields.io/badge/completion-90%25-brightgreen.svg?maxAge=3600)|
 |ChainsawSim|Simulator for automatic-chainsaw computer|[@disaderp](https://github.com/disaderp)|![completion](https://img.shields.io/badge/completion-100%25-brightgreen.svg?maxAge=3600)|
 
 

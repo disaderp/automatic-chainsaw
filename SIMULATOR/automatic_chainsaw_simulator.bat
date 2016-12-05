@@ -2,10 +2,10 @@
 
 SET OLDPATH=%cd%
 SET SIM_PATH=%~dp0
-SET ASM_PATH="..\ASM\CPUAssembler\bin\Debug\CPUAssembler.exe"
+SET ASM_PATH=..\ASM\CPUAssembler\bin\Debug\CPUAssembler.exe
 SET CPU_FILES=..\CPU\
 SET IVERILOG_PATH=c:\iverilog\bin\
-SET CC_PATH=""
+SET CC_PATH=..\COMPILER\node compiler.js
 SET INPUT_EXT=%~x1
 SET TMP_PATH=tmp
 
@@ -20,8 +20,7 @@ CD %OLDPATH%
 EXIT /B 1
 
 :compilec
-rem no compiler yet
-%CC_PATH% %1 -a %TMP_PATH%\program.asm 1>nul
+%CC_PATH% %1 -o %TMP_PATH%\program.asm 1>nul
 IF %ERRORLEVEL% NEQ 0 GOTO error
 %ASM_PATH% -ram %TMP_PATH%\ram.v %TMP_PATH%\program.asm 1>nul
 IF %ERRORLEVEL% NEQ 0 GOTO error

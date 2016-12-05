@@ -12,12 +12,15 @@ const { op, m, l, L, r, mem, label, data, getAssembly, zeros, dumpBinary } = req
 const util = require('util');
 const cli = require('meow')(`
   Usage:
-    compile INPUT [-o OUTPUT]
+    compile [INPUT] [-Flags] [-o OUTPUT]
+
+  Flags:
+    --tree - displays code tree after parsing
 `);
 
 const fs = require('fs');
 if (cli.input.length < 1) {
-  console.log('at leprogram input file required');
+  console.log(cli.help);
   process.exit(1);
 }
 
@@ -34,7 +37,9 @@ try {
   console.log(`failed to parse input: ${e.message}`);
 }
 
-//dump(program);
+if(cli.flags.tree != null) {
+dump(program);
+};
 
 /* for a given type, return its size in data section */
 function typeSize(type) {
@@ -58,7 +63,7 @@ const statementHandlers = {
 	}else if(statement.predicate.kind == 'Integer' || statement.predicate.kind == 'Char'){
 		op.mov(r.ax, statement.predicate.value);
 	} else {
-		statementHandlers[statement.predicate.kind](statement.predicate);//write to ax
+		statementHandlers[statement.predicate.kind](statement.predicate);
 	}
 	
 	op.mov(r.cx, 0);
@@ -87,7 +92,7 @@ const statementHandlers = {
 	}else if(statement.predicate.kind == 'Integer' || statement.predicate.kind == 'Char'){
 		op.mov(r.ax, statement.predicate.value);
 	} else {
-		statementHandlers[statement.predicate.kind](statement.predicate);//write to ax
+		statementHandlers[statement.predicate.kind](statement.predicate);
 	}
 	
     op.mov(r.cx, 0);
@@ -108,7 +113,7 @@ const statementHandlers = {
 	}else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
 		op.mov(l[statement.leftHandSide], statement.rightHandSide.value);
 	} else {
-		statementHandlers[statement.rightHandSide.kind](statement.rightHandSide);//write to ax
+		statementHandlers[statement.rightHandSide.kind](statement.rightHandSide);
 		op.mov(l[statement.leftHandSide], r.ax);
 	}
   },
@@ -118,7 +123,7 @@ const statementHandlers = {
 	}else if(statement.expression.kind == 'Integer' || statement.expression.kind == 'Char'){
 		op.mov(r.ax, statement.expression.value);
 	} else {
-		statementHandlers[statement.expression.kind](statement.expression);//write to ax
+		statementHandlers[statement.expression.kind](statement.expression);
 	}
 	op.pop(r.dx);
 	//TODO
@@ -226,36 +231,50 @@ const statementHandlers = {
 
 	op.pop(r.ax);
 	switch(statement.operator){
-		case '+': op.add(r.ax, r.dx, 0); break;
-		case '-': op.sub(r.ax, r.dx, 0); break;
+		case '+': op.add(r.ax, r.dx); break;
+		case '-': op.sub(r.ax, r.dx); break;
 		case '*': op.mul8(r.ax, r.dx); break;
 		case '/': op.div8(r.ax, r.dx); break;
 		case '&': op.and(r.ax, r.dx); break;
 		case '|': op.or(r.ax, r.dx); break;
 		case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+		case '<': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+		case '>': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jno(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+		case '>=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+		case '<=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jo(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		default: throw new Error('not implemented operator');
 	}
 
+  },
+  LeftUnaryOperator (statement){
+	
+	
   }
 }
 
 function visit(statements, tag) {
   statements.forEach(function (st) {
-  //try{
+  try{
     if (!statementHandlers.hasOwnProperty(st.kind)) {
       throw new Error(`statement ${st.kind} not implemented`);
     }
     statementHandlers[st.kind](st, tag);
-  //}catch(e){ console.log("ERROR: TYPE: " + e.stack + " CODE: " + dump(st) + "END ERROR \n");}
+  }catch(e){ console.log("ERROR: TYPE: " + e.stack + " CODE: " + dump(st) + "END ERROR \n");}
   });
 }
 
-try {
-  visit(program, {});
-} catch (e) {
-  console.log('translation error, but printing what we already have');
+visit(program, {});
+
+if(cli.flags.o != null){
+	try {
+		input = fs.writeFileSync(cli.flags.o, getAssembly());
+	} catch (e) {
+		console.log(`failed to read input file ${cli.input[0]}`);
+		process.exit(1);
+	}
+}else{
+	console.log(getAssembly());
 }
-console.log(getAssembly());
 
 function randomHash() {
   return '.'.repeat(5).split('').map(x => String.fromCharCode(Math.floor(Math.random() * 25) + 97)).join('');
