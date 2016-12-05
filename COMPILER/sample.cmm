@@ -11,6 +11,7 @@ int[0x20] T;
 n = (n + 1);
 pi = n;
 esc = 1;
+T[10] = 1;
 fastcall int write(char *buf) {
   /* to be developed… */
   return (x);

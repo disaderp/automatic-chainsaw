@@ -238,6 +238,7 @@ const statementHandlers = {
 		case '&': op.and(r.ax, r.dx); break;
 		case '|': op.or(r.ax, r.dx); break;
 		case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+		case '!=': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		case '<': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		case '>': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jno(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		case '>=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
@@ -247,8 +248,10 @@ const statementHandlers = {
 
   },
   UnaryOperator (statement){
+	op.mov(r.cx, 0);//nul pointer, eroreoroeror
 	if(statement.operand.kind == null){
 		op.lea(r.ax, l[statement.operand]);
+		op.mov(r.cx, l[statement.operand]);
 	}else if(statement.operand.kind == 'Integer' || statement.operand.kind == 'Char'){
 		op.mov(r.ax, statement.operand.value);
 	} else {
@@ -262,7 +265,7 @@ const statementHandlers = {
 		case '-': op.neg(r.ax); break;
 		case '+': break;
 		case '*': op.lea(r.ax, r.ax); break;
-		case '&': break;
+		case '&': op.mov(r.ax, r.cx); break;
 		default: throw new Error('not implemented operator');
 	}
   }
