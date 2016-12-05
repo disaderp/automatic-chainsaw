@@ -13,7 +13,7 @@ pi = n;
 esc = 1;
 fastcall int write(char *buf) {
   /* to be developed… */
-  /*return (x);*/
+  return (x);
 }
 
 int f(char *s, int flags) {
