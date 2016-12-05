@@ -168,8 +168,8 @@ const statementHandlers = {
 	if(statement.expression.kind == 'FunctionCall') {
 		if(statement.expression.name == "print_const") {
 			for (let i = 0 ;i < statement.expression.args[0].value.length; i++) {
-				dumpBinary(0b11000001);
-				dumpBinary(statement.expression.args[0].value[i]);
+				db(0b11000001);
+				db(statement.expression.args[0].value[i]);
 			}
 			return;
 		}
