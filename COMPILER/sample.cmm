@@ -1,0 +1,30 @@
+/*
+ * Chainsaw C-- compiler test
+ */
+
+int pi = 314;
+int esc = 0x1B;
+char *hello = "Hello World";
+int[0x20] T;
+;
+
+n = (n + 1);
+pi = n;
+esc = 1;
+fastcall int write(char *buf) {
+  /* to be developed… */
+  return (x);
+}
+
+int f(char *s, int flags) {
+  while (s - 1){
+    printn(s);}
+  if (s) {
+    print(s);
+  } else{
+    print_const("fatal");}
+  return (0);
+}
+f(a, 1);
+a = (!a);
+write(3);

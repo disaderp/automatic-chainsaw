@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "build": "pegjs -o parser.js grammar.pegjs"
+  },
+  "dependencies": {
+    "meow": "^3.7.0",
+    "pegjs": "^0.10.0"
+  }
+}
