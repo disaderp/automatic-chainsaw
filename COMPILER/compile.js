@@ -192,6 +192,7 @@ const statementHandlers = {
 					case 'CX': reg='DX';break;
 				}
 			}
+			op.jmp(".func" + statement.expression.name);
 		}else{
 			for(let i = statement.expression.args.length - 1;i >= 0; i--){
 				if(statement.expression.args[i].kind == null) {
@@ -204,8 +205,10 @@ const statementHandlers = {
 				}
 				op.push(r.dx);
 			}
+			op.jmp(".func" + statement.expression.name);
+			op.pop(r.ax);
 		}
-		op.jmp(".func" + statement.expression.name);
+		
 	}
   },
   BinaryOperator(statement){
@@ -243,6 +246,9 @@ const statementHandlers = {
 		case '>': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jno(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		case '>=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		case '<=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jo(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+		case '%': op.mov(r.bx, 1); op.sub(r.dx, r.bx); op.and(r.ax, r.dx); break;//WORKS ONLY FOR B=2^n
+		case '&&': op.mov(r.cx, 0); op.test(r.ax, r.cx); statement.id = randomHash(); op.mov(r.ax, 0); op.jz(l[".testexit" + statement.id]); op.test(r.dx, r.cx); op.jz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+		case '||': op.mov(r.cx, 0); op.test(r.ax, r.cx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.test(r.dx, r.cx); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
 		default: throw new Error('not implemented operator');
 	}
 
@@ -256,7 +262,6 @@ const statementHandlers = {
 		op.mov(r.ax, statement.operand.value);
 	} else {
 		statementHandlers[statement.operand.kind](statement.operand);//write to ax
-		op.push(r.ax);
 	}
 
 	switch(statement.operator){

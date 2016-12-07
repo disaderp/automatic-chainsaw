@@ -160,6 +160,7 @@ BinaryOperator "binary operator"
   / "<"
   / "<="
   / ">="
+  / "."
 
 LeftUnaryOperator "unary operator"
   = "+"
