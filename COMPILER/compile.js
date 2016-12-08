@@ -51,6 +51,7 @@ function typeSize(type) {
   }else return 1;//for int and char//16bites == 1* X000000000
 }
 
+let callingConventions = {};
 const statementHandlers = {
   VariableDeclaration({ type, name, initial }) {
     data(name, typeSize(type), initial !== null ? initial.value : zeros(typeSize(type)));
@@ -117,7 +118,7 @@ const statementHandlers = {
 		op.mov(l[statement.leftHandSide], r.ax);
 	}
   },
-  ReturnStatement(statement/*,TODO { callingConvention }*/) {
+  ReturnStatement(statement, { callingConvention }) {
 	if(statement.expression.kind == null) {
 		op.lea(r.ax, l[statement.expression]);
 	}else if(statement.expression.kind == 'Integer' || statement.expression.kind == 'Char'){
@@ -134,6 +135,8 @@ const statementHandlers = {
   },
   FunctionDefinition(statement) {
 	label("func" + statement.name);
+    let extra = { callingConvention: statement.convention };
+    callingConventions[statement.name] = statement.convention;
 	if(statement.convention == "fastcall") {
 		if(statement.args.length > 4) { throw new Error("too many args for fastcall");}
 		reg = 'AX';
@@ -148,7 +151,7 @@ const statementHandlers = {
 		}
 		for(let i = 0;i < statement.statement.length; i++){
 			if (statement.statement[i].kind != null) {
-				statementHandlers[statement.statement[i].kind](statement.statement[i]);
+				statementHandlers[statement.statement[i].kind](statement.statement[i], extra);
 			}
 		}
 	}else{
@@ -159,7 +162,7 @@ const statementHandlers = {
 		}
 		for(let i = 0;i < statement.statement.length; i++){
 			if (statement.statement[i].kind != null) {
-				statementHandlers[statement.statement[i].kind](statement.statement[i]);
+				statementHandlers[statement.statement[i].kind](statement.statement[i], extra);
 			}
 		}
 	}
@@ -175,6 +178,7 @@ const statementHandlers = {
 		}
 		op.cpc();
 		op.push(r.dx);
+    statement.expression.convention = callingConventions[statement.expression.name];
 		if(statement.expression.convention == "fastcall"){
 			if(statement.expression.args.length > 4) { throw new Error("too many args for fastcall");}
 			reg = 'AX';
