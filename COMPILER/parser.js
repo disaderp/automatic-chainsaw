@@ -138,7 +138,7 @@ function peg$parse(input, options) {
 
   var peg$FAILED = {},
 
-      peg$startRuleFunctions = { Program: peg$parseProgram },
+      peg$startRuleFunctions = { Program: peg$parseProgram, Expression: peg$parseExpression },
       peg$startRuleFunction  = peg$parseProgram,
 
       peg$c0 = peg$otherExpectation("program"),

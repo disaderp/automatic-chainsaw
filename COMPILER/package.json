@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "pegjs -o parser.js grammar.pegjs"
+    "build": "pegjs -o parser.js --allowed-start-rules Program,Expression grammar.pegjs"
   },
   "dependencies": {
     "meow": "^3.7.0",
