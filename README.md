@@ -3,6 +3,8 @@
 
 *logo created by [@winek](https://github.com/winek)*
 
+---
+
 A custom 16-bit computer
 
 |project|type|maintainer|state|
