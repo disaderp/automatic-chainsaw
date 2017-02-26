@@ -2,4 +2,4 @@
 #define ANSWER 42
 
 print_const(HELLO);
-printn(42);
+printn(ANSWER);

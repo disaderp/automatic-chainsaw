@@ -45,25 +45,33 @@ try {
   process.exit(1);
 }
 
-// function expandMacros(program) {
-//   function traverseAST(visitor, tree = null) {
-//     if (tree === null) {
-//       return function (tree) {
-//         return traverseAST(visitor, tree);
-//       };
-//     }
+function expandMacros(program) {
+  function traverseAST(visitor, tree = null) {
+    if (tree === null) {
+      return function (tree) {
+        return traverseAST(visitor, tree);
+      };
+    }
 
-//     if (typeof tree === 'object') {
-//       Object.keys(tree).map(k => tree[k]).forEach(traverseAST);
-//     }
-//   }
+    if (typeof tree === 'object') {
+      visitor(tree);
+      Object.keys(tree).map(k => tree[k]).forEach(traverseAST(visitor));
+    }
+  }
 
-//   traverseAST(program, function visitor(node) {
-//     if () {
+  traverseAST(function visitor(node) {
+    if (node && node.kind === 'Identifier') {
+      if (macros.hasOwnProperty(node.toString())) {
+        const def = macros[node.toString()];
+        for (let prop in def) {
+          node[prop] = def[prop];
+        }
+      }
+    }
+  }, program);
+}
 
-//     }
-//   });
-// }
+expandMacros(program);
 
 // expandMacros(program);
 if (cli.flags.tree) {
@@ -88,7 +96,7 @@ const statementHandlers = {
   ConditionalStatement(statement) {
     statement.id = randomHash();
 
-    if(statement.predicate.kind == null) {
+    if(statement.predicate.kind == 'Identifier') {
       op.lea(r.ax, l[statement.predicate]);
     }else if(statement.predicate.kind == 'Integer' || statement.predicate.kind == 'Char'){
       op.mov(r.ax, statement.predicate.value);
@@ -117,7 +125,7 @@ const statementHandlers = {
     statement.id = randomHash();
     label("while" + statement.id);
 
-    if(statement.predicate.kind == null) {
+    if(statement.predicate.kind == 'Identifier') {
       op.lea(r.ax, l[statement.predicate]);
     }else if(statement.predicate.kind == 'Integer' || statement.predicate.kind == 'Char'){
       op.mov(r.ax, statement.predicate.value);
@@ -129,7 +137,7 @@ const statementHandlers = {
     op.test(r.ax, r.cx);
     op.jz(".endwhile" + statement.id);
     for(let i = 0;i < statement.statement.length;i++){
-      if (statement.statement[i].kind != null) {
+      if (statement.statement[i].kind != 'Identifier') {
         statementHandlers[statement.statement[i].kind](statement.statement[i]);
       }
     }
@@ -137,7 +145,7 @@ const statementHandlers = {
     label("endwhile" + statement.id);
   },
   AssignmentStatement(statement) {
-    if(statement.rightHandSide.kind == null) {
+    if(statement.rightHandSide.kind == 'Identifier') {
       op.lea(r.ax, l[statement.rightHandSide]);
       op.mov(l[statement.leftHandSide], r.ax);
     }else if(statement.rightHandSide.kind == 'Integer' || statement.rightHandSide.kind == 'Char'){
@@ -148,7 +156,7 @@ const statementHandlers = {
     }
   },
   ReturnStatement(statement, { callingConvention }) {
-    if(statement.expression.kind == null) {
+    if(statement.expression.kind == 'Identifier') {
       op.lea(r.ax, l[statement.expression]);
     }else if(statement.expression.kind == 'Integer' || statement.expression.kind == 'Char'){
       op.mov(r.ax, statement.expression.value);
@@ -200,8 +208,8 @@ const statementHandlers = {
     if(statement.expression.kind == 'FunctionCall') {
       if(statement.expression.name == "print_const") {
         for (let i = 0 ;i < statement.expression.args[0].value.length; i++) {
-          dumpBinary(0b11000001);
-          dumpBinary(statement.expression.args[0].value[i]);
+          db(0b11000001);
+          db(statement.expression.args[0].value[i]);
         }
         return;
       }
@@ -212,7 +220,7 @@ const statementHandlers = {
         if(statement.expression.args.length > 4) { throw new Error("too many args for fastcall");}
         reg = 'AX';
         for(let i = 0;i < statement.expression.args.length - 1 ; i++){
-          if(statement.expression.args[i].kind == null) {
+          if(statement.expression.args[i].kind == 'Identifier') {
             op.lea(reg, l[statement.expression.args[i]]);
           }else if(statement.expression.kind == 'Integer' || statement.expression.kind == 'Char'){
             op.mov(reg, statement.expression.args[i].value);
@@ -227,7 +235,7 @@ const statementHandlers = {
         }
       }else{
         for(let i = statement.expression.args.length - 1;i >= 0; i--){
-          if(statement.expression.args[i].kind == null) {
+          if(statement.expression.args[i].kind == 'Identifier') {
             op.lea(r.dx, l[statement.expression.args[i]]);
           }else if(statement.expression.args[i].kind == 'Integer' || statement.expression.args[i].kind == 'Char'){
             op.mov(r.dx, statement.expression.args[i].value);
@@ -242,7 +250,7 @@ const statementHandlers = {
     }
   },
   BinaryOperator(statement){
-    if(statement.leftOperand.kind == null){
+    if(statement.leftOperand.kind == 'Identifier'){
       op.lea(r.dx, l[statement.leftOperand]);
       op.push(r.dx);
     }else if(statement.leftOperand.kind == 'Integer' || statement.leftOperand.kind == 'Char'){
@@ -253,7 +261,7 @@ const statementHandlers = {
       op.push(r.ax);
     }
 
-    if(statement.rightOperand.kind == null){
+    if(statement.rightOperand.kind == 'Identifier'){
       op.lea(r.dx, l[statement.rightOperand]);
     }else if(statement.rightOperand.kind == 'Integer' || statement.rightOperand.kind == 'Char'){
       op.mov(r.dx, statement.rightOperand.value);
@@ -280,7 +288,7 @@ const statementHandlers = {
   },
 
   UnaryOperator (statement){
-    if(statement.operand.kind == null){
+    if(statement.operand.kind == 'Identifier'){
       op.lea(r.ax, l[statement.operand]);
     }else if(statement.operand.kind == 'Integer' || statement.operand.kind == 'Char'){
       op.mov(r.ax, statement.operand.value);
