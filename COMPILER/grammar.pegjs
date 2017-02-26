@@ -181,7 +181,11 @@ EmptyStatement
   = StatementTerminator { return Node('EmptyStatement'); }
 
 Identifier "identifier"
-  = chars: $([a-zA-Z_][a-zA-Z0-9_]*) { return chars; }
+  = chars: $([a-zA-Z_][a-zA-Z0-9_]*) { return Node('Identifier', {
+    toString() {
+      return chars;
+    },
+  }); }
 
 String "string"
   = '"' inner:StringInner '"' { return Node('String', { value: inner }); }
