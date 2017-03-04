@@ -4,7 +4,7 @@ let parser = require('./parser');
 const fs = require('fs');
 
 function preprocessFile(fileName) {
-  return preprocess(fs.readFileSync(fileName, 'utf-8').split('\n'));
+  return preprocess(fs.readFileSync(fileName, 'utf-8').split(/\r?\n/));
 };
 
 function preprocess(lines) {
