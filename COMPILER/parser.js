@@ -138,7 +138,7 @@ function peg$parse(input, options) {
 
   var peg$FAILED = {},
 
-      peg$startRuleFunctions = { Program: peg$parseProgram },
+      peg$startRuleFunctions = { Program: peg$parseProgram, Expression: peg$parseExpression },
       peg$startRuleFunction  = peg$parseProgram,
 
       peg$c0 = peg$otherExpectation("program"),
@@ -284,7 +284,11 @@ function peg$parse(input, options) {
       peg$c110 = peg$classExpectation([["a", "z"], ["A", "Z"], "_"], false, false),
       peg$c111 = /^[a-zA-Z0-9_]/,
       peg$c112 = peg$classExpectation([["a", "z"], ["A", "Z"], ["0", "9"], "_"], false, false),
-      peg$c113 = function(chars) { return chars; },
+      peg$c113 = function(chars) { return Node('Identifier', {
+          toString() {
+            return chars;
+          },
+        }); },
       peg$c114 = peg$otherExpectation("string"),
       peg$c115 = "\"",
       peg$c116 = peg$literalExpectation("\"", false),

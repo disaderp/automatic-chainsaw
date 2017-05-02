@@ -33,9 +33,9 @@ module InBuff #(parameter WIDTH = 16)(
 		if (!oldread) begin
 			if (read) begin
 				if(bufpointer > 0) begin
-					out = inbuf[bufpointer - 1];
-					bufpointer = bufpointer - 1;
-					oldread = 1;
+					out <= inbuf[bufpointer - 1];
+					bufpointer <= bufpointer - 1;
+					oldread <= 1;
 				end
 			end
 		end
@@ -81,8 +81,8 @@ module OutBuff #(parameter WIDTH = 13)(
 						outbuf[i] <= outbuf[i-1];
 					end
 					outbuf[0] <= in;
-					bufpointer = bufpointer + 1;
-					oldwrite = 1;
+					bufpointer <= bufpointer + 1;
+					oldwrite <= 1;
 				end
 			end
 		end

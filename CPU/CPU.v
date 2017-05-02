@@ -1,7 +1,7 @@
 module CPU(
 	input clk,
 	input KINPIN,
-	//inout SD_DAT [3:0],
+	input [3:0] SD_DAT,
 	output SD_SCK,
 	output SD_CMD,
 	output reg [15:0] gpuline
@@ -26,8 +26,21 @@ module CPU(
 	reg of = 0;//overflow
 	
 	//stack, ram
-	reg [15:0] stack[100:0];
-	reg [15:0] ram[50:0];//ram+programmemory
+	reg [15:0] stack[63:0];
+	reg [11:0] ADDR1 = 0;
+    reg [11:0] ADDR2;
+    reg [11:0] ADDR3;
+    reg [11:0] ADDR4;
+    reg [11:0] ADDW1;
+    reg [15:0] DATA;
+    reg WREN = 0;
+    wire [15:0] DATA1;
+    wire [15:0] DATA2;
+    wire [15:0] DATA3;
+    wire [15:0] DATA4;
+    reg RAMState = 0;
+	RAM r(ADDR1, ADDR2, ADDR3, ADDR4, ADDW1, DATA, WREN, DATA1, DATA2, DATA3, DATA4, clk);
+	//reg [15:0] ram[10:0];//ram+programmemory
 	
 	//op
 	parameter oNOP = 16'h0;
@@ -158,11 +171,11 @@ module CPU(
 	wire [4:0] state;
 	reg flush = 0;//set before power off
 	
-	reg [7:0] sdcard [511:0];//temp
+	reg [7:0] sdcard [10:0];//temp
 	reg [2:0] stat = 0;
 	reg [8:0] sdpointer = 0;
 	
-	wire SD_DAT [3:0];
+	wire [3:0] SD_DAT;
 	assign SD_RESET = 0;
 	assign SD_DAT[1] = 1;
 	assign SD_DAT[2] = 1;
@@ -180,57 +193,21 @@ module CPU(
 	//sdcardmodule
 	
 	//bootloader
-	initial begin
-	ram[0] <= 16'b0000000000000000;
-	ram[1] <= 16'b0000000011000000;
-	ram[2] <= 16'b0000000000000000;
-	ram[3] <= 16'b0000000011000001;
-	ram[4] <= 16'b0000000001101100;
-	ram[5] <= 16'b0000000011000001;
-	ram[6] <= 16'b0000000001101111;
-	ram[7] <= 16'b0000000011000001;
-	ram[8] <= 16'b0000000001100001;
-	ram[9] <= 16'b0000000011000001;
-	ram[10] <= 16'b0000000001100100;
-	ram[11] <= 16'b0000000011000001;
-	ram[12] <= 16'b0000000001101001;
-	ram[13] <= 16'b0000000011000001;
-	ram[14] <= 16'b0000000001101110;
-	ram[15] <= 16'b0000000011000001;
-	ram[16] <= 16'b0000000001100111;
-	ram[17] <= 16'b0000000000100100;
-	ram[18] <= 16'b0000000000010001;
-	ram[19] <= 16'b0000000000001000;
-	ram[20] <= 16'b0000000000000010;
-	ram[21] <= 16'b0000000001100100;
-	ram[22] <= 16'b0000000000001000;
-	ram[23] <= 16'b0000000000000001;
-	ram[24] <= 16'b0000000000000000;
-	ram[25] <= 16'b0000000000001000;
-	ram[26] <= 16'b0000000000000000;
-	ram[27] <= 16'b0000000000000001;
-	ram[28] <= 16'b0000000000101000;
-	ram[29] <= 16'b0000000000110000;
-	ram[30] <= 16'b0000000000001011;
-	ram[31] <= 16'b0000000000001100;
-	ram[32] <= 16'b0000000000001000;
-	ram[33] <= 16'b0000000000001100;
-	ram[34] <= 16'b0000000000000100;
-	ram[35] <= 16'b0000000000001000;
-	ram[36] <= 16'b0000000000000011;
-	ram[37] <= 16'b0000000001100100;
-	ram[38] <= 16'b0000000000011100;
-	ram[39] <= 16'b0000000000000111;
-	ram[40] <= 16'b0000000000100100;
-	ram[41] <= 16'b0000000000011100;
-	ram[42] <= 16'b0000000000110001;
-	ram[43] <= 16'b0000000001100100;
+		initial begin 
+		/*ram[0] <= 16'b0000000000000000;
+    	ram[1] <= 16'b0000000011000000;
+    	ram[2] <= 16'b0000000000000000;
+    	ram[3] <= 16'b0000000011000001;
+    	ram[4] <= 16'b0000000001101100;
+    	ram[5] <= 16'b0000000011000001;
+    	ram[6] <= 16'b0000000001101111;
+    	ram[7] <= 16'b0000000011000001;
+    	ram[8] <= 16'b0000000001100001;
+    	ram[9] <= 16'b0000000011000001;*/
+    	
+    	end
 	
-	//(SIM)DONOTREMOVE//
-	
-	end
-	
-	
+	/*
 	always @(posedge clk25) begin : SD
 		//if (!reset) disable SD;
 		adr <= 0;//temp only 512bytes
@@ -263,8 +240,8 @@ module CPU(
 				end
 			end
 			3'd3: begin //probably shutdown
+			     din <= sdcard[sdpointer];
 				if (ready_for_next_byte) begin
-					din <= sdcard[sdpointer];
 					sdpointer <= sdpointer + 1;
 				end
 				if (sdpointer == 9'd511) begin
@@ -277,731 +254,780 @@ module CPU(
 			end
 		endcase
 	end
-	
+	*/
 	always @(posedge clk) begin : FSM
-		if (kread) begin
-			kread <= 0;
-			dx <= keydata;
-		end
 		
-		gpuline <= 16'h0;
-		pc = pc + 1;
-		opcode = ram[pc];
-		par1 = ram[pc+1];
-		par2 = ram[pc+2];
-		case (opcode)
-			oNOP: begin end
-			oSCF: begin 
-				cf <= par1;
-				pc <= pc + 1;
+			if (kread) begin
+				kread <= 0;
+				dx <= keydata;
 			end
-			oCFF: begin
-				dx <= cf;
-			end
-			oCOF: begin
-				dx <= of;
-			end
-			oCZF: begin
-				dx <= zf;
-			end
-			oCBP: begin
-				dx <= bp;
-			end
-			oCPC: begin
-				dx <= pc;
-			end
-			oMOV1: begin //[adr],xx [adr]<=xx //relative address
-				case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
-					2'b00: ram[par1+bp] <= ax;
-					2'b01: ram[par1+bp] <= bx;
-					2'b10: ram[par1+bp] <= cx;
-					2'b11: ram[par1+bp] <= dx;
-				endcase
-				pc <= pc + 2;
-			end
-			oMOV2: begin //xx,[adr] xx<=[adr] //relative address
-				case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
-					2'b00: ax <= ram[par2+bp];
-					2'b01: bx <= ram[par2+bp];
-					2'b10: cx <= ram[par2+bp];
-					2'b11: dx <= ram[par2+bp];
-				endcase
-				pc <= pc + 2;
-			end
-			oMOV5: begin //<adr>,xx <adr><=xx //absolute address
-				case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
-					2'b00: ram[par1] <= ax;
-					2'b01: ram[par1] <= bx;
-					2'b10: ram[par1] <= cx;
-					2'b11: ram[par1] <= dx;
-				endcase
-				pc <= pc + 2;
-			end
-			oMOV6: begin //xx,<adr> xx<=<adr> //absolute address
-				case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
-					2'b00: ax <= ram[par2];
-					2'b01: bx <= ram[par2];
-					2'b10: cx <= ram[par2];
-					2'b11: dx <= ram[par2];
-				endcase
-				pc <= pc + 2;
-			end
-			oMOV3: begin //xx,yx xx<=yx 
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ax <= bx;
-					4'b0010: ax <= cx;
-					4'b0011: ax <= dx;
-					4'b0100: bx <= ax;
-					4'b0110: bx <= cx;
-					4'b0111: bx <= dx;
-					4'b1000: cx <= ax;
-					4'b1001: cx <= bx;
-					4'b1011: cx <= dx;
-					4'b1100: dx <= ax;
-					4'b1101: dx <= bx;
-					4'b1110: dx <= cx;
-				endcase
-				pc <= pc + 1;
-			end
-			oMOV4: begin //xx,(int) xx<=(int)
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-					2'b00: ax <= par2;
-					2'b01: bx <= par2;
-					2'b10: cx <= par2;
-					2'b11: dx <= par2;
-				endcase
-				pc <= pc + 2;
-			end
-			oLEA1: begin //xx,[yy] xx<=[yx]
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ax <= ram[bx+bp];
-					4'b0010: ax <= ram[cx+bp];
-					4'b0011: ax <= ram[dx+bp];
-					4'b0100: bx <= ram[ax+bp];
-					4'b0110: bx <= ram[cx+bp];
-					4'b0111: bx <= ram[dx+bp];
-					4'b1000: cx <= ram[ax+bp];
-					4'b1001: cx <= ram[bx+bp];
-					4'b1011: cx <= ram[dx+bp];
-					4'b1100: dx <= ram[ax+bp];
-					4'b1101: dx <= ram[bx+bp];
-					4'b1110: dx <= ram[cx+bp];
-				endcase
-				pc <= pc + 1;
-			end
-			oLEA2: begin //[xx],yy [xx]<=yy
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ram[ax+bp] <= bx;
-					4'b0010: ram[ax+bp] <= cx;
-					4'b0011: ram[ax+bp] <= dx;
-					4'b0100: ram[bx+bp] <= ax;
-					4'b0110: ram[bx+bp] <= cx;
-					4'b0111: ram[bx+bp] <= dx;
-					4'b1000: ram[cx+bp] <= ax;
-					4'b1001: ram[cx+bp] <= bx;
-					4'b1011: ram[cx+bp] <= dx;
-					4'b1100: ram[dx+bp] <= ax;
-					4'b1101: ram[dx+bp] <= bx;
-					4'b1110: ram[dx+bp] <= cx;
-				endcase
-				pc <= pc + 1;
-			end
-			oLEA3: begin //xx,<yy> xx<=<yx>
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ax <= ram[bx];
-					4'b0010: ax <= ram[cx];
-					4'b0011: ax <= ram[dx];
-					4'b0100: bx <= ram[ax];
-					4'b0110: bx <= ram[cx];
-					4'b0111: bx <= ram[dx];
-					4'b1000: cx <= ram[ax];
-					4'b1001: cx <= ram[bx];
-					4'b1011: cx <= ram[dx];
-					4'b1100: dx <= ram[ax];
-					4'b1101: dx <= ram[bx];
-					4'b1110: dx <= ram[cx];
-				endcase
-				pc <= pc + 1;
-			end
-			oLEA4: begin //<xx>,yy <xx><=yy
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ram[ax] <= bx;
-					4'b0010: ram[ax] <= cx;
-					4'b0011: ram[ax] <= dx;
-					4'b0100: ram[bx] <= ax;
-					4'b0110: ram[bx] <= cx;
-					4'b0111: ram[bx] <= dx;
-					4'b1000: ram[cx] <= ax;
-					4'b1001: ram[cx] <= bx;
-					4'b1011: ram[cx] <= dx;
-					4'b1100: ram[dx] <= ax;
-					4'b1101: ram[dx] <= bx;
-					4'b1110: ram[dx] <= cx;
-				endcase
-				pc <= pc + 1;
-			end
-			oPOP: begin
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-					2'b00: ax <= stack[sp-1];
-					2'b01: bx <= stack[sp-1];
-					2'b10: cx <= stack[sp-1];
-					2'b11: dx <= stack[sp-1];
-				endcase
-				sp <= sp - 1;
-				pc <= pc + 1;
-			end
-			oOUT: begin
-				if (bx[15:13] == 0) begin//sdcard
-					sdcard[bx[12:0]] <= dx;
+			
+			WREN = 0;
+			gpuline <= 16'h0;
+			pc = pc + 1;
+			ADDR1 = pc;
+			opcode = DATA1;
+			//rdataaddr;ram[pc];
+			ADDR2 = pc+1;
+			par1 = DATA2;
+			//rdataadd = pc;
+			ADDR3 = pc+2;
+			par2 = DATA3;
+			//par2 = rout;
+			case (opcode)
+				oNOP: begin end
+				oSCF: begin 
+					cf <= par1;
+					pc <= pc + 1;
 				end
-				$display("Address: %b, Data: %b", bx, dx);
-			end
-			oIN: begin
-				if (bx[15:13] == 0) begin//sdcard
-					dx <= sdcard[bx[12:0]];
+				oCFF: begin
+					dx <= cf;
 				end
-				if (bx[15:13] == 1) begin//keyboard
-					if (!ktoread) begin
-						zf <= 1;//no data to read zf=0
+				oCOF: begin
+					dx <= of;
+				end
+				oCZF: begin
+					dx <= zf;
+				end
+				oCBP: begin
+					dx <= bp;
+				end
+				oCPC: begin
+					dx <= pc;
+				end
+				oMOV1: begin //[adr],xx [adr]<=xx //relative address
+					ADDW1 = par1+bp;
+					case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
+						 2'b00: DATA = ax;
+						 2'b01: DATA = bx;
+						 2'b10: DATA = cx;
+						 2'b11: DATA = dx;
+					endcase
+					WREN = 1;
+					pc <= pc + 2;
+				end
+				oMOV2: begin //xx,[adr] xx<=[adr] //relative address
+					case (RAMState)
+						1'b0: begin
+							ADDR4 = par2+bp;
+							pc <= pc - 1;
+							RAMState = 1;
+						end
+						1'b1: begin
+							case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= DATA4;
+								2'b01: bx <= DATA4;
+								2'b10: cx <= DATA4;
+								2'b11: dx <= DATA4;
+							endcase
+							pc <= pc + 2;
+							RAMState = 0;
+						end
+					endcase
+				end
+				oMOV5: begin //<adr>,xx <adr><=xx //absolute address
+					ADDW1 = par1;
+					case (par2[1:0]) //00-ax 01-bx 10-cx 11-dx
+						2'b00: DATA = ax;
+						2'b01: DATA = bx;
+						2'b10: DATA = cx;
+						2'b11: DATA = dx;
+					endcase
+					WREN = 1;
+					pc <= pc + 2;
+				end
+				oMOV6: begin //xx,<adr> xx<=<adr> //absolute address
+					case (RAMState)
+						1'b0: begin
+							ADDR4 = par2;
+							pc <= pc - 1;
+							RAMState = 1;
+						end
+						1'b1: begin
+							case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= DATA4;
+								2'b01: bx <= DATA4;
+								2'b10: cx <= DATA4;
+								2'b11: dx <= DATA4;
+							endcase
+							pc <= pc + 2;
+							RAMState = 0;
+						end
+					endcase
+				end
+				oMOV3: begin //xx,yx xx<=yx 
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+						4'b0001: ax <= bx;
+						4'b0010: ax <= cx;
+						4'b0011: ax <= dx;
+						4'b0100: bx <= ax;
+						4'b0110: bx <= cx;
+						4'b0111: bx <= dx;
+						4'b1000: cx <= ax;
+						4'b1001: cx <= bx;
+						4'b1011: cx <= dx;
+						4'b1100: dx <= ax;
+						4'b1101: dx <= bx;
+						4'b1110: dx <= cx;
+					endcase
+					pc <= pc + 1;
+				end
+				oMOV4: begin //xx,(int) xx<=(int)
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+						2'b00: ax <= par2;
+						2'b01: bx <= par2;
+						2'b10: cx <= par2;
+						2'b11: dx <= par2;
+					endcase
+					pc <= pc + 2;
+				end
+				oLEA1: begin //xx,[yy] xx<=[yx]
+					case (RAMState)
+						1'b0: begin
+							case (par1[1:0])
+								2'b00: ADDR4 = ax+bp;
+								2'b01: ADDR4 = bx+bp;
+								2'b10: ADDR4 = cx+bp;
+								2'b11: ADDR4 = dx+bp;
+							endcase
+							pc <= pc - 1;
+							RAMState = 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= DATA4;
+								2'b01: bx <= DATA4;
+								2'b10: cx <= DATA4;
+								2'b11: dx <= DATA4;
+							endcase
+							pc <= pc + 1;
+							RAMState = 0;
+						end
+					endcase
+				end
+				oLEA2: begin //[xx],yy [xx]<=yy
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+						4'b0001: begin ADDW1 = ax+bp; DATA = bx; end
+						4'b0010: begin ADDW1 = ax+bp; DATA = cx; end
+						4'b0011: begin ADDW1 = ax+bp; DATA = dx; end
+						4'b0100: begin ADDW1 = bx+bp; DATA = ax; end
+						4'b0110: begin ADDW1 = bx+bp; DATA = cx; end
+						4'b0111: begin ADDW1 = bx+bp; DATA = dx; end
+						4'b1000: begin ADDW1 = cx+bp; DATA = ax; end
+						4'b1001: begin ADDW1 = cx+bp; DATA = bx; end
+						4'b1011: begin ADDW1 = cx+bp; DATA = dx; end
+						4'b1100: begin ADDW1 = dx+bp; DATA = ax; end
+						4'b1101: begin ADDW1 = dx+bp; DATA = bx; end
+						4'b1110: begin ADDW1 = dx+bp; DATA = cx; end
+					endcase
+					WREN = 1;
+					pc <= pc + 1;
+				end
+				oLEA3: begin //xx,<yy> xx<=<yx>
+					case (RAMState)
+						1'b0: begin
+							case (par1[1:0])
+								2'b00: ADDR4 = ax;
+								2'b01: ADDR4 = bx;
+								2'b10: ADDR4 = cx;
+								2'b11: ADDR4 = dx;
+							endcase
+							pc <= pc - 1;
+							RAMState = 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= DATA4;
+								2'b01: bx <= DATA4;
+								2'b10: cx <= DATA4;
+								2'b11: dx <= DATA4;
+							endcase
+							pc <= pc + 1;
+							RAMState = 0;
+						end
+					endcase
+				end
+				oLEA4: begin //<xx>,yy <xx><=yy
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx //ABS
+						4'b0001: begin ADDW1 = ax; DATA = bx; end
+						4'b0010: begin ADDW1 = ax; DATA = cx; end
+						4'b0011: begin ADDW1 = ax; DATA = dx; end
+						4'b0100: begin ADDW1 = bx; DATA = ax; end
+						4'b0110: begin ADDW1 = bx; DATA = cx; end
+						4'b0111: begin ADDW1 = bx; DATA = dx; end
+						4'b1000: begin ADDW1 = cx; DATA = ax; end
+						4'b1001: begin ADDW1 = cx; DATA = bx; end
+						4'b1011: begin ADDW1 = cx; DATA = dx; end
+						4'b1100: begin ADDW1 = dx; DATA = ax; end
+						4'b1101: begin ADDW1 = dx; DATA = bx; end
+						4'b1110: begin ADDW1 = dx; DATA = cx; end
+					endcase
+					WREN = 1;
+					pc <= pc + 1;
+				end
+				oPOP: begin
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+						2'b00: ax <= stack[sp-1];
+						2'b01: bx <= stack[sp-1];
+						2'b10: cx <= stack[sp-1];
+						2'b11: dx <= stack[sp-1];
+					endcase
+					sp <= sp - 1;
+					pc <= pc + 1;
+				end
+				oOUT: begin
+					if (bx[15:13] == 0) begin//sdcard
+						sdcard[bx[12:0]] <= dx;
+					end
+					$display("Address: %b, Data: %b", bx, dx);
+				end
+				oIN: begin
+					if (bx[15:13] == 0) begin//sdcard
+						dx <= sdcard[bx[12:0]];
+					end
+					if (bx[15:13] == 1) begin//keyboard
+						if (!ktoread) begin
+							zf <= 1;//no data to read zf=0
+						end
+						else begin
+							zf <= 0;
+							kread <= 1;
+						end
+					end
+				end
+				oXCH: begin
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+						4'b0001: begin ax <= bx; bx <= ax; end
+						4'b0010: begin ax <= cx; cx <= ax; end
+						4'b0011: begin ax <= dx; dx <= ax; end
+						4'b0100: begin bx <= ax; ax <= bx; end
+						4'b0110: begin bx <= cx; cx <= bx; end
+						4'b0111: begin bx <= dx; dx <= bx; end
+						4'b1000: begin cx <= ax; ax <= cx; end
+						4'b1001: begin cx <= bx; bx <= cx; end
+						4'b1011: begin cx <= dx; dx <= cx; end
+						4'b1100: begin dx <= ax; ax <= dx; end
+						4'b1101: begin dx <= bx; bx <= dx; end
+						4'b1110: begin dx <= cx; cx <= dx; end
+					endcase
+					pc <= pc + 1;
+				end
+				oPUSH: begin
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: stack[sp] <= ax;
+								2'b01: stack[sp] <= bx;
+								2'b10: stack[sp] <= cx;
+								2'b11: stack[sp] <= dx;
+					endcase
+					sp <= sp + 1;
+					pc <= pc + 1;
+				end
+				
+				oADD: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xADD;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							pc <= pc + 1;
+							cf <= c_flag;
+							zf <= z_flag;
+							of <= o_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oADC: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xADC;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							pc <= pc + 1;
+							cf <= c_flag;
+							zf <= z_flag;
+							of <= o_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oSUB: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xSUB;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							pc <= pc + 1;
+							cf <= c_flag;
+							zf <= z_flag;
+							of <= o_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oSUC: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xSUC;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							pc <= pc + 1;
+							cf <= c_flag;
+							zf <= z_flag;
+							of <= o_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oMUL8: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xMUL8;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							pc <= pc + 1;
+							zf <= z_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oMUL6: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xMUL6;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= c;
+								2'b01: bx <= c;
+								2'b10: cx <= c;
+								2'b11: dx <= c;
+							endcase
+							pc <= pc + 1;
+							zf <= z_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oDIV8: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xDIV8;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							pc <= pc + 1;
+							zf <= z_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oDIV6: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xDIV6;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= acc;
+								2'b01: bx <= acc;
+								2'b10: cx <= acc;
+								2'b11: dx <= acc;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= c;
+								2'b01: bx <= c;
+								2'b10: cx <= c;
+								2'b11: dx <= c;
+							endcase
+							pc <= pc + 1;
+							zf <= z_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				oCMP: begin
+					case (alustate) //0- not initiated 1-waiting
+						1'b0: begin
+							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ain <= ax;
+								2'b01: ain <= bx;
+								2'b10: ain <= cx;
+								2'b11: ain <= dx;
+							endcase
+							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: bin <= ax;
+								2'b01: bin <= bx;
+								2'b10: bin <= cx;
+								2'b11: bin <= dx;
+							endcase
+							op <= xCMP;
+							pc <= pc - 1;
+							alustate <= 1;
+						end
+						1'b1: begin
+							cf <= c_flag;
+							zf <= z_flag;
+							of <= o_flag;
+							alustate <= 0;
+						end
+					endcase
+				end
+				
+				oAND: begin //xx,yx xx <= xx&&yx
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+						4'b0001: ax <= (ax & bx);
+						4'b0010: ax <= (ax & cx);
+						4'b0011: ax <= (ax & dx);
+						4'b0100: bx <= (bx & ax);
+						4'b0110: bx <= (bx & cx);
+						4'b0111: bx <= (bx & dx);
+						4'b1000: cx <= (cx & ax);
+						4'b1001: cx <= (cx & bx);
+						4'b1011: cx <= (cx & dx);
+						4'b1100: dx <= (dx & ax);
+						4'b1101: dx <= (dx & bx);
+						4'b1110: dx <= (dx & cx);
+					endcase
+					pc <= pc + 1;
+				end
+				oNEG: begin //xx xx <= ~xx
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= ~ax;
+								2'b01: bx <= ~bx;
+								2'b10: cx <= ~cx;
+								2'b11: dx <= ~dx;
+					endcase
+					pc <= pc + 1;
+				end
+				oNOT: begin //xx xx <= !xx
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= !ax;
+								2'b01: bx <= !bx;
+								2'b10: cx <= !cx;
+								2'b11: dx <= !dx;
+					endcase
+					pc <= pc + 1;
+				end
+				oOR: begin //xx,yx xx <= xx||yx
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+						4'b0001: ax <= (ax | bx);
+						4'b0010: ax <= (ax | cx);
+						4'b0011: ax <= (ax | dx);
+						4'b0100: bx <= (bx | ax);
+						4'b0110: bx <= (bx | cx);
+						4'b0111: bx <= (bx | dx);
+						4'b1000: cx <= (cx | ax);
+						4'b1001: cx <= (cx | bx);
+						4'b1011: cx <= (cx | dx);
+						4'b1100: dx <= (dx | ax);
+						4'b1101: dx <= (dx | bx);
+						4'b1110: dx <= (dx | cx);
+					endcase
+					pc <= pc + 1;
+				end
+				oSHL: begin //xx xx <= xx << 1
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= ax << 1;
+								2'b01: bx <= bx << 1;
+								2'b10: cx <= cx << 1;
+								2'b11: dx <= dx << 1;
+					endcase
+					pc <= pc + 1;
+				end
+				oSHR: begin //xx xx <= xx >> 1
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+								2'b00: ax <= ax >> 1;
+								2'b01: bx <= bx >> 1;
+								2'b10: cx <= cx >> 1;
+								2'b11: dx <= dx >> 1;
+					endcase
+					pc <= pc + 1;
+				end
+				oXOR: begin //xx,yx xx <= xx^yx
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+						4'b0001: ax <= (ax ^ bx);
+						4'b0010: ax <= (ax ^ cx);
+						4'b0011: ax <= (ax ^ dx);
+						4'b0100: bx <= (bx ^ ax);
+						4'b0110: bx <= (bx ^ cx);
+						4'b0111: bx <= (bx ^ dx);
+						4'b1000: cx <= (cx ^ ax);
+						4'b1001: cx <= (cx ^ bx);
+						4'b1011: cx <= (cx ^ dx);
+						4'b1100: dx <= (dx ^ ax);
+						4'b1101: dx <= (dx ^ bx);
+						4'b1110: dx <= (dx ^ cx);
+					endcase
+					pc <= pc + 1;
+				end
+				oTEST: begin //xx,yx xx ?= yx
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+						4'b0001: zf <= (ax == bx);
+						4'b0010: zf <= (ax == cx);
+						4'b0011: zf <= (ax == dx);
+						4'b0100: zf <= (ax == bx);
+						4'b0110: zf <= (cx == bx);
+						4'b0111: zf <= (dx == bx);
+						4'b1000: zf <= (ax == cx);
+						4'b1001: zf <= (cx == bx);
+						4'b1011: zf <= (cx == dx);
+						4'b1100: zf <= (ax == dx);
+						4'b1101: zf <= (dx == bx);
+						4'b1110: zf <= (dx == cx);
+					endcase
+					pc <= pc + 1;
+				end
+				
+				oINT: begin//absolute address
+					if (par1 == 16'h1) begin
+						zf <= 0;
+						flush <= 1;
+					end else begin
+					stack[sp] <= bp;
+					stack[sp+1] <= pc + 1;
+					sp <= sp + 2;
+					pc <= par1 - 1;
+					bp <= par1;
+					end
+				end
+				oCALL: begin//relative address
+					stack[sp] <= bp;
+					stack[sp+1] <= pc + 1;
+					sp <= sp + 2;
+					pc <= par1 + bp - 1;
+					bp <= par1;
+				end
+				oRET: begin
+					pc <= stack[sp-1];
+					bp <= stack[sp-2];
+					sp <= sp - 2;
+				end
+				oJMP1: begin
+					pc <= par1 + bp - 1;
+				end
+				oJMP2: begin
+					pc <= par1 - 1;
+				end
+				oJMP3: begin
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+						2'b00: pc <= ax + bp - 1;
+						2'b01: pc <= bx + bp - 1;
+						2'b10: pc <= cx + bp - 1;
+						2'b11: pc <= dx + bp - 1;
+					endcase
+				end
+				oJMP4: begin
+					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
+						2'b00: pc <= ax - 1;
+						2'b01: pc <= bx - 1;
+						2'b10: pc <= cx - 1;
+						2'b11: pc <= dx - 1;
+					endcase
+				end
+				oJC: begin
+					if (cf) pc <= par1 + bp - 1;
+					else pc <= pc + 1;
+				end
+				oJNC: begin
+					if (!cf) pc <= par1 + bp - 1;
+					else pc <= pc + 1;
+				end
+				oJZ: begin
+					if (zf) pc <= par1 + bp - 1;
+					else pc <= pc + 1;
+				end
+				oJNZ: begin
+					if (!zf) pc <= par1 + bp - 1;
+					else pc <= pc + 1;
+				end
+				oJO: begin
+					if (of) pc <= par1 + bp - 1;
+					else pc <= pc + 1;
+				end
+				oJNO: begin
+					if (!of) pc <= par1 + bp - 1;
+					else pc <= pc + 1;
+				end
+				16'hBF: begin //putchar from mem
+					if (!alustate) begin
+						pc <= pc - 1;
+						gpuline <= opcode;
+						ADDR4 = par2+bp;
+						alustate <= 1;
 					end
 					else begin
-						zf <= 0;
-						kread <= 1;
+						pc <= pc + 1;
+						//gpuline <= ram[par1 + bp];
+						gpuline <= DATA4;
+						alustate <= 0;
 					end
 				end
-			end
-			oXCH: begin
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: begin ax <= bx; bx <= ax; end
-					4'b0010: begin ax <= cx; cx <= ax; end
-					4'b0011: begin ax <= dx; dx <= ax; end
-					4'b0100: begin bx <= ax; ax <= bx; end
-					4'b0110: begin bx <= cx; cx <= bx; end
-					4'b0111: begin bx <= dx; dx <= bx; end
-					4'b1000: begin cx <= ax; ax <= cx; end
-					4'b1001: begin cx <= bx; bx <= cx; end
-					4'b1011: begin cx <= dx; dx <= cx; end
-					4'b1100: begin dx <= ax; ax <= dx; end
-					4'b1101: begin dx <= bx; bx <= dx; end
-					4'b1110: begin dx <= cx; cx <= dx; end
-				endcase
-				pc <= pc + 1;
-			end
-			oPUSH: begin
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: stack[sp] <= ax;
-							2'b01: stack[sp] <= bx;
-							2'b10: stack[sp] <= cx;
-							2'b11: stack[sp] <= dx;
-				endcase
-				sp <= sp + 1;
-				pc <= pc + 1;
-			end
-			
-			oADD: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xADD;
+				default: begin//unrecognized cmd//maybe gpu
+					if (!alustate) begin
 						pc <= pc - 1;
+						gpuline <= opcode;
 						alustate <= 1;
 					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
+					else begin
 						pc <= pc + 1;
-						cf <= c_flag;
-						zf <= z_flag;
-						of <= o_flag;
+						gpuline <= par1;
 						alustate <= 0;
 					end
-				endcase
-			end
-			oADC: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xADC;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
-						pc <= pc + 1;
-						cf <= c_flag;
-						zf <= z_flag;
-						of <= o_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			oSUB: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xSUB;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
-						pc <= pc + 1;
-						cf <= c_flag;
-						zf <= z_flag;
-						of <= o_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			oSUC: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xSUC;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
-						pc <= pc + 1;
-						cf <= c_flag;
-						zf <= z_flag;
-						of <= o_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			oMUL8: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xMUL8;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
-						pc <= pc + 1;
-						zf <= z_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			oMUL6: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xMUL6;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= c;
-							2'b01: bx <= c;
-							2'b10: cx <= c;
-							2'b11: dx <= c;
-						endcase
-						pc <= pc + 1;
-						zf <= z_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			oDIV8: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xDIV8;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
-						pc <= pc + 1;
-						zf <= z_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			oDIV6: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xDIV6;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= acc;
-							2'b01: bx <= acc;
-							2'b10: cx <= acc;
-							2'b11: dx <= acc;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= c;
-							2'b01: bx <= c;
-							2'b10: cx <= c;
-							2'b11: dx <= c;
-						endcase
-						pc <= pc + 1;
-						zf <= z_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			oCMP: begin
-				case (alustate) //0- not initiated 1-waiting
-					1'b0: begin
-						case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ain <= ax;
-							2'b01: ain <= bx;
-							2'b10: ain <= cx;
-							2'b11: ain <= dx;
-						endcase
-						case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: bin <= ax;
-							2'b01: bin <= bx;
-							2'b10: bin <= cx;
-							2'b11: bin <= dx;
-						endcase
-						op <= xCMP;
-						pc <= pc - 1;
-						alustate <= 1;
-					end
-					1'b1: begin
-						cf <= c_flag;
-						zf <= z_flag;
-						of <= o_flag;
-						alustate <= 0;
-					end
-				endcase
-			end
-			
-			oAND: begin //xx,yx xx <= xx&&yx
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ax <= (ax & bx);
-					4'b0010: ax <= (ax & cx);
-					4'b0011: ax <= (ax & dx);
-					4'b0100: bx <= (bx & ax);
-					4'b0110: bx <= (bx & cx);
-					4'b0111: bx <= (bx & dx);
-					4'b1000: cx <= (cx & ax);
-					4'b1001: cx <= (cx & bx);
-					4'b1011: cx <= (cx & dx);
-					4'b1100: dx <= (dx & ax);
-					4'b1101: dx <= (dx & bx);
-					4'b1110: dx <= (dx & cx);
-				endcase
-				pc <= pc + 1;
-			end
-			oNEG: begin //xx xx <= ~xx
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= ~ax;
-							2'b01: bx <= ~bx;
-							2'b10: cx <= ~cx;
-							2'b11: dx <= ~dx;
-				endcase
-				pc <= pc + 1;
-			end
-			oNOT: begin //xx xx <= !xx
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= !ax;
-							2'b01: bx <= !bx;
-							2'b10: cx <= !cx;
-							2'b11: dx <= !dx;
-				endcase
-				pc <= pc + 1;
-			end
-			oOR: begin //xx,yx xx <= xx||yx
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ax <= (ax | bx);
-					4'b0010: ax <= (ax | cx);
-					4'b0011: ax <= (ax | dx);
-					4'b0100: bx <= (bx | ax);
-					4'b0110: bx <= (bx | cx);
-					4'b0111: bx <= (bx | dx);
-					4'b1000: cx <= (cx | ax);
-					4'b1001: cx <= (cx | bx);
-					4'b1011: cx <= (cx | dx);
-					4'b1100: dx <= (dx | ax);
-					4'b1101: dx <= (dx | bx);
-					4'b1110: dx <= (dx | cx);
-				endcase
-				pc <= pc + 1;
-			end
-			oSHL: begin //xx xx <= xx << 1
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= ax << 1;
-							2'b01: bx <= bx << 1;
-							2'b10: cx <= cx << 1;
-							2'b11: dx <= dx << 1;
-				endcase
-				pc <= pc + 1;
-			end
-			oSHR: begin //xx xx <= xx >> 1
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-							2'b00: ax <= ax >> 1;
-							2'b01: bx <= bx >> 1;
-							2'b10: cx <= cx >> 1;
-							2'b11: dx <= dx >> 1;
-				endcase
-				pc <= pc + 1;
-			end
-			oXOR: begin //xx,yx xx <= xx^yx
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: ax <= (ax ^ bx);
-					4'b0010: ax <= (ax ^ cx);
-					4'b0011: ax <= (ax ^ dx);
-					4'b0100: bx <= (bx ^ ax);
-					4'b0110: bx <= (bx ^ cx);
-					4'b0111: bx <= (bx ^ dx);
-					4'b1000: cx <= (cx ^ ax);
-					4'b1001: cx <= (cx ^ bx);
-					4'b1011: cx <= (cx ^ dx);
-					4'b1100: dx <= (dx ^ ax);
-					4'b1101: dx <= (dx ^ bx);
-					4'b1110: dx <= (dx ^ cx);
-				endcase
-				pc <= pc + 1;
-			end
-			oTEST: begin //xx,yx xx ?= yx
-				case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
-					4'b0001: zf <= (ax == bx);
-					4'b0010: zf <= (ax == cx);
-					4'b0011: zf <= (ax == dx);
-					4'b0100: zf <= (ax == bx);
-					4'b0110: zf <= (cx == bx);
-					4'b0111: zf <= (dx == bx);
-					4'b1000: zf <= (ax == cx);
-					4'b1001: zf <= (cx == bx);
-					4'b1011: zf <= (cx == dx);
-					4'b1100: zf <= (ax == dx);
-					4'b1101: zf <= (dx == bx);
-					4'b1110: zf <= (dx == cx);
-				endcase
-				pc <= pc + 1;
-			end
-			
-			oINT: begin//absolute address
-				if (par1 == 16'h1) begin
-					zf <= 0;
-					flush <= 1;
-				end else begin
-				stack[sp] <= bp;
-				stack[sp+1] <= pc + 1;
-				sp <= sp + 2;
-				pc <= par1 - 1;
-				bp <= par1;
 				end
-			end
-			oCALL: begin//relative address
-				stack[sp] <= bp;
-				stack[sp+1] <= pc + 1;
-				sp <= sp + 2;
-				pc <= par1 + bp - 1;
-				bp <= par1;
-			end
-			oRET: begin
-				pc <= stack[sp-1];
-				bp <= stack[sp-2];
-				sp <= sp - 2;
-			end
-			oJMP1: begin
-				pc <= par1 + bp - 1;
-			end
-			oJMP2: begin
-				pc <= par1 - 1;
-			end
-			oJMP3: begin
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-					2'b00: pc <= ax + bp - 1;
-					2'b01: pc <= bx + bp - 1;
-					2'b10: pc <= cx + bp - 1;
-					2'b11: pc <= dx + bp - 1;
-				endcase
-			end
-			oJMP4: begin
-				case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-					2'b00: pc <= ax - 1;
-					2'b01: pc <= bx - 1;
-					2'b10: pc <= cx - 1;
-					2'b11: pc <= dx - 1;
-				endcase
-			end
-			oJC: begin
-				if (cf) pc <= par1 + bp - 1;
-				else pc <= pc + 1;
-			end
-			oJNC: begin
-				if (!cf) pc <= par1 + bp - 1;
-				else pc <= pc + 1;
-			end
-			oJZ: begin
-				if (zf) pc <= par1 + bp - 1;
-				else pc <= pc + 1;
-			end
-			oJNZ: begin
-				if (!zf) pc <= par1 + bp - 1;
-				else pc <= pc + 1;
-			end
-			oJO: begin
-				if (of) pc <= par1 + bp - 1;
-				else pc <= pc + 1;
-			end
-			oJNO: begin
-				if (!of) pc <= par1 + bp - 1;
-				else pc <= pc + 1;
-			end
-			16'hBF: begin //putchar from mem
-				if (!alustate) begin
-					pc <= pc - 1;
-					gpuline <= opcode;
-					alustate <= 1;
-				end
-				else begin
-					pc <= pc + 1;
-					gpuline <= ram[par1 + bp];
-					alustate <= 0;
-					$display("%s", ram[par1 + bp]);
-				end
-			end
-			default: begin//unrecognized cmd//maybe gpu
-				if (!alustate) begin
-					pc <= pc - 1;
-					gpuline <= opcode;
-					alustate <= 1;
-				end
-				else begin
-					pc <= pc + 1;
-					gpuline <= par1;
-					alustate <= 0;
-				end
-			end
-		endcase
-	end
+			endcase
+		end
 endmodule

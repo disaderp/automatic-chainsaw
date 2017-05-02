@@ -1,6 +1,7 @@
 /*
  * Chainsaw C-- compiler test
  */
+#define TEST 1
 
 int pi = 314;
 int esc = 0x1B;
@@ -8,7 +9,7 @@ char *hello = "Hello World";
 int[0x20] T;
 ;
 
-n = (n + 1);
+n = (n + TEST);
 pi = n;
 esc = 1;
 T[10] = 1;
