@@ -20,3 +20,8 @@ A custom architecture 16-bit RISC CPU created in Verilog.
 ## opcodes
 
 - See a [complete list of opcodes](https://github.com/disaderp/automatic-chainsaw/blob/master/SCHEMATIC/op.txt).
+
+## memory
+
+- stack - 64 *16bites
+- RAM - 4092 *16bites
