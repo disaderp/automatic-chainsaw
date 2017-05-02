@@ -72,9 +72,7 @@ module CPU(
 	parameter oSUB = 16'hE;
 	parameter oSUC = 16'hF;
 	parameter oMUL8 = 16'h10;
-	parameter oMUL6 = 16'h11;
 	parameter oDIV8 = 16'h12;
-	parameter oDIV6 = 16'h13;
 	parameter oCMP = 16'h14;
 	//logic
 	parameter oAND = 16'h15;
@@ -106,9 +104,7 @@ module CPU(
 	parameter xSUB = 8'h3;
 	parameter xSUC = 8'h4;
 	parameter xMUL8 = 8'h5;
-	parameter xMUL6 = 8'h6;
 	parameter xDIV8 = 8'h7;
-	parameter xDIV6 = 8'h8;
 	parameter xCMP = 8'h9;
 
 	
@@ -691,44 +687,6 @@ module CPU(
 						end
 					endcase
 				end
-				oMUL6: begin
-					case (alustate) //0- not initiated 1-waiting
-						1'b0: begin
-							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
-							endcase
-							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
-							endcase
-							op <= xMUL6;
-							pc <= pc - 1;
-							alustate <= 1;
-						end
-						1'b1: begin
-							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ax <= acc;
-								2'b01: bx <= acc;
-								2'b10: cx <= acc;
-								2'b11: dx <= acc;
-							endcase
-							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ax <= c;
-								2'b01: bx <= c;
-								2'b10: cx <= c;
-								2'b11: dx <= c;
-							endcase
-							pc <= pc + 1;
-							zf <= z_flag;
-							alustate <= 0;
-						end
-					endcase
-				end
 				oDIV8: begin
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
@@ -754,44 +712,6 @@ module CPU(
 								2'b01: bx <= acc;
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
-							endcase
-							pc <= pc + 1;
-							zf <= z_flag;
-							alustate <= 0;
-						end
-					endcase
-				end
-				oDIV6: begin
-					case (alustate) //0- not initiated 1-waiting
-						1'b0: begin
-							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
-							endcase
-							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
-							endcase
-							op <= xDIV6;
-							pc <= pc - 1;
-							alustate <= 1;
-						end
-						1'b1: begin
-							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ax <= acc;
-								2'b01: bx <= acc;
-								2'b10: cx <= acc;
-								2'b11: dx <= acc;
-							endcase
-							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ax <= c;
-								2'b01: bx <= c;
-								2'b10: cx <= c;
-								2'b11: dx <= c;
 							endcase
 							pc <= pc + 1;
 							zf <= z_flag;
@@ -826,7 +746,6 @@ module CPU(
 						end
 					endcase
 				end
-				
 				oAND: begin //xx,yx xx <= xx&&yx
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
 						4'b0001: ax <= (ax & bx);
