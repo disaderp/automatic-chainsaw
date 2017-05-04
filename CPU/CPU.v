@@ -1,9 +1,9 @@
 module CPU(
 	input clk,
-	input KINPIN,
+	/*input KINPIN,
 	input [3:0] SD_DAT,
 	output SD_SCK,
-	output SD_CMD,
+	output SD_CMD,*/
 	output reg [15:0] gpuline
 	);
 	
@@ -146,6 +146,7 @@ module CPU(
 	reg [15:0] tmp = 0;
 	reg alustate = 0;
 	
+	/*
 	//sdcardmodule
 	wire spiClk;
 	wire spiMiso;
@@ -187,6 +188,7 @@ module CPU(
 			.ready_for_next_byte(ready_for_next_byte), .clk(clk25), 
 			.status(state));
 	//sdcardmodule
+	*/
 	
 	//bootloader
 		initial begin 
@@ -259,7 +261,7 @@ module CPU(
 			end
 			
 			WREN = 0;
-			gpuline <= 16'h0;
+			gpuline = 16'h0;
 			pc = pc + 1;
 			ADDR1 = pc;
 			opcode = DATA1;
@@ -274,7 +276,7 @@ module CPU(
 				oNOP: begin end
 				oSCF: begin 
 					cf <= par1;
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oCFF: begin
 					dx <= cf;
@@ -300,14 +302,14 @@ module CPU(
 						 2'b11: DATA = dx;
 					endcase
 					WREN = 1;
-					pc <= pc + 2;
+					pc = pc + 2;
 				end
 				oMOV2: begin //xx,[adr] xx<=[adr] //relative address
 					case (RAMState)
 						1'b0: begin
 							ADDR4 = par2+bp;
-							pc <= pc - 1;
-							RAMState = 1;
+							pc = pc - 1;
+							RAMState <= 1;
 						end
 						1'b1: begin
 							case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
@@ -316,8 +318,8 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc <= pc + 2;
-							RAMState = 0;
+							pc = pc + 2;
+							RAMState <= 0;
 						end
 					endcase
 				end
@@ -330,14 +332,14 @@ module CPU(
 						2'b11: DATA = dx;
 					endcase
 					WREN = 1;
-					pc <= pc + 2;
+					pc = pc + 2;
 				end
 				oMOV6: begin //xx,<adr> xx<=<adr> //absolute address
 					case (RAMState)
 						1'b0: begin
 							ADDR4 = par2;
-							pc <= pc - 1;
-							RAMState = 1;
+							pc = pc - 1;
+							RAMState <= 1;
 						end
 						1'b1: begin
 							case (par1[1:0]) //00-ax 01-bx 10-cx 11-dx
@@ -346,8 +348,8 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc <= pc + 2;
-							RAMState = 0;
+							pc = pc + 2;
+							RAMState <= 0;
 						end
 					endcase
 				end
@@ -366,7 +368,7 @@ module CPU(
 						4'b1101: dx <= bx;
 						4'b1110: dx <= cx;
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oMOV4: begin //xx,(int) xx<=(int)
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -375,7 +377,7 @@ module CPU(
 						2'b10: cx <= par2;
 						2'b11: dx <= par2;
 					endcase
-					pc <= pc + 2;
+					pc = pc + 2;
 				end
 				oLEA1: begin //xx,[yy] xx<=[yx]
 					case (RAMState)
@@ -386,8 +388,8 @@ module CPU(
 								2'b10: ADDR4 = cx+bp;
 								2'b11: ADDR4 = dx+bp;
 							endcase
-							pc <= pc - 1;
-							RAMState = 1;
+							pc = pc - 1;
+							RAMState <= 1;
 						end
 						1'b1: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
@@ -396,8 +398,8 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc <= pc + 1;
-							RAMState = 0;
+							pc = pc + 1;
+							RAMState <= 0;
 						end
 					endcase
 				end
@@ -417,7 +419,7 @@ module CPU(
 						4'b1110: begin ADDW1 = dx+bp; DATA = cx; end
 					endcase
 					WREN = 1;
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oLEA3: begin //xx,<yy> xx<=<yx>
 					case (RAMState)
@@ -428,8 +430,8 @@ module CPU(
 								2'b10: ADDR4 = cx;
 								2'b11: ADDR4 = dx;
 							endcase
-							pc <= pc - 1;
-							RAMState = 1;
+							pc = pc - 1;
+							RAMState <= 1;
 						end
 						1'b1: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
@@ -438,8 +440,8 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc <= pc + 1;
-							RAMState = 0;
+							pc = pc + 1;
+							RAMState <= 0;
 						end
 					endcase
 				end
@@ -459,7 +461,7 @@ module CPU(
 						4'b1110: begin ADDW1 = dx; DATA = cx; end
 					endcase
 					WREN = 1;
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oPOP: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -469,17 +471,17 @@ module CPU(
 						2'b11: dx <= stack[sp-1];
 					endcase
 					sp <= sp - 1;
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oOUT: begin
 					if (bx[15:13] == 0) begin//sdcard
-						sdcard[bx[12:0]] <= dx;
+						//sdcard[bx[12:0]] <= dx;
 					end
 					$display("Address: %b, Data: %b", bx, dx);
 				end
 				oIN: begin
 					if (bx[15:13] == 0) begin//sdcard
-						dx <= sdcard[bx[12:0]];
+						//dx <= sdcard[bx[12:0]];
 					end
 					if (bx[15:13] == 1) begin//keyboard
 						if (!ktoread) begin
@@ -506,7 +508,7 @@ module CPU(
 						4'b1101: begin dx <= bx; bx <= dx; end
 						4'b1110: begin dx <= cx; cx <= dx; end
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oPUSH: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -516,26 +518,26 @@ module CPU(
 								2'b11: stack[sp] <= dx;
 					endcase
 					sp <= sp + 1;
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				
 				oADD: begin
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
+								2'b00: ain = ax;
+								2'b01: ain = bx;
+								2'b10: ain = cx;
+								2'b11: ain = dx;
 							endcase
 							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
+								2'b00: bin = ax;
+								2'b01: bin = bx;
+								2'b10: bin = cx;
+								2'b11: bin = dx;
 							endcase
-							op <= xADD;
-							pc <= pc - 1;
+							op = xADD;
+							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -545,7 +547,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc <= pc + 1;
+							pc = pc + 1;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -557,19 +559,19 @@ module CPU(
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
+								2'b00: ain = ax;
+								2'b01: ain = bx;
+								2'b10: ain = cx;
+								2'b11: ain = dx;
 							endcase
 							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
+								2'b00: bin = ax;
+								2'b01: bin = bx;
+								2'b10: bin = cx;
+								2'b11: bin = dx;
 							endcase
-							op <= xADC;
-							pc <= pc - 1;
+							op = xADC;
+							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -579,7 +581,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc <= pc + 1;
+							pc = pc + 1;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -591,19 +593,19 @@ module CPU(
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
+								2'b00: ain = ax;
+								2'b01: ain = bx;
+								2'b10: ain = cx;
+								2'b11: ain = dx;
 							endcase
 							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
+								2'b00: bin = ax;
+								2'b01: bin = bx;
+								2'b10: bin = cx;
+								2'b11: bin = dx;
 							endcase
-							op <= xSUB;
-							pc <= pc - 1;
+							op = xSUB;
+							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -613,7 +615,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc <= pc + 1;
+							pc = pc + 1;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -625,19 +627,19 @@ module CPU(
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
+								2'b00: ain = ax;
+								2'b01: ain = bx;
+								2'b10: ain = cx;
+								2'b11: ain = dx;
 							endcase
 							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
+								2'b00: bin = ax;
+								2'b01: bin = bx;
+								2'b10: bin = cx;
+								2'b11: bin = dx;
 							endcase
-							op <= xSUC;
-							pc <= pc - 1;
+							op = xSUC;
+							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -647,7 +649,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc <= pc + 1;
+							pc = pc + 1;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -659,19 +661,19 @@ module CPU(
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
+								2'b00: ain = ax;
+								2'b01: ain = bx;
+								2'b10: ain = cx;
+								2'b11: ain = dx;
 							endcase
 							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
+								2'b00: bin = ax;
+								2'b01: bin = bx;
+								2'b10: bin = cx;
+								2'b11: bin = dx;
 							endcase
-							op <= xMUL8;
-							pc <= pc - 1;
+							op = xMUL8;
+							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -681,7 +683,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc <= pc + 1;
+							pc = pc + 1;
 							zf <= z_flag;
 							alustate <= 0;
 						end
@@ -691,19 +693,19 @@ module CPU(
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
+								2'b00: ain = ax;
+								2'b01: ain = bx;
+								2'b10: ain = cx;
+								2'b11: ain = dx;
 							endcase
 							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
+								2'b00: bin = ax;
+								2'b01: bin = bx;
+								2'b10: bin = cx;
+								2'b11: bin = dx;
 							endcase
-							op <= xDIV8;
-							pc <= pc - 1;
+							op = xDIV8;
+							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -713,7 +715,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc <= pc + 1;
+							pc = pc + 1;
 							zf <= z_flag;
 							alustate <= 0;
 						end
@@ -723,22 +725,23 @@ module CPU(
 					case (alustate) //0- not initiated 1-waiting
 						1'b0: begin
 							case (par1[3:2])//00-ax 01-bx 10-cx 11-dx
-								2'b00: ain <= ax;
-								2'b01: ain <= bx;
-								2'b10: ain <= cx;
-								2'b11: ain <= dx;
+								2'b00: ain = ax;
+								2'b01: ain = bx;
+								2'b10: ain = cx;
+								2'b11: ain = dx;
 							endcase
 							case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-								2'b00: bin <= ax;
-								2'b01: bin <= bx;
-								2'b10: bin <= cx;
-								2'b11: bin <= dx;
+								2'b00: bin = ax;
+								2'b01: bin = bx;
+								2'b10: bin = cx;
+								2'b11: bin = dx;
 							endcase
-							op <= xCMP;
-							pc <= pc - 1;
+							op = xCMP;
+							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
+							pc = pc + 1;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -761,7 +764,7 @@ module CPU(
 						4'b1101: dx <= (dx & bx);
 						4'b1110: dx <= (dx & cx);
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oNEG: begin //xx xx <= ~xx
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -770,7 +773,7 @@ module CPU(
 								2'b10: cx <= ~cx;
 								2'b11: dx <= ~dx;
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oNOT: begin //xx xx <= !xx
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -779,7 +782,7 @@ module CPU(
 								2'b10: cx <= !cx;
 								2'b11: dx <= !dx;
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oOR: begin //xx,yx xx <= xx||yx
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
@@ -796,7 +799,7 @@ module CPU(
 						4'b1101: dx <= (dx | bx);
 						4'b1110: dx <= (dx | cx);
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oSHL: begin //xx xx <= xx << 1
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -805,7 +808,7 @@ module CPU(
 								2'b10: cx <= cx << 1;
 								2'b11: dx <= dx << 1;
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oSHR: begin //xx xx <= xx >> 1
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -814,7 +817,7 @@ module CPU(
 								2'b10: cx <= cx >> 1;
 								2'b11: dx <= dx >> 1;
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oXOR: begin //xx,yx xx <= xx^yx
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
@@ -831,7 +834,7 @@ module CPU(
 						4'b1101: dx <= (dx ^ bx);
 						4'b1110: dx <= (dx ^ cx);
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				oTEST: begin //xx,yx xx ?= yx
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
@@ -848,19 +851,19 @@ module CPU(
 						4'b1101: zf <= (dx == bx);
 						4'b1110: zf <= (dx == cx);
 					endcase
-					pc <= pc + 1;
+					pc = pc + 1;
 				end
 				
 				oINT: begin//absolute address
 					if (par1 == 16'h1) begin
 						zf <= 0;
-						flush <= 1;
+						//flush <= 1;
 					end else begin
 					stack[sp] <= bp;
 					stack[sp+1] <= pc + 1;
 					sp <= sp + 2;
-					pc <= par1 - 1;
 					bp <= par1;
+					pc <= par1 - 1;
 					end
 				end
 				oCALL: begin//relative address
@@ -871,79 +874,79 @@ module CPU(
 					bp <= par1;
 				end
 				oRET: begin
-					pc <= stack[sp-1];
+					pc = stack[sp-1];
 					bp <= stack[sp-2];
 					sp <= sp - 2;
 				end
 				oJMP1: begin
-					pc <= par1 + bp - 1;
+					pc = par1 + bp - 1;
 				end
 				oJMP2: begin
-					pc <= par1 - 1;
+					pc = par1 - 1;
 				end
 				oJMP3: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-						2'b00: pc <= ax + bp - 1;
-						2'b01: pc <= bx + bp - 1;
-						2'b10: pc <= cx + bp - 1;
-						2'b11: pc <= dx + bp - 1;
+						2'b00: pc = ax + bp - 1;
+						2'b01: pc = bx + bp - 1;
+						2'b10: pc = cx + bp - 1;
+						2'b11: pc = dx + bp - 1;
 					endcase
 				end
 				oJMP4: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-						2'b00: pc <= ax - 1;
-						2'b01: pc <= bx - 1;
-						2'b10: pc <= cx - 1;
-						2'b11: pc <= dx - 1;
+						2'b00: pc = ax - 1;
+						2'b01: pc = bx - 1;
+						2'b10: pc = cx - 1;
+						2'b11: pc = dx - 1;
 					endcase
 				end
 				oJC: begin
-					if (cf) pc <= par1 + bp - 1;
-					else pc <= pc + 1;
+					if (cf) pc = par1 + bp - 1;
+					else pc = pc + 1;
 				end
 				oJNC: begin
-					if (!cf) pc <= par1 + bp - 1;
-					else pc <= pc + 1;
+					if (!cf) pc = par1 + bp - 1;
+					else pc = pc + 1;
 				end
 				oJZ: begin
-					if (zf) pc <= par1 + bp - 1;
-					else pc <= pc + 1;
+					if (zf) pc = par1 + bp - 1;
+					else pc = pc + 1;
 				end
 				oJNZ: begin
-					if (!zf) pc <= par1 + bp - 1;
-					else pc <= pc + 1;
+					if (!zf) pc = par1 + bp - 1;
+					else pc = pc + 1;
 				end
 				oJO: begin
-					if (of) pc <= par1 + bp - 1;
-					else pc <= pc + 1;
+					if (of) pc = par1 + bp - 1;
+					else pc = pc + 1;
 				end
 				oJNO: begin
-					if (!of) pc <= par1 + bp - 1;
-					else pc <= pc + 1;
+					if (!of) pc = par1 + bp - 1;
+					else pc = pc + 1;
 				end
 				16'hBF: begin //putchar from mem
 					if (!alustate) begin
-						pc <= pc - 1;
-						gpuline <= opcode;
+						pc = pc - 1;
+						gpuline = opcode;
 						ADDR4 = par2+bp;
 						alustate <= 1;
 					end
 					else begin
-						pc <= pc + 1;
+						pc = pc + 1;
 						//gpuline <= ram[par1 + bp];
-						gpuline <= DATA4;
+						gpuline = DATA4;
 						alustate <= 0;
 					end
 				end
 				default: begin//unrecognized cmd//maybe gpu
 					if (!alustate) begin
-						pc <= pc - 1;
-						gpuline <= opcode;
+						pc = pc - 1;
+						gpuline = opcode;
 						alustate <= 1;
 					end
 					else begin
-						pc <= pc + 1;
-						gpuline <= par1;
+						pc = pc + 1;
+						gpuline = par1;
 						alustate <= 0;
 					end
 				end
