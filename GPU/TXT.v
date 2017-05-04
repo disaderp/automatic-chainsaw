@@ -19,25 +19,27 @@ VGA z0 (
 		.clk (clk),
 		.clr (clr),
 		.pixv (pixv),
-		.pixh (pixh)
+		.pixh (pixh),
+		.hsync(hsync),
+		.vsync(vsync)
 		);
 assign pix_x = pixh;
 assign pix_y = pixv;
 
-always @ (posedge clk or negedge clr)
+always @ (posedge clk)//or negedge clr
 begin
 	if (clr == 1)		//reset of all registers 
-		begin
+	begin
 		asciiaddress <= 0;
 		line <= 0;
 		dis_mem_en <= 0;
 		font_mem_en <= 0;
 	end 
-		else 
-		begin
-			asciiaddress <= 0;
-				case (pixh[2:0])
-					3'b110: begin
+	else 
+	begin
+		asciiaddress <= 0;
+			case (pixh[2:0])
+				3'b110: begin
 					hp[11:0] <= { 6'd0, pixh[9:4] };
 					vp[11:0] <= { 6'd0, pixv[9:4] };
 					asciiaddress[11:0] <= hp + (vp << 5) + (vp << 3); //40 = 2*2*2*2*2 + 2*2*2
@@ -46,13 +48,13 @@ begin
 				end
 	
 				3'b111: begin
-				line <= char_line_dat;
-			end
-				3'b000: begin
-				dis_mem_en <= 0;
-				font_mem_en <=0;
+					line <= char_line_dat;
 				end
-		endcase
+				3'b000: begin
+					dis_mem_en <= 0;
+					font_mem_en <=0;
+				end
+			endcase
 	end
 end
 

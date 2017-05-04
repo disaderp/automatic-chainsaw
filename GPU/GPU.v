@@ -1,17 +1,36 @@
 module GPU(
 input clk,
 input [15:0] cpuline,
-input clr
+input clr,
+output out_vga
 );
 
+		
+wire [7:0] out;
+assign dat = out;
 
+
+wire [9:0] pix_x;	//pixel vertical location
+wire [9:0] pix_y;
+reg [15:0] cmd = 0;
+reg [15:0] param = 0;
+reg [11:0] ram [7:0];
+reg [11:0] pointer = 0;
+reg [11:0] tmpx = 0;
+reg [11:0] tmpy = 0;
+reg nopstate = 0;
+reg [15:0] nextcmd = 0;
+reg [6:0] i;
+
+reg [7:0] ascii = 0;
+//wire [7:0] ascii;
 
 TXT d0 (
 		.clk (clk),
 		.clr (clr),
 		.out_vga (out_vga),
 		.char_line_dat (dat),
-		.asciiaddress (asciiadress),
+		.asciiaddress (asciiaddress),
 		.font_mem_en (font_mem_en),
 		.dis_mem_en (dis_mem_en),
 		.pix_x(pix_x),
@@ -23,120 +42,107 @@ font_rom x0 (
 		.address ({ascii[6:0], pix_y[3:0], !pix_x[3]}),
 		.out (out)
 		);
-		
 
-wire [7:0] out;
-assign dat = out;
-
-
-wire [9:0] pix_x;	//pixel vertical location
-wire [9:0] pix_y;
-reg [15:0] cmd;
-reg [15:0] param;
-reg [11:0] ram [7:0];
-reg [11:0] pointer;
-reg [11:0] tmpx;
-reg [11:0] tmpy;
-reg nopstate;
-reg [15:0] nextcmd;
-reg [6:0] i;
-
-reg [7:0] ascii;
+/*
 always @ (posedge clk) begin : clr2
-	if (clr) disable clr2;
-	cmd <= 0;
-	param <= 0;
-	pointer <= 0;
-	tmpx <= 0;
-	tmpy <=0;
-	nopstate <= 0;
-	nextcmd <= 0;
-	ascii <= 0;
+	if (!clr) begin
+		cmd <= 0;
+		param <= 0;
+		pointer <= 0;
+		tmpx <= 0;
+		tmpy <=0;
+		nopstate <= 0;
+		nextcmd <= 0;
+		ascii <= 0;
 	end
+end*/
 
 always @ (posedge dis_mem_en) begin : dismem
-	if (!clr) disable dismem;
-	ascii <= ram[pointer];
+	//if (clr) begin
+		//ascii <= ram[pointer];
+		ascii <= ram[asciiaddress];
+	//end
 end
 
 always @(posedge clk) begin : main
-	if (!clr) disable main;
-	case (cmd)
-		16'h0: begin
-			if (!nopstate) begin
-				nextcmd <= cpuline;
-				nopstate <= 1;
+	if (clr) begin
+		case (cmd)
+			16'h0: begin
+				if (!nopstate) begin
+					nextcmd <= cpuline;
+					nopstate <= 1;
+				end
+				else begin
+					cmd <= nextcmd;
+					param <= cpuline;
+					nopstate <= 0;
+				end
 			end
-			else begin
-				cmd <= nextcmd;
-				param <= cpuline;
-				nopstate <= 0;
+			16'hC0: begin
+				if (param == 0) begin
+					for (i=0; i<8; i=i+1) ram[i] <= 2'b00;
+					pointer <=0;
+					tmpy <=0;
+					tmpx <=0;
+				end
+				else begin
+					//graphical mode
+				end
 			end
-		end
-		16'hC0: begin
-			if (param == 0) begin
+			16'hC1: begin
+				ram[pointer] <= param;
+				pointer <= pointer + 1;
+				if(tmpx > 12'd38) begin//0..39
+					if(tmpy > 12'd23) //0..24
+						tmpy <= 0;
+					else tmpy <= tmpy + 1;
+					tmpx <= 0;
+				end
+				else tmpx <= tmpx + 1;
+				cmd <= 16'h0;
+			end
+			16'hC2: begin
+				ram[pointer - 1] <= 8'h0;
+				pointer <= pointer - 1;
+				if(tmpx == 12'h0) begin
+					tmpx <= 12'd39;
+					tmpy <= tmpy - 1;
+				end
+				else tmpx <= tmpx - 1;
+				cmd <= 16'h0;
+			end
+			16'hC3: begin
+				tmpy <= param;
+				pointer <= (param << 5) + (param << 3) + tmpx;//Y*40 +x
+				cmd <= 16'h0;
+			end
+			16'hC4: begin
+				tmpx <= param;
+				pointer <= (tmpy << 5) + (tmpy << 3) + param;//X*40 +y
+				cmd <= 16'h0;
+			end
+			16'hC5: begin
 				for (i=0; i<8; i=i+1) ram[i] <= 2'b00;
-				pointer <=0;
-				tmpy <=0;
-				tmpx <=0;
-			end
-			else begin
-				//graphical mode
-			end
-		end
-		16'hC1: begin
-			ram[pointer] <= param;
-			pointer <= pointer + 1;
-			if(tmpx > 12'd38) begin//0..39
-				if(tmpy > 12'd23) //0..24
-					tmpy <= 0;
-				else tmpy <= tmpy + 1;
-				tmpx <= 0;
-			end
-			else tmpx <= tmpx + 1;
-			cmd <= 16'h0;
-		end
-		16'hC2: begin
-			ram[pointer - 1] <= 8'h0;
-			pointer <= pointer - 1;
-			if(tmpx == 12'h0) begin
-				tmpx <= 12'd39;
-				tmpy <= tmpy - 1;
-			end
-			else tmpx <= tmpx - 1;
-			cmd <= 16'h0;
-		end
-		16'hC3: begin
-			tmpy <= param;
-			pointer = (param << 5) + (param << 3) + tmpx;//Y*40 +x
-			cmd <= 16'h0;
-		end
-		16'hC4: begin
-			tmpx <= param;
-			pointer = (tmpy << 5) + (tmpy << 3) + param;//X*40 +y
-			cmd <= 16'h0;
-		end
-		16'hC5: begin
-			for (i=0; i<8; i=i+1) ram[i] <= 2'b00;
-			pointer <= 0;
-			tmpx <= 0;
-			tmpy <= 0;
-			cmd <= 16'h0;
-		end
-		16'hC6: begin
-			if(tmpy > 12'd23) begin//0..24
-				pointer <= 0;//not the best solution
+				pointer <= 0;
 				tmpx <= 0;
 				tmpy <= 0;
+				cmd <= 16'h0;
 			end
-			else begin
-				tmpx <= 0;
-				tmpy = tmpy + 1;
-				pointer = (tmpy << 5) + (tmpy << 3);//*40
+			16'hC6: begin
+				if(tmpy > 12'd23) begin//0..24
+					pointer <= 0;//not the best solution
+					tmpx <= 0;
+					tmpy <= 0;
 				end
-			cmd <= 16'h0;
-		end
-	endcase
+				else begin
+					tmpx <= 0;
+					tmpy <= tmpy + 1;
+					pointer <= ((tmpy+1) << 5) + ((tmpy+1) << 3);//*40
+					end
+				cmd <= 16'h0;
+			end
+		endcase
+	end
 end
 	
 endmodule
