@@ -4,6 +4,7 @@ module CPU(
 	input [3:0] SD_DAT,
 	output SD_SCK,
 	output SD_CMD,*/
+	input ina, input inb, output reg [7:0] led,
 	output reg [15:0] gpuline
 	);
 	
@@ -40,7 +41,6 @@ module CPU(
     wire [15:0] DATA4;
     reg RAMState = 0;
 	RAM r(ADDR1, ADDR2, ADDR3, ADDR4, ADDW1, DATA, WREN, DATA1, DATA2, DATA3, DATA4, clk);
-	//reg [15:0] ram[10:0];//ram+programmemory
 	
 	//op
 	parameter oNOP = 16'h0;
@@ -190,21 +190,6 @@ module CPU(
 	//sdcardmodule
 	*/
 	
-	//bootloader
-		initial begin 
-		/*ram[0] <= 16'b0000000000000000;
-    	ram[1] <= 16'b0000000011000000;
-    	ram[2] <= 16'b0000000000000000;
-    	ram[3] <= 16'b0000000011000001;
-    	ram[4] <= 16'b0000000001101100;
-    	ram[5] <= 16'b0000000011000001;
-    	ram[6] <= 16'b0000000001101111;
-    	ram[7] <= 16'b0000000011000001;
-    	ram[8] <= 16'b0000000001100001;
-    	ram[9] <= 16'b0000000011000001;*/
-    	
-    	end
-	
 	/*
 	always @(posedge clk25) begin : SD
 		//if (!reset) disable SD;
@@ -262,36 +247,36 @@ module CPU(
 			
 			WREN = 0;
 			gpuline = 16'h0;
-			pc = pc + 1;
-			ADDR1 = pc;
+			//pc = pc + 1;
 			opcode = DATA1;
-			//rdataaddr;ram[pc];
-			ADDR2 = pc+1;
 			par1 = DATA2;
-			//rdataadd = pc;
-			ADDR3 = pc+2;
 			par2 = DATA3;
-			//par2 = rout;
+
 			case (opcode)
-				oNOP: begin end
+				oNOP: begin pc = pc + 1; end
 				oSCF: begin 
 					cf <= par1;
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oCFF: begin
 					dx <= cf;
+					pc = pc + 1;
 				end
 				oCOF: begin
 					dx <= of;
+					pc = pc + 1;
 				end
 				oCZF: begin
 					dx <= zf;
+					pc = pc + 1;
 				end
 				oCBP: begin
 					dx <= bp;
+					pc = pc + 1;
 				end
 				oCPC: begin
 					dx <= pc;
+					pc = pc + 1;
 				end
 				oMOV1: begin //[adr],xx [adr]<=xx //relative address
 					ADDW1 = par1+bp;
@@ -302,13 +287,12 @@ module CPU(
 						 2'b11: DATA = dx;
 					endcase
 					WREN = 1;
-					pc = pc + 2;
+					pc = pc + 3;
 				end
 				oMOV2: begin //xx,[adr] xx<=[adr] //relative address
 					case (RAMState)
 						1'b0: begin
 							ADDR4 = par2+bp;
-							pc = pc - 1;
 							RAMState <= 1;
 						end
 						1'b1: begin
@@ -318,7 +302,7 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc = pc + 2;
+							pc = pc + 3;
 							RAMState <= 0;
 						end
 					endcase
@@ -332,13 +316,12 @@ module CPU(
 						2'b11: DATA = dx;
 					endcase
 					WREN = 1;
-					pc = pc + 2;
+					pc = pc + 3;
 				end
 				oMOV6: begin //xx,<adr> xx<=<adr> //absolute address
 					case (RAMState)
 						1'b0: begin
 							ADDR4 = par2;
-							pc = pc - 1;
 							RAMState <= 1;
 						end
 						1'b1: begin
@@ -348,7 +331,7 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc = pc + 2;
+							pc = pc + 3;
 							RAMState <= 0;
 						end
 					endcase
@@ -368,7 +351,7 @@ module CPU(
 						4'b1101: dx <= bx;
 						4'b1110: dx <= cx;
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oMOV4: begin //xx,(int) xx<=(int)
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -377,7 +360,7 @@ module CPU(
 						2'b10: cx <= par2;
 						2'b11: dx <= par2;
 					endcase
-					pc = pc + 2;
+					pc = pc + 3;
 				end
 				oLEA1: begin //xx,[yy] xx<=[yx]
 					case (RAMState)
@@ -388,7 +371,6 @@ module CPU(
 								2'b10: ADDR4 = cx+bp;
 								2'b11: ADDR4 = dx+bp;
 							endcase
-							pc = pc - 1;
 							RAMState <= 1;
 						end
 						1'b1: begin
@@ -398,13 +380,13 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							RAMState <= 0;
 						end
 					endcase
 				end
 				oLEA2: begin //[xx],yy [xx]<=yy
-					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx//@TODO: two-step
 						4'b0001: begin ADDW1 = ax+bp; DATA = bx; end
 						4'b0010: begin ADDW1 = ax+bp; DATA = cx; end
 						4'b0011: begin ADDW1 = ax+bp; DATA = dx; end
@@ -419,7 +401,7 @@ module CPU(
 						4'b1110: begin ADDW1 = dx+bp; DATA = cx; end
 					endcase
 					WREN = 1;
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oLEA3: begin //xx,<yy> xx<=<yx>
 					case (RAMState)
@@ -430,7 +412,6 @@ module CPU(
 								2'b10: ADDR4 = cx;
 								2'b11: ADDR4 = dx;
 							endcase
-							pc = pc - 1;
 							RAMState <= 1;
 						end
 						1'b1: begin
@@ -440,13 +421,13 @@ module CPU(
 								2'b10: cx <= DATA4;
 								2'b11: dx <= DATA4;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							RAMState <= 0;
 						end
 					endcase
 				end
 				oLEA4: begin //<xx>,yy <xx><=yy
-					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx //ABS
+					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx //ABS //@TODO: two-step
 						4'b0001: begin ADDW1 = ax; DATA = bx; end
 						4'b0010: begin ADDW1 = ax; DATA = cx; end
 						4'b0011: begin ADDW1 = ax; DATA = dx; end
@@ -461,7 +442,7 @@ module CPU(
 						4'b1110: begin ADDW1 = dx; DATA = cx; end
 					endcase
 					WREN = 1;
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oPOP: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -471,12 +452,14 @@ module CPU(
 						2'b11: dx <= stack[sp-1];
 					endcase
 					sp <= sp - 1;
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oOUT: begin
 					if (bx[15:13] == 0) begin//sdcard
 						//sdcard[bx[12:0]] <= dx;
 					end
+					led <= dx;
+					pc = pc + 1;
 					$display("Address: %b, Data: %b", bx, dx);
 				end
 				oIN: begin
@@ -492,6 +475,8 @@ module CPU(
 							kread <= 1;
 						end
 					end
+					dx <= {ina, inb};
+					pc = pc + 1;
 				end
 				oXCH: begin
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
@@ -508,7 +493,7 @@ module CPU(
 						4'b1101: begin dx <= bx; bx <= dx; end
 						4'b1110: begin dx <= cx; cx <= dx; end
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oPUSH: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -518,7 +503,7 @@ module CPU(
 								2'b11: stack[sp] <= dx;
 					endcase
 					sp <= sp + 1;
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				
 				oADD: begin
@@ -537,7 +522,6 @@ module CPU(
 								2'b11: bin = dx;
 							endcase
 							op = xADD;
-							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -547,7 +531,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -571,7 +555,6 @@ module CPU(
 								2'b11: bin = dx;
 							endcase
 							op = xADC;
-							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -581,7 +564,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -605,7 +588,6 @@ module CPU(
 								2'b11: bin = dx;
 							endcase
 							op = xSUB;
-							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -615,7 +597,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -639,7 +621,6 @@ module CPU(
 								2'b11: bin = dx;
 							endcase
 							op = xSUC;
-							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -649,7 +630,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -673,7 +654,6 @@ module CPU(
 								2'b11: bin = dx;
 							endcase
 							op = xMUL8;
-							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -683,7 +663,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							zf <= z_flag;
 							alustate <= 0;
 						end
@@ -705,7 +685,6 @@ module CPU(
 								2'b11: bin = dx;
 							endcase
 							op = xDIV8;
-							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
@@ -715,7 +694,7 @@ module CPU(
 								2'b10: cx <= acc;
 								2'b11: dx <= acc;
 							endcase
-							pc = pc + 1;
+							pc = pc + 2;
 							zf <= z_flag;
 							alustate <= 0;
 						end
@@ -737,11 +716,10 @@ module CPU(
 								2'b11: bin = dx;
 							endcase
 							op = xCMP;
-							pc = pc - 1;
 							alustate <= 1;
 						end
 						1'b1: begin
-							pc = pc + 1;
+							pc = pc + 2;
 							cf <= c_flag;
 							zf <= z_flag;
 							of <= o_flag;
@@ -764,7 +742,7 @@ module CPU(
 						4'b1101: dx <= (dx & bx);
 						4'b1110: dx <= (dx & cx);
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oNEG: begin //xx xx <= ~xx
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -773,7 +751,7 @@ module CPU(
 								2'b10: cx <= ~cx;
 								2'b11: dx <= ~dx;
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oNOT: begin //xx xx <= !xx
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -782,7 +760,7 @@ module CPU(
 								2'b10: cx <= !cx;
 								2'b11: dx <= !dx;
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oOR: begin //xx,yx xx <= xx||yx
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
@@ -799,7 +777,7 @@ module CPU(
 						4'b1101: dx <= (dx | bx);
 						4'b1110: dx <= (dx | cx);
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oSHL: begin //xx xx <= xx << 1
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -808,7 +786,7 @@ module CPU(
 								2'b10: cx <= cx << 1;
 								2'b11: dx <= dx << 1;
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oSHR: begin //xx xx <= xx >> 1
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
@@ -817,7 +795,7 @@ module CPU(
 								2'b10: cx <= cx >> 1;
 								2'b11: dx <= dx >> 1;
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oXOR: begin //xx,yx xx <= xx^yx
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
@@ -834,7 +812,7 @@ module CPU(
 						4'b1101: dx <= (dx ^ bx);
 						4'b1110: dx <= (dx ^ cx);
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				oTEST: begin //xx,yx xx ?= yx
 					case (par1[3:0])//00-ax 01-bx 10-cx 11-dx
@@ -851,7 +829,7 @@ module CPU(
 						4'b1101: zf <= (dx == bx);
 						4'b1110: zf <= (dx == cx);
 					endcase
-					pc = pc + 1;
+					pc = pc + 2;
 				end
 				
 				oINT: begin//absolute address
@@ -860,17 +838,17 @@ module CPU(
 						//flush <= 1;
 					end else begin
 					stack[sp] <= bp;
-					stack[sp+1] <= pc + 1;
+					stack[sp+1] <= pc;
 					sp <= sp + 2;
 					bp <= par1;
-					pc <= par1 - 1;
+					pc = par1;
 					end
 				end
 				oCALL: begin//relative address
 					stack[sp] <= bp;
-					stack[sp+1] <= pc + 1;
+					stack[sp+1] <= pc;
 					sp <= sp + 2;
-					pc <= par1 + bp - 1;
+					pc = par1 + bp;
 					bp <= par1;
 				end
 				oRET: begin
@@ -879,60 +857,59 @@ module CPU(
 					sp <= sp - 2;
 				end
 				oJMP1: begin
-					pc = par1 + bp - 1;
+					pc = par1 + bp;
 				end
 				oJMP2: begin
-					pc = par1 - 1;
+					pc = par1;
 				end
 				oJMP3: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-						2'b00: pc = ax + bp - 1;
-						2'b01: pc = bx + bp - 1;
-						2'b10: pc = cx + bp - 1;
-						2'b11: pc = dx + bp - 1;
+						2'b00: pc = ax + bp;
+						2'b01: pc = bx + bp;
+						2'b10: pc = cx + bp;
+						2'b11: pc = dx + bp;
 					endcase
 				end
 				oJMP4: begin
 					case (par1[1:0])//00-ax 01-bx 10-cx 11-dx
-						2'b00: pc = ax - 1;
-						2'b01: pc = bx - 1;
-						2'b10: pc = cx - 1;
-						2'b11: pc = dx - 1;
+						2'b00: pc = ax;
+						2'b01: pc = bx;
+						2'b10: pc = cx;
+						2'b11: pc = dx;
 					endcase
 				end
 				oJC: begin
-					if (cf) pc = par1 + bp - 1;
-					else pc = pc + 1;
+					if (cf) pc = par1 + bp;
+					else pc = pc + 2;
 				end
 				oJNC: begin
-					if (!cf) pc = par1 + bp - 1;
-					else pc = pc + 1;
+					if (!cf) pc = par1 + bp;
+					else pc = pc + 2;
 				end
 				oJZ: begin
-					if (zf) pc = par1 + bp - 1;
-					else pc = pc + 1;
+					if (zf) pc = par1 + bp;
+					else pc = pc + 2;
 				end
 				oJNZ: begin
-					if (!zf) pc = par1 + bp - 1;
-					else pc = pc + 1;
+					if (!zf) pc = par1 + bp;
+					else pc = pc + 2;
 				end
 				oJO: begin
-					if (of) pc = par1 + bp - 1;
-					else pc = pc + 1;
+					if (of) pc = par1 + bp;
+					else pc = pc + 2;
 				end
 				oJNO: begin
-					if (!of) pc = par1 + bp - 1;
-					else pc = pc + 1;
+					if (!of) pc = par1 + bp;
+					else pc = pc + 2;
 				end
 				16'hBF: begin //putchar from mem
 					if (!alustate) begin
-						pc = pc - 1;
 						gpuline = opcode;
 						ADDR4 = par2+bp;
 						alustate <= 1;
 					end
 					else begin
-						pc = pc + 1;
+						pc = pc + 2;
 						//gpuline <= ram[par1 + bp];
 						gpuline = DATA4;
 						alustate <= 0;
@@ -940,16 +917,26 @@ module CPU(
 				end
 				default: begin//unrecognized cmd//maybe gpu
 					if (!alustate) begin
-						pc = pc - 1;
 						gpuline = opcode;
 						alustate <= 1;
 					end
 					else begin
-						pc = pc + 1;
+						pc = pc + 2;
 						gpuline = par1;
 						alustate <= 0;
 					end
 				end
 			endcase
+			
+						ADDR1 = pc;
+						//opcode = DATA1;
+						//rdataaddr;ram[pc];
+						ADDR2 = pc+1;
+						//par1 = DATA2;
+						//rdataadd = pc;
+						ADDR3 = pc+2;
+						//par2 = DATA3;
+						//par2 = rout;
+			
 		end
 endmodule
