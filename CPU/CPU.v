@@ -5,8 +5,13 @@ module CPU(
 	output SD_SCK,
 	output SD_CMD,*/
 	input ina, input inb, output reg [7:0] led,
-	output reg [15:0] gpuline
+	output vga, output hsync, output vsync
+	//output reg [15:0] gpuline
 	);
+	reg [15:0] gpuline;
+	//wire vga;
+	 GPU g1(clk, gpuline,1, vga, hsync, vsync);
+
 	
 	reg reset = 0;
 	wire clk;

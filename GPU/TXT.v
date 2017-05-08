@@ -3,47 +3,40 @@ input clk,		//clock
 input clr,		//clear
 input [7:0] char_line_dat,	//data
 output reg out_vga, //vga output
-output reg [11:0] asciiaddress, 
-output reg dis_mem_en,		//enables display memory
-output reg font_mem_en,		//enables font memory
-output pix_x,
-output pix_y
+output reg [11:0] asciiaddress = 0, 
+output reg dis_mem_en = 0,		//enables display memory
+output reg font_mem_en = 0,		//enables font memory
+output [9:0] pix_x,
+output [9:0] pix_y,
+output hsync, output vsync
 );
 
-reg [8:0] line;		//sth
+reg [7:0] line;		//sth
 reg [11:0] hp;		//sth else
 reg [11:0] vp;		//sth else2
-wire [9:0] pixv;	//pixel vertical location
-wire [9:0] pixh;
+//wire [9:0] pixv;	//pixel vertical location
+//wire [9:0] pixh;
 VGA z0 (
 		.clk (clk),
-		.clr (clr),
-		.pixv (pixv),
-		.pixh (pixh),
+		//.clr (clr),
+		.pixv (pix_x),
+		.pixh (pix_y),
 		.hsync(hsync),
 		.vsync(vsync)
 		);
-assign pix_x = pixh;
-assign pix_y = pixv;
+//assign pix_x = pixh;
+//assign pix_y = pixv;
 
 always @ (posedge clk)//or negedge clr
 begin
-	if (clr == 1)		//reset of all registers 
-	begin
+
 		asciiaddress <= 0;
-		line <= 0;
-		dis_mem_en <= 0;
-		font_mem_en <= 0;
-	end 
-	else 
-	begin
-		asciiaddress <= 0;
-			case (pixh[2:0])
+			case (pix_x[2:0])
 				3'b110: begin
-					hp[11:0] <= { 6'd0, pixh[9:4] };
-					vp[11:0] <= { 6'd0, pixv[9:4] };
+					hp[11:0] <= { 6'd0, pix_x[9:4] };
+					vp[11:0] <= { 6'd0, pix_y[9:4] };
 					asciiaddress[11:0] <= hp + (vp << 5) + (vp << 3); //40 = 2*2*2*2*2 + 2*2*2
-					dis_mem_en <=1;
+					dis_mem_en <= 1;
 					font_mem_en <= 1;
 				end
 	
@@ -55,12 +48,11 @@ begin
 					font_mem_en <=0;
 				end
 			endcase
-	end
 end
 
 always @ (posedge clk)
 begin
-	case (pixh[2:0])
+	case (pix_x[2:0])
 	3'b000: out_vga <= line[7];
 	3'b001: out_vga <= line[6];
 	3'b010: out_vga <= line[5];

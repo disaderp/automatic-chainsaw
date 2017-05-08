@@ -2,19 +2,16 @@ module GPU(
 input clk,
 input [15:0] cpuline,
 input clr,
-output out_vga
+output outvga, output hsync, output vsync
 );
 
 		
 wire [7:0] out;
-assign dat = out;
-
-
 wire [9:0] pix_x;	//pixel vertical location
 wire [9:0] pix_y;
 reg [15:0] cmd = 0;
 reg [15:0] param = 0;
-reg [11:0] ram [7:0];
+reg [7:0] ram [11:0];
 reg [11:0] pointer = 0;
 reg [11:0] tmpx = 0;
 reg [11:0] tmpy = 0;
@@ -23,18 +20,20 @@ reg [15:0] nextcmd = 0;
 reg [6:0] i;
 
 reg [7:0] ascii = 0;
-//wire [7:0] ascii;
+wire [11:0] asciiaddress;
 
 TXT d0 (
 		.clk (clk),
 		.clr (clr),
-		.out_vga (out_vga),
-		.char_line_dat (dat),
+		.out_vga (outvga),
+		.char_line_dat (out),
 		.asciiaddress (asciiaddress),
 		.font_mem_en (font_mem_en),
 		.dis_mem_en (dis_mem_en),
 		.pix_x(pix_x),
-		.pix_y(pix_y)
+		.pix_y(pix_y),
+		.hsync(hsync),
+		.vsync(vsync)
 		);
 
 font_rom x0 (
@@ -65,7 +64,7 @@ always @ (posedge dis_mem_en) begin : dismem
 end
 
 always @(posedge clk) begin : main
-	if (clr) begin
+
 		case (cmd)
 			16'h0: begin
 				if (!nopstate) begin
@@ -88,6 +87,7 @@ always @(posedge clk) begin : main
 				else begin
 					//graphical mode
 				end
+				cmd <= 0;
 			end
 			16'hC1: begin
 				ram[pointer] <= param;
@@ -142,7 +142,6 @@ always @(posedge clk) begin : main
 				cmd <= 16'h0;
 			end
 		endcase
-	end
 end
 	
 endmodule
