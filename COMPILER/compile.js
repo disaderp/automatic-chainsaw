@@ -181,9 +181,9 @@ const statementHandlers = {
         data(statement.args[i].name, typeSize(statement.args[i].type), zeros(typeSize(statement.args[i].type)));
         op.mov(l[statement.args[i].name], reg);
         switch(reg){
-          case 'AX': reg='BX';break;
-          case 'BX': reg='CX';break;
-          case 'CX': reg='DX';break;
+        case 'AX': reg='BX';break;
+        case 'BX': reg='CX';break;
+        case 'CX': reg='DX';break;
         }
       }
       for(let i = 0;i < statement.statement.length; i++){
@@ -228,9 +228,9 @@ const statementHandlers = {
             throw new Error("do not use expression in fastcall function call");
           }
           switch(reg){
-            case 'AX': reg='BX';break;
-            case 'BX': reg='CX';break;
-            case 'CX': reg='DX';break;
+          case 'AX': reg='BX';break;
+          case 'BX': reg='CX';break;
+          case 'CX': reg='DX';break;
           }
         }
       }else{
@@ -272,18 +272,19 @@ const statementHandlers = {
 
     op.pop(r.ax);
     switch(statement.operator){
-      case '+': op.add(r.ax, r.dx); break;
-      case '-': op.sub(r.ax, r.dx); break;
-      case '*': op.mul8(r.ax, r.dx); break;
-      case '/': op.div8(r.ax, r.dx); break;
-      case '&': op.and(r.ax, r.dx); break;
-      case '|': op.or(r.ax, r.dx); break;
-      case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
-      case '<': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
-      case '>': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jno(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
-      case '>=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
-      case '<=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jo(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
-      default: throw new Error('not implemented operator');
+    case '+': op.add(r.ax, r.dx); break;
+    case '-': op.sub(r.ax, r.dx); break;
+    case '*': op.mul8(r.ax, r.dx); break;
+    case '/': op.div8(r.ax, r.dx); break;
+    case '&': op.and(r.ax, r.dx); break;
+    case '|': op.or(r.ax, r.dx); break;
+    case '<<': op.shl(r.ax, r.dx); break;
+    case '==': op.test(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnz(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+    case '<': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jnc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+    case '>': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jno(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+    case '>=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jc(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+    case '<=': op.cmp(r.ax, r.dx); statement.id = randomHash(); op.mov(r.ax, 0); op.jo(l[".testexit" + statement.id]); op.mov(r.ax, 1); label("testexit" + statement.id); break;
+    default: throw new Error('not implemented operator');
     }
   },
 
@@ -298,13 +299,13 @@ const statementHandlers = {
     }
 
     switch(statement.operator){
-      case '!': op.not(r.ax); break;
-      case '~': op.neg(r.ax); break;
-      case '-': op.neg(r.ax); break;
-      case '+': break;
-      case '*': op.lea(r.ax, r.ax); break;
-      case '&': break;
-      default: throw new Error('not implemented operator');
+    case '!': op.not(r.ax); break;
+    case '~': op.neg(r.ax); break;
+    case '-': op.neg(r.ax); break;
+    case '+': break;
+    case '*': op.lea(r.ax, r.ax); break;
+    case '&': break;
+    default: throw new Error('not implemented operator');
     }
   },
 }
