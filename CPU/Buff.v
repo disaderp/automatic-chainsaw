@@ -19,11 +19,11 @@ module InBuff #(parameter WIDTH = 16)(
 	
 	
 	always @(posedge clk) begin
-		if (counter > clkdiv) begin
+		if (counter > clkdiv) begin//@TODO: external clk
 			outclk <= !outclk;
 			counter <= 0;
 			if (in != 0) begin
-				for(i=1;i<21;i=i+1) begin//probably very slow
+				for(i=1;i<21;i=i+1) begin//probably very slow //WHAT THE FUCK-@TODO: implement cyclic buffer
 					inbuf[i] <= inbuf[i-1];
 				end
 				inbuf[0] <= in;
