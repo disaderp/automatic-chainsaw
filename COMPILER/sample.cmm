@@ -7,7 +7,7 @@ int pi = 314;
 int esc = 0x1B;
 char *hello = "Hello World";
 int[0x20] T;
-;
+
 
 n = (n + TEST);
 pi = n;
