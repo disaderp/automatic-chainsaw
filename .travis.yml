@@ -12,6 +12,7 @@ matrix:
 before_install:
     - export PATH=$HOME/.local/bin:$PATH
     - bash ./SCHEMATIC/installv.sh
+    - bash ./SCHEMATIC/installn.sh
 
 install:
 
