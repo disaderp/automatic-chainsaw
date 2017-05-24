@@ -9,14 +9,9 @@ matrix:
     - env: BUILD=CPU
     - env: BUILD=GPU
     - env: BUILD=OS
-
-
 before_install:
     - export PATH=$HOME/.local/bin:$PATH
-    - git clone https://github.com/steveicarus/iverilog.git
-    - cd iverilog
-    - ./configure
-    - make
+    - bash ./SCHEMATIC/installv.sh
 
 install:
 
