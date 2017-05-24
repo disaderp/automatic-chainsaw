@@ -10,16 +10,13 @@ matrix:
     - env: BUILD=GPU
     - env: BUILD=OS
 
-#addons:
-    #apt:
-        #packages:
-       # - verilog
 
 before_install:
     - export PATH=$HOME/.local/bin:$PATH
-    - sudo add-apt-repository http://archive.ubuntu.com/ubuntu/ -y
-    - sudo apt-get update -q
-    - sudo apt-get install verilog -y
+    - git clone https://github.com/steveicarus/iverilog.git
+    - cd iverilog
+    - ./configure
+    - make
 
 install:
 

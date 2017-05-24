@@ -2,7 +2,7 @@
 set -ev
 
 if [ "${BUILD}" = "ASM" ]; then
-	msbuild /p:Configuration=Release ./ASM/CPUAssembler/CPUAssembler.sln
+	xbuild /p:Configuration=Release ./ASM/CPUAssembler/CPUAssembler.sln
 elif [ "${BUILD}" = "COM" ]; then
 	node ./COMPILER/compile.js ./COMPILER/define.cmm
 elif [ "${BUILD}" = "CPU" ]; then
