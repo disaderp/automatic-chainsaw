@@ -6,10 +6,10 @@ module RAM(
     input [11:0] ADDW1,
     input [15:0] DATA,
     input WREN,
-    output [15:0] DATA1,
-    output [15:0] DATA2,
-    output [15:0] DATA3,
-    output [15:0] DATA4,
+    output reg [15:0] DATA1,
+    output reg [15:0] DATA2,
+    output reg [15:0] DATA3,
+    output reg [15:0] DATA4,
     input clk);
     
     reg [15:0] ram [1000:0];

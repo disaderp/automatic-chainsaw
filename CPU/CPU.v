@@ -2,7 +2,7 @@ module CPU(
 	input clk,
 	output [15:0] ADDRBUS,
 	output reg [1:0] CTRLBUS,//00 - none //01 - read // 10 - write // 11 - ?
-	inout reg [15:0] DATABUS,
+	inout [15:0] DATABUS,
 	output vga, output hsync, output vsync
 	);
 	reg reset = 0;
