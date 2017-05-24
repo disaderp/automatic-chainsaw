@@ -1,10 +1,8 @@
-language: csharp
-mono: none
+language: node_js
+node_js: "node"
 sudo: required
-
 matrix:
   include:
-    - env: BUILD=ASM
     - env: BUILD=COM
     - env: BUILD=CPU
     - env: BUILD=GPU
@@ -13,11 +11,6 @@ before_install:
     - export PATH=$HOME/.local/bin:$PATH
     - bash ./SCHEMATIC/installv.sh
     - bash ./SCHEMATIC/installn.sh
-
-install:
-
-
 script: bash ./SCHEMATIC/build.sh
-
 notifications:
     email: false
