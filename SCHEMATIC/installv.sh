@@ -6,4 +6,5 @@ tar -xzf v.tar.gz
 cd verilog-10.1.1
 ./configure
 make
+sudo make install
 ls -la
