@@ -1,0 +1,27 @@
+language: csharp
+
+sudo: false
+
+matrix:
+  include:
+    - env: BUILD=ASM
+    - env: BUILD=COM
+    - env: BUILD=CPU
+    - env: BUILD=GPU
+    - env: BUILD=OS
+
+addons:
+    apt:
+        packages:
+        - verilog
+
+before_install:
+    - export PATH=$HOME/.local/bin:$PATH
+
+install:
+
+
+script: bash ./SCHEMATIC/build.sh
+
+notifications:
+    email: false
