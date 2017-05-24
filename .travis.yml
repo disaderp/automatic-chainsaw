@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-sudo: false
+sudo: required
 
 matrix:
   include:
