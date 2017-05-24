@@ -1,12 +1,12 @@
 language: node_js
 node_js: "node"
 sudo: required
-matrix:
-  include:
-    - env: BUILD=COM
-    - env: BUILD=CPU
-    - env: BUILD=GPU
-    - env: BUILD=OS
+env:
+  matrix:
+    - BUILD=COM
+    - BUILD=CPU
+    - BUILD=GPU
+    - BUILD=OS
 before_install:
     - export PATH=$HOME/.local/bin:$PATH
     - bash ./SCHEMATIC/installv.sh
