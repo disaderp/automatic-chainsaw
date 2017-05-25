@@ -5,3 +5,8 @@
 *.config linguist-vendored
 fontbuilder.cpp linguist-vendored
 *.h linguist-language=C
+parser.js linguist-vendored
+Application.Designer.vb linguist-vendored
+AssemblyInfo.vb linguist-vendored
+Resources.Designer.vb linguist-vendored
+Settings.Designer.vb linguist-vendored
