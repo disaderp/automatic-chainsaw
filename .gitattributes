@@ -1,1 +1,7 @@
-"ASM/CPUAssembler/My Project/Resources.resx" linguist-vendored=true
+"ASM/CPUAssembler/My Project/Resources.resx" linguist-vendored
+*.xml linguist-vendored
+*.vbproj linguist-vendored
+*.resx linguist-vendored
+*.config linguist-vendored
+fontbuilder.cpp linguist-vendored
+*.h linguist-language=C
