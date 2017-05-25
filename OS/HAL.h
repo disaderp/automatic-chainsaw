@@ -26,13 +26,13 @@ void newline() {
 }
 
 void initGPU(int mode) {
-	if(mode == 0) {//textmode
+	if(mode == 0) {/*textmode*/
 		asm("X11000000");
 		asm("X0");
 		return;
 	}
 	else {
-		//not implemented
+		/*not implemented*/
 	}
 }
 char scan() {
@@ -41,7 +41,7 @@ char scan() {
 	asm("CZF");
 	int zf;
 	asm("MOV [" + &zf + "],DX";
-	if(zf == 0) {//no data in buffer
+	if(zf == 0) {/*no data in buffer*/
 		asm("MOV DX,(0)");
 		asm("PUSH DX");
 	}else{
@@ -65,5 +65,5 @@ void shutdown(){
 	asm(".waitforshutdown");
 	asm("NOP");
 	asm("JNZ .waitforshutdown");
-	//done, display message that comouter can be shutdown
+	/*done, display message that comouter can be shutdown*/
 }

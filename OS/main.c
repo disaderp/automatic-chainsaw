@@ -5,31 +5,31 @@
 
 #define enter 13
 #define backspace 8
-#define max_buffer_size 63 // + 1
+#define max_buffer_size 63
 #define function_name_lenght 6
 
 void main ()
 {
 initGPU(0);
-//WELCOME MESSAGE
+/*WELCOME MESSAGE*/
 print_const("Welcome to Brain_OS 0.1a");
 
-//BASIC VARIABLES
+/*BASIC VARIABLES*/
 char c_user_buffer[64];
 c_user_buffer[max_buffer_size] = 0;
-//
-int p_user_buffer = 0;
-//bool b_isEnterPressed = false;
 
-// MAIN SYSTEM LOOP
+int p_user_buffer = 0;
+/*bool b_isEnterPressed = false;*/
+
+/* MAIN SYSTEM LOOP*/
 while (1){
-	//Get key pressed by user
+	/*Get key pressed by user*/
 	print_const(">");
 	while (1){
 	char c_temp = scan();
 		if (c_temp != 0){
 			if (c_temp == enter){
-				//b_isEnterPressed = true;
+				/*b_isEnterPressed = true;*/
 				c_user_buffer[p_user_buffer] = 0;
 				p_user_buffer = 0;
 				newline();
@@ -58,12 +58,12 @@ while (1){
 	
 		}
 	}
-	// Check if buffer contains function
-	// First characters contains function name. The rest is either parameters, null or gibberish. 
+	/* Check if buffer contains function
+	 First characters contains function name. The rest is either parameters, null or gibberish. */
 
-	//TODO (CREATE FUNCTION CHECKER)
+	/*TODO (CREATE FUNCTION CHECKER)*/
 		if (char_compare_l (c_user_buffer, "helpme",6)){
-		//TODO (CREATE PARAMETER CHECKER AND RELAY)
+		/*TODO (CREATE PARAMETER CHECKER AND RELAY)*/
 	}
 	else if (char_compare_l (c_user_buffer, "exec",4)){
 		
@@ -80,6 +80,6 @@ while (1){
 		
 	}
 	
-	//b_isEnterPressed = false;
+	/*b_isEnterPressed = false;*/
 }
 }
