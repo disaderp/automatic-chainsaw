@@ -1,13 +1,14 @@
 const util = require('util');
 let parser = require('./parser');
+const path = require('path');
 
 const fs = require('fs');
 
 function preprocessFile(fileName) {
-  return preprocess(fs.readFileSync(fileName, 'utf-8').split(/\r?\n/));
+  return preprocess(fs.readFileSync(fileName, 'utf-8').split(/\r?\n/), fileName);
 };
 
-function preprocess(lines) {
+function preprocess(lines, fileName) {
   const macros = {};
 
   function Macro() {
@@ -27,11 +28,14 @@ function preprocess(lines) {
 
         switch (tokens[0]) {
           case 'include': {
-            const _ = preprocessFile(tokens[1]);
+            let includedFilename = tokens[1];
+            if (includedFilename[0] === '"') includedFilename = includedFilename.substr(1, includedFilename.length -2);
+            const _ = preprocessFile(path.resolve(path.dirname(fileName), includedFilename));
             Object.assign(macros, _.macros);
             return _.code;
           }
           case 'define':
+            console.log(tokens.slice(2).join(' '));
             macros[tokens[1]] = parser.parse(tokens.slice(2).join(' '), {
               startRule: 'Expression',
             });
