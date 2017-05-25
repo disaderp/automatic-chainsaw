@@ -40,7 +40,7 @@ char scan() {
 	asm("IN");
 	asm("CZF");
 	int zf;
-	asm("MOV [" + &zf + "],DX";
+	asm("MOV [" + &zf + "],DX");
 	if(zf == 0) {/*no data in buffer*/
 		asm("MOV DX,(0)");
 		asm("PUSH DX");
