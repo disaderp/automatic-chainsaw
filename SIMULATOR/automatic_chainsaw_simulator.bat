@@ -4,10 +4,12 @@ SET OLDPATH=%cd%
 SET SIM_PATH=%~dp0
 SET ASM_PATH=..\ASM\CPUAssembler\bin\Debug\CPUAssembler.exe
 SET CPU_FILES=..\CPU\
+SET GPU_FILES=..\GPU\
 SET IVERILOG_PATH=c:\iverilog\bin\
-SET CC_PATH=..\COMPILER\node compiler.js
+SET GTKWAVE_PATH=C:\Users\Karol\Downloads\gtkwave-3.3.80-bin-win32\gtkwave\bin\
+SET CC_PATH=..\COMPILER\node compile.js
 SET INPUT_EXT=%~x1
-SET TMP_PATH=tmp
+SET TMP_PATH=tmp\
 
 CD %SIM_PATH%
 MKDIR %TMP_PATH% 2> nul
@@ -20,14 +22,18 @@ CD %OLDPATH%
 EXIT /B 1
 
 :compilec
-%CC_PATH% %1 -o %TMP_PATH%\program.asm 1>nul
+%CC_PATH% %1 -o %TMP_PATH%program.asm
 IF %ERRORLEVEL% NEQ 0 GOTO error
-%ASM_PATH% -ram %TMP_PATH%\ram.v %TMP_PATH%\program.asm 1>nul
+%ASM_PATH% -ram %TMP_PATH%ram.v %TMP_PATH%program.asm
 IF %ERRORLEVEL% NEQ 0 GOTO error
-SearchReplace %CPU_FILES%CPU.v //(SIM)DONOTREMOVE// %TMP_PATH%\ram.v %TMP_PATH%\CPU_modified.v
-%IVERILOG_PATH%iverilog -Wall -g2012 -s testbench -o %TMP_PATH%\compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%Buff.v %CPU_FILES%SDCard.v %TMP_PATH%\CPU_modified.v testbench.v 2>nul
+SearchReplace %CPU_FILES%debugging\RAM_sim.v //(SIM)DONOTREMOVE// %TMP_PATH%ram.v %TMP_PATH%RAM_modified.v
+%IVERILOG_PATH%iverilog -g2012 -s testbench -o %TMP_PATH%compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%CPU.v %GPU_FILES%Font_ROM.v %GPU_FILES%GPU.v %GPU_FILES%TXT.v %GPU_FILES%VGA.v %TMP_PATH%RAM_modified.v %CPU_FILES%debugging\cpu_testbench.v
 IF %ERRORLEVEL% NEQ 0 GOTO error
-%IVERILOG_PATH%vvp %TMP_PATH%\compiled.vvp
+cd %TMP_PATH%
+%IVERILOG_PATH%vvp compiled.vvp -lxt2
+IF %ERRORLEVEL% NEQ 0 GOTO error
+%GTKWAVE_PATH%gtkwave CPU_dump.lxt
+cd ..
 
 SET /P CLEARTMP=Remove temporary files?(y/n)
 IF /I %CLEARTMP%==n GOTO :cend
@@ -38,12 +44,16 @@ CD %OLDPATH%
 EXIT /B 0
 
 :assemble
-%ASM_PATH% -ram %TMP_PATH%\ram.v %1% 1>nul
+%ASM_PATH% -ram %TMP_PATH%ram.v %1% 
 IF %ERRORLEVEL% NEQ 0 GOTO error
-SearchReplace %CPU_FILES%CPU.v //(SIM)DONOTREMOVE// %TMP_PATH%\ram.v %TMP_PATH%\CPU_modified.v
-%IVERILOG_PATH%iverilog -Wall -g2012 -s testbench -o %TMP_PATH%\compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%Buff.v %CPU_FILES%SDCard.v %TMP_PATH%\CPU_modified.v testbench.v 2>nul
+SearchReplace %CPU_FILES%debugging\RAM_sim.v //(SIM)DONOTREMOVE// %TMP_PATH%ram.v %TMP_PATH%RAM_modified.v
+%IVERILOG_PATH%iverilog -g2012 -s testbench -o %TMP_PATH%compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%CPU.v %GPU_FILES%Font_ROM.v %GPU_FILES%GPU.v %GPU_FILES%TXT.v %GPU_FILES%VGA.v %TMP_PATH%RAM_modified.v %CPU_FILES%debugging\cpu_testbench.v
 IF %ERRORLEVEL% NEQ 0 GOTO error
-%IVERILOG_PATH%vvp %TMP_PATH%\compiled.vvp
+cd %TMP_PATH%
+%IVERILOG_PATH%vvp compiled.vvp -lxt2
+IF %ERRORLEVEL% NEQ 0 GOTO error
+%GTKWAVE_PATH%gtkwave CPU_dump.lxt
+cd ..
 
 SET /P CLEARTMP=Remove temporary files?(y/n)
 IF /I %CLEARTMP%==n GOTO :aend

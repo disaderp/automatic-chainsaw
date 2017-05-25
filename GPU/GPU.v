@@ -21,6 +21,8 @@ reg [6:0] i;
 
 reg [7:0] ascii = 0;
 wire [11:0] asciiaddress;
+wire font_mem_en;
+wire dis_mem_en;
 
 TXT d0 (
 		.clk (clk),

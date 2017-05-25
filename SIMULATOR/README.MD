@@ -12,14 +12,16 @@ Depending on the input filetype, it will:
 - Assemble
 - Update CPU.v code to contain your code on startup
 - Compile .v
-- Run the simulator and output result
+- Run the simulator 
+- **[UPDATE]** view result using `gtkwave`
 
 ## setting up
 
 Open `automatic_chainsaw_simulator.bat` and edit paths if you are using custom directories.
 If you have default paths from repository, you do not have to modify anything.
 
-Download Icarus Verilog simulator, Windows binaries are avaliable [here](http://bleyer.org/icarus/). Make sure to use version above 0.9. On Debian/Ubuntu, use `sudo apt install verilog`, on Arch Linux use `pacman -S iverilog`.
+Download Icarus Verilog(versions below 0.10 DOES NOT work), Windows binaries are avaliable [here](http://bleyer.org/icarus/). Make sure to use version above 0.9. On Debian/Ubuntu, use `sudo apt install verilog`, on Arch Linux use `pacman -S iverilog`.
+Download GTKWave. Windows binaries [here](https://sourceforge.net/projects/gtkwave/files/)
 
 ## usage
 

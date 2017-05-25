@@ -25,3 +25,9 @@ A custom architecture 16-bit RISC CPU created in Verilog.
 
 - stack - 64 *16bites
 - RAM - 4092 *16bites
+
+## how to run gtkwave
+
+- compile source to `CPU_c.vvp` file (with `-s testbench`, and files from `debugging` folder(`RAM_sim.v` and `cpu_testbench.v`)
+- `vvp CPU_c.vvp -lxt2`
+- `gtkwave CPU_dump.lxt`

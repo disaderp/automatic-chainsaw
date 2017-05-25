@@ -1,32 +1,37 @@
 module testbench();
 
 	reg clk;
-	reg [15:0] in;
-	wire [15:0] base;
-	wire [15:0] data;
-	wire flag;//r/w flag
-	reg reset;
+	wire [15:0] ADDRBUS;
+	wire [1:0] CTRLBUS;//00 - none //01 - read // 10 - write // 11 - ?
+	wire [15:0] DATABUS;
+	wire vga;
+	wire hsync; 
+	wire vsync;
 	CPU c0 (
 		.clk (clk),
-		.in(in),
-		.base(base),
-		.data(data),
-		.flag(flag) ,
-		.reset(reset)
+		.ADDRBUS(ADDRBUS),
+		.CTRLBUS(CTRLBUS),
+		.DATABUS(DATABUS),
+		.vga(vga),
+		.hsync(hsync),
+		.vsync(vsync)
 	);
 	
 	
 	initial begin
-		$monitor ("%g\t clk=%b in=%b base=%b data=%b flag=%b",
-		$time, clk, in, base, data, flag);
-		reset = 0;
+		//$monitor ("%g\t clk=%b in=%b base=%b data=%b flag=%b",
+		//$time, clk, in, base, data, flag);
+		//reset = 0;
+		$dumpfile("CPU_dump.lxt");
+		$dumpvars(0,testbench);
 		clk = 1;
-		#15 reset = 1;
-		#250 $finish;
+		//#15 reset = 1;
+		#500 $finish;
+		
 	end
 	  
 	always begin
-		#5 clk =~clk;
+		#1 clk =~clk;
 	end
 	
 endmodule

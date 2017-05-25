@@ -16,7 +16,7 @@ module CPU(
 	
 	//<GPU>
 	reg [15:0] gpuline;
-	GPU g1(clk, gpuline,1, vga, hsync, vsync);
+	GPU g1(clk, gpuline,1'b1, vga, hsync, vsync);
 	//</GPU>
 	
 	//<reg>
