@@ -10,7 +10,7 @@ reg [7:0] font_rom [4095:0];
 
 //Output file: Untitled.raw.dat
 //ASCII 0x00 ' '
-always @(posedge clk) begin : once
+initial begin : once
 	font_rom[0] <= 8'b00000000;
 	font_rom[1] <= 8'b00000000;
 	font_rom[2] <= 8'b00000000;

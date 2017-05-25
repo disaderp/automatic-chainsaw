@@ -24,21 +24,9 @@ wire [11:0] asciiaddress;
 wire font_mem_en;
 wire dis_mem_en;
 
-TXT d0 (
-		.clk (clk),
-		.clr (clr),
-		.out_vga (outvga),
-		.char_line_dat (out),
-		.asciiaddress (asciiaddress),
-		.font_mem_en (font_mem_en),
-		.dis_mem_en (dis_mem_en),
-		.pix_x(pix_x),
-		.pix_y(pix_y),
-		.hsync(hsync),
-		.vsync(vsync)
-		);
+TXT seq0 (clk,clr,outvga,out,asciiaddress,font_mem_en,dis_mem_en,pix_x,pix_y,hsync,vsync);
 
-font_rom x0 (
+font_rom f_rom0 (
 		.clk (font_mem_en),
 		.address ({ascii[6:0], pix_y[3:0], !pix_x[3]}),
 		.out (out)

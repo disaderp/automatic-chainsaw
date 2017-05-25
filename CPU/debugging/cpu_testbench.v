@@ -26,7 +26,7 @@ module testbench();
 		$dumpvars(0,testbench);
 		clk = 1;
 		//#15 reset = 1;
-		#500 $finish;
+		#1000000 $finish;
 		
 	end
 	  
