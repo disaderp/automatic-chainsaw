@@ -2,7 +2,7 @@
 
 *maintainer: [@Vanderpool0312](https://github.com/Vanderpool0312)*
 
-A custom architecture(Vanderpool0312 architecture) GPU created in Verilog.
+A GPU created in Verilog.
 
 ## opcodes
 
