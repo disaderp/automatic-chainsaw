@@ -19,12 +19,28 @@ reg nopstate = 0;
 reg [15:0] nextcmd = 0;
 reg [6:0] i;
 
-reg [7:0] ascii = 0;
+wire [7:0] ascii;
 wire [11:0] asciiaddress;
 wire font_mem_en;
 wire dis_mem_en;
 
-TXT seq0 (clk,clr,outvga,out,asciiaddress,font_mem_en,dis_mem_en,pix_x,pix_y,hsync,vsync);
+wire vgaclock;
+//VGAclk clk2(.CLK_IN1(clk), .CLK_OUT1(vgaclock));
+
+TXT d0 (
+		//.clk (vgaclock),
+		.clk(clk),
+		.reset (clr),
+		.vga_out (outvga),
+		.char_line_data (out),
+		.ascii_address (asciiaddress),
+		.font_mem_en (font_mem_en),
+		.disp_mem_en (dis_mem_en),
+		.pix_x(pix_x),
+		.pix_y(pix_y),
+		.hsync(hsync),
+		.vsync(vsync)
+		);
 
 font_rom f_rom0 (
 		.clk (font_mem_en),
@@ -32,26 +48,10 @@ font_rom f_rom0 (
 		.out (out)
 		);
 
-/*
-always @ (posedge clk) begin : clr2
-	if (!clr) begin
-		cmd <= 0;
-		param <= 0;
-		pointer <= 0;
-		tmpx <= 0;
-		tmpy <=0;
-		nopstate <= 0;
-		nextcmd <= 0;
-		ascii <= 0;
-	end
-end*/
-
-always @ (posedge dis_mem_en) begin : dismem
-	//if (clr) begin
-		//ascii <= ram[pointer];
-		ascii <= ram[asciiaddress];
-	//end
-end
+dispram d_ram0(
+	.clk(dis_mem_en),
+	.address(asciiaddress),
+	.out(ascii));
 
 always @(posedge clk) begin : main
 

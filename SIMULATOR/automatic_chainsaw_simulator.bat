@@ -27,7 +27,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO error
 %ASM_PATH% -ram %TMP_PATH%ram.v %TMP_PATH%program.asm
 IF %ERRORLEVEL% NEQ 0 GOTO error
 SearchReplace %CPU_FILES%debugging\RAM_sim.v //(SIM)DONOTREMOVE// %TMP_PATH%ram.v %TMP_PATH%RAM_modified.v
-%IVERILOG_PATH%iverilog -g2012 -s testbench -o %TMP_PATH%compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%CPU.v %GPU_FILES%Font_ROM.v %GPU_FILES%GPU.v %GPU_FILES%TXT.v %GPU_FILES%VGA.v %TMP_PATH%RAM_modified.v %CPU_FILES%debugging\cpu_testbench.v
+%IVERILOG_PATH%iverilog -g2012 -s testbench -o %TMP_PATH%compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%CPU.v %GPU_FILES%Font_ROM.v %GPU_FILES%disp_RAM.v  %GPU_FILES%GPU.v %GPU_FILES%TXT.v %GPU_FILES%VGA.v %TMP_PATH%RAM_modified.v %CPU_FILES%debugging\cpu_testbench.v
 IF %ERRORLEVEL% NEQ 0 GOTO error
 cd %TMP_PATH%
 %IVERILOG_PATH%vvp compiled.vvp -lxt2
@@ -47,7 +47,7 @@ EXIT /B 0
 %ASM_PATH% -ram %TMP_PATH%ram.v %1% 
 IF %ERRORLEVEL% NEQ 0 GOTO error
 SearchReplace %CPU_FILES%debugging\RAM_sim.v //(SIM)DONOTREMOVE// %TMP_PATH%ram.v %TMP_PATH%RAM_modified.v
-%IVERILOG_PATH%iverilog -g2012 -s testbench -o %TMP_PATH%compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%CPU.v %GPU_FILES%Font_ROM.v %GPU_FILES%GPU.v %GPU_FILES%TXT.v %GPU_FILES%VGA.v %TMP_PATH%RAM_modified.v %CPU_FILES%debugging\cpu_testbench.v
+%IVERILOG_PATH%iverilog -g2012 -s testbench -o %TMP_PATH%compiled.vvp %CPU_FILES%ALU.v %CPU_FILES%CPU.v %GPU_FILES%Font_ROM.v %GPU_FILES%disp_RAM.v %GPU_FILES%GPU.v %GPU_FILES%TXT.v %GPU_FILES%VGA.v %TMP_PATH%RAM_modified.v %CPU_FILES%debugging\cpu_testbench.v
 IF %ERRORLEVEL% NEQ 0 GOTO error
 cd %TMP_PATH%
 %IVERILOG_PATH%vvp compiled.vvp -lxt2

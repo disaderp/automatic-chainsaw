@@ -1,4 +1,3 @@
-
 // Module VGA_SYNC
 //
 // Generates output sync signals to drive VGA display in 640x480 pixel mode:

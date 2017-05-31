@@ -8,8 +8,8 @@ module TXT (
 input clk,                    // Input 25.175 MHz clock, this is a pixel clock for this VGA mode
 input reset,                     // Input async. active low reset signal
  
-input [9:0] pix_x,               // The exact X coordinate of a pixel that is currently being drawn
-input [9:0] pix_y,               // The exact Y coordinate of a pixel that is currently being drawn
+output [9:0] pix_x,               // The exact X coordinate of a pixel that is currently being drawn
+output [9:0] pix_y,               // The exact Y coordinate of a pixel that is currently being drawn
  
 output reg[11:0] ascii_address,  // Address into memory containing a current character code
 input [7:0] char_line_data,      // Currect character single line data (8 bit at a time)
@@ -33,8 +33,8 @@ VGA vga0 (
 
  
 reg [7:0] line_data;             // Current character line data shifter
-reg [11:0] xp;                   // Temp
-reg [11:0] yp;                   // Temp
+reg [11:0] xp = 0;                   // Temp
+reg [11:0] yp = 0;                   // Temp
  
 always @( posedge clk or negedge reset )
 begin
