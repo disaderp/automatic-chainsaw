@@ -12,5 +12,6 @@ elif [ "${BUILD}" = "OS" ]; then
 elif [ "${BUILD}" = "SIM" ]; then
 	echo "exit 0" > gtkwave.sh
 	chmod a+x gtkwave.sh
+	chmod a+x ./SIMULATOR/automatic_chainsaw_simulator.sh
 	./SIMULATOR/automatic_chainsaw_simulator.sh ./SIMULATOR/test.asm
 fi
