@@ -14,7 +14,7 @@ A custom 16-bit computer
 |ChainsawASM|Assembler for the machine code|[@disaderp](https://github.com/disaderp)|[![Build status](https://ci.appveyor.com/api/projects/status/xo4shwgw1nuei6qw/branch/master?svg=true)](https://ci.appveyor.com/project/disaderp/automatic-chainsaw/branch/master)|
 |ChainsawOS|Operating System for Chainsaw|[@Ka-15](https://github.com/Ka-15)|[![Build Status](https://travis-matrix-badges.herokuapp.com/repos/disaderp/automatic-chainsaw/branches/master/4)](https://travis-ci.org/disaderp/automatic-chainsaw)|
 |ChainsawC--|Compiler for a subset of C for Chainsaw|[@winek](https://github.com/disaderp)|[![Build Status](https://travis-matrix-badges.herokuapp.com/repos/disaderp/automatic-chainsaw/branches/master/1)](https://travis-ci.org/disaderp/automatic-chainsaw)|
-|ChainsawSim|Simulator for automatic-chainsaw computer|[@disaderp](https://github.com/disaderp)|![completion](https://img.shields.io/badge/completion-100%25-brightgreen.svg?maxAge=3600)|
+|ChainsawSim|Simulator for automatic-chainsaw computer|[@disaderp](https://github.com/disaderp)|[![Build Status](https://travis-matrix-badges.herokuapp.com/repos/disaderp/automatic-chainsaw/branches/master/5)](https://travis-ci.org/disaderp/automatic-chainsaw)|
 
 
 ## why the name?
