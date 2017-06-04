@@ -1,5 +1,8 @@
 // Module VGA_SYNC
 //
+// Author: Goran Devic 
+// https://baltazarstudios.com/poem-fpga/
+//
 // Generates output sync signals to drive VGA display in 640x480 pixel mode:
 //
 // Refresh rate:    60 Hz

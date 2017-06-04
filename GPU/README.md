@@ -2,7 +2,8 @@
 
 *maintainer: [@Vanderpool0312](https://github.com/Vanderpool0312)*
 
-A GPU created in Verilog.
+A GPU created in Verilog. Module `VGA` and `TXT` was taken from [Goran Devic's site](https://baltazarstudios.com/poem-fpga/)
+
 
 ## opcodes
 

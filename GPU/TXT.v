@@ -1,5 +1,8 @@
 // Module SEQUENCER
-//https://baltazarstudios.com/poem-fpga/
+//
+// Author: Goran Devic 
+// https://baltazarstudios.com/poem-fpga/
+//
 // Sequences the ASCII character data from display ROM, through the font ROM, and out
 // as a monochrome wire data
 
