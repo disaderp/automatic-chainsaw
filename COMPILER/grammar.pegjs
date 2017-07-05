@@ -93,8 +93,8 @@ FunctionDefinition "function definition"
 
 CallingConvention
   = "stdcall"
-    / "fastcall"
-    / ""
+  / "fastcall"
+  / ""
 
 TypeSpecifier "type specifier"
   = name:Identifier _ modifiers:TypeModifier * { return Node('Type', { name, modifiers }); }
@@ -190,10 +190,21 @@ Identifier "identifier"
   }); }
 
 String "string"
-  = '"' inner:StringInner '"' { return Node('String', { value: inner }); }
+  = '"' inner:StringData* '"' { return Node('String', { value: inner.join('') }); }
 
-StringInner "string data"
-  = chars:([^"])* { return chars.join(''); }
+StringData "string data"
+  = "\\n" { return '\n'; }
+  / "\\r" { return '\r'; }
+  / "\\t" { return '\t'; }
+  / "\\\\" { return '\\'; }
+  / "\\" ascii:([0-9][0-9][0-9]) {
+    return String.fromCharCode(parseInt(ascii.join(''), 10));
+  }
+  / "\\0" { return String.fromCharCode(0); }
+  / "\\x" ascii:([0-9a-fA-F][0-9a-fA-F]) {
+    return String.fromCharCode(parseInt(ascii.join(''), 16));
+  }
+  / normal:([^"]) { return normal; }
 
 Integer
   = Hexadecimal

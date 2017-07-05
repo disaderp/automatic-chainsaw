@@ -1,0 +1,1 @@
+print_const("\\n\r\n\t\x22\034\0");
