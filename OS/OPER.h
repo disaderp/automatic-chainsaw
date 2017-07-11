@@ -1,22 +1,23 @@
 bool char_compare (char *x, char *y){
-	bool b_areCharsEqual = true;
 	while (*x != 0 || *y != 0){
-		if (*x != *y) b_areCharsEqual = false;
+		if (*x != *y)
+			return false;
 		x++;
 		y++;
 	}
-	return b_areCharsEqual;
+	return true;
 }
 
 bool char_compare_l (char *x, char *y, int l){
-	if (l < 0) return false;
-	bool b_areCharsEqual = true;
+	if (l < 0) 
+		return false;
 	int i = 0;
 	while (i != l){
-		if (*x != *y) b_areCharsEqual = false;
+		if (*x != *y)
+			return false;
 		x++;
 		y++;
 		i++;
 	}
-	return b_areCharsEqual;
+	return true;
 }
