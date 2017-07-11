@@ -10,7 +10,7 @@ bool char_compare (char *x, char *y){
 }
 
 bool char_compare_l (char *x, char *y, int l){
-	if (l < 0) {
+	if (l < 0){
 		return false;
 	}
 	int i = 0;
