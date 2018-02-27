@@ -1,18 +1,16 @@
-const util = require('util');
 let parser = require('./parser');
+const util = require('util');
 const path = require('path');
-
 const fs = require('fs');
 
 function preprocessFile(fileName) {
   return preprocess(fs.readFileSync(fileName, 'utf-8').split(/\r?\n/), fileName);
-};
+}
+
+let callingConventions = {};
 
 function preprocess(lines, fileName) {
   const macros = {};
-
-  function Macro() {
-  }
 
   return {
     macros,
@@ -35,7 +33,6 @@ function preprocess(lines, fileName) {
             return _.code;
           }
           case 'define':
-            console.log(tokens.slice(2).join(' '));
             macros[tokens[1]] = parser.parse(tokens.slice(2).join(' '), {
               startRule: 'Expression',
             });
@@ -49,4 +46,3 @@ function preprocess(lines, fileName) {
 }
 
 module.exports = { preprocess, preprocessFile };
-

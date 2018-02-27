@@ -1,12 +1,14 @@
 module CPU(
-	input clk,
+	input clkR,
 	output [15:0] ADDRBUS,
 	output reg [1:0] CTRLBUS,//00 - none //01 - read // 10 - write // 11 - ?
 	inout [15:0] DATABUS,
 	output vga, output hsync, output vsync
 	);
-	reg reset = 0;
 	wire clk;
+	CPUclk clk3(.CLK_IN1(clkR), .CLK_OUT1(clk));
+	
+	reg reset = 0;
 	
 	//<bus>
 	reg [15:0] toWrite;
@@ -16,7 +18,7 @@ module CPU(
 	
 	//<GPU>
 	reg [15:0] gpuline;
-	GPU g1(clk, gpuline,1'b1, vga, hsync, vsync);
+	GPU g1(clk, gpuline, 1'b1, vga, hsync, vsync);
 	//</GPU>
 	
 	//<reg>
@@ -157,7 +159,7 @@ module CPU(
 		CTRLBUS <= 0; //totally fucking unsafe
 		WREN = 0;
 		gpuline = 16'h0;
-		//pc = pc + 1;
+
 		opcode = DATA1;
 		par1 = DATA2;
 		par2 = DATA3;
@@ -828,7 +830,7 @@ module CPU(
 			end
 		endcase
 		
-		if(clkint > 1000) begin//might interfere in some calcs //@TODO: Find a better way
+		if(clkint > 1000 && !alustate && !RAMState) begin
 			clkint <= 0;
 			//GENERATE INTERRUPT
 			stack[sp] <= bp;
@@ -841,13 +843,7 @@ module CPU(
 		end
 		
 		ADDR1 = pc;
-		//opcode = DATA1;
-		//rdataaddr;ram[pc];
 		ADDR2 = pc + 1;
-		//par1 = DATA2;
-		//rdataadd = pc;
 		ADDR3 = pc + 2;
-		//par2 = DATA3;
-		//par2 = rout;
 	end
 endmodule

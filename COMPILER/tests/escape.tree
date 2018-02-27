@@ -1,0 +1,5 @@
+[ { "kind": "ExpressionStatement",
+    "expression":
+     { "kind": "FunctionCall",
+       "name": { "kind": "Identifier" },
+       "args": [ { "kind": "String", "value": "\\n\r\n\t\"\"\u0000" } ] } } ]

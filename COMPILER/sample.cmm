@@ -1,6 +1,7 @@
 /*
  * Chainsaw C-- compiler test
  */
+
 #define TEST 1
 
 int pi = 314;
@@ -23,8 +24,9 @@ int f(char *s, int flags) {
     printn(s);}
   if (s) {
     print(s);
-  } else{
-    print_const("fatal");}
+  } else {
+    print_const("fatal");
+  }
   return (0);
 }
 f(a, 1);
