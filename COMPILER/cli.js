@@ -38,7 +38,7 @@ try {
     startRule: 'Program',
   });
 } catch (e) {
-  console.log(`failed to parse input: ${e.stack}`);
+  console.log(`syntax error at ${JSON.stringify(e.location)}:\n${e.stack}`);
   process.exit(1);
 }
 

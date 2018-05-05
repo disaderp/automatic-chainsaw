@@ -128,7 +128,7 @@ AssignmentTail "assignment"
   = _ "=" _ value:Expression { return value; }
 
 AssignmentStatement
-  = leftHandSide:Expression tail:AssignmentTail {
+  = _ leftHandSide:Expression tail:AssignmentTail {
       return Node('AssignmentStatement', { leftHandSide, rightHandSide: tail });
     }
 
@@ -141,7 +141,25 @@ Expression
     }
     / "(" _ expression:Expression _ ")" { return expression; }
     / expression:FunctionCall { return expression; }
+    / expression:ArrayDereference { return expression; }
     / expression:TerminalExpression { return expression; }
+
+ArraylessExpression
+  = "(" _ leftOperand:Expression _ operator:BinaryOperator _ rightOperand:Expression _ ")" {
+      return Node('BinaryOperator', { leftOperand, operator, rightOperand });
+    }
+    / "(" _ operator:LeftUnaryOperator _ operand:Expression _ ")" {
+      return Node('UnaryOperator', { operand, operator });
+    }
+    / "(" _ expression:Expression _ ")" { return expression; }
+    / expression:FunctionCall { return expression; }
+    / expression:TerminalExpression { return expression; }
+
+ArrayDereference
+  = array: ArraylessExpression _ "[" index: Expression "]"
+  {
+    return Node('ArrayDereference', { array, index });
+  }
 
 BinaryOperator "binary operator"
   = "+"
