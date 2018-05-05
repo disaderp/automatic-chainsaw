@@ -24,7 +24,7 @@ const visitors = {
     statement.id = generator.randomIdentifier();
 
     if (statement.predicate.kind == 'Identifier') {
-      generator.op.lea(generator.r.ax, generator.generator.l[statement.predicate]);
+      generator.op.lea(generator.r.ax, generator.l[statement.predicate]);
     } else if (statement.predicate.kind == 'Integer' || statement.predicate.kind == 'Char') {
       generator.op.mov(generator.r.ax, statement.predicate.value);
     } else {
