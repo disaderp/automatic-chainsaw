@@ -12,8 +12,8 @@ int[10] T;
 
 n = (n + TEST);
 pi = n;
-esc = 1;
-T[10] = 1;
+esc = 5;
+T[10] = 3;
 fastcall int write(char *buf) {
   /* to be developed… */
   return (x);

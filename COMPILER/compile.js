@@ -17,7 +17,7 @@ function compile(program) {
 let callingConventions = {};
 const visitors = {
   VariableDeclaration(generator, { type, name, initial }) {
-    generator.data(name, typeSize(type), initial !== null ? initial.value : generator.zeros(typeSize(type)));
+    generator.data(name, typeSize(type), initial !== null ? initial.value : generator.zeros(typeSize(type)));//@TODO: add check type size (pi=314)
   },
 
   ConditionalStatement(generator, statement) {
