@@ -1,4 +1,5 @@
 let parser;
+const assert = require('assert');
 const util = require('util');
 const Generator = require('./generator').Generator;
 
@@ -81,7 +82,12 @@ const visitors = {
       generator.op.mov(generator.l[statement.leftHandSide], statement.rightHandSide.value);
     } else {
       visitors[statement.rightHandSide.kind](generator, statement.rightHandSide);
-      generator.op.mov(generator.l[statement.leftHandSide], generator.r.ax);
+
+      if (typeof statement.leftHandSide === 'string') {
+        generator.op.mov(generator.l[statement.leftHandSide], generator.r.ax);
+      } else {
+        throw new Error('todo todo todo');
+      }
     }
   },
 
@@ -327,6 +333,7 @@ function visit(generator, statements, tag) {
       visitors[st.kind](generator, st, tag);
     } catch (e) {
       console.log('ERROR: TYPE: ' + e.stack + ' CODE: ' + inspect(st) + 'END ERROR \n');
+      return;
     }
   });
 }

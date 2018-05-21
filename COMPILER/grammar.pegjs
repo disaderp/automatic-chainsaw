@@ -66,9 +66,6 @@ FunctionCall "function call"
       });
     }
 
-ArrayLookup "array lookup"
-  = array:Expression _ "[" _ Expression _ "]"
-
 ActualParameters
   = head:Expression ArgumentSeparator tail:ActualParameters { return [head].concat(tail); }
     / expression:Expression { return [expression]; }
