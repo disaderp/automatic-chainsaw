@@ -1,24 +1,24 @@
-LEA DX,.n
+LEA DX,[.n]
 PUSH DX
 MOV DX,(1)
 POP AX
 ADD AX,DX
-LEA AX,.n
+LEA AX,[.n]
 MOV .pi,AX
 MOV .esc,(5)
-MOV .[object Object],(3)
+MOV .Object,(3)
 .funcwrite
 MOV .buf,AX
-LEA AX,.x
+LEA AX,[.x]
 POP DX
-JMP DX
+JMP [DX]
 .funcf
 POP DX
 MOV .s,DX
 POP DX
 MOV .flags,DX
 .whilewtvfs
-LEA DX,.s
+LEA DX,[.s]
 PUSH DX
 MOV DX,(1)
 POP AX
@@ -28,18 +28,18 @@ TEST AX,CX
 JZ .endwhilewtvfs
 CPC 
 PUSH DX
-LEA DX,.s
+LEA DX,[.s]
 PUSH DX
 JMP .funcprintn
 JMP .whilewtvfs
 .endwhilewtvfs
-LEA AX,.s
+LEA AX,[.s]
 MOV CX,(0)
 TEST AX,CX
 JZ .elseifbxtfn
 CPC 
 PUSH DX
-LEA DX,.s
+LEA DX,[.s]
 PUSH DX
 JMP .funcprint
 JMP .endifbxtfn
@@ -59,15 +59,15 @@ X0
 .endifbxtfn
 MOV AX,(0)
 POP DX
-JMP DX
+JMP [DX]
 CPC 
 PUSH DX
 MOV DX,(1)
 PUSH DX
-LEA DX,.a
+LEA DX,[.a]
 PUSH DX
 JMP .funcf
-LEA AX,.a
+LEA AX,[.a]
 NOT AX
 CPC 
 PUSH DX

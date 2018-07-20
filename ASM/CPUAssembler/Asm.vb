@@ -13,15 +13,26 @@ Module Asm
 		Dim bytes As Byte() = bytesAsStrings.[Select](Function(s) Convert.ToByte(s, 2)).ToArray()
 		Return bytes
 	End Function
-	Function toRAM(str As String) As String
-		Dim ram As String = ""
-		For i As Integer = 0 To (str.Length() / 16) - 1
-			ram += "ram[" & i & "] <= 16'b" + str.Substring(i * 16, 16) + ";" + vbNewLine
-		Next
-		Return ram
-	End Function
+    Function toRAM(str As String) As String
+        Dim ram As String = ""
+        For i As Integer = 0 To (str.Length() / 16) - 1
+            ram += "ram[" & i & "] <= 16'b" + str.Substring(i * 16, 16) + ";" + vbNewLine
+        Next
+        Return ram
+    End Function
+    Function regToBin(str As String) As String
+        If str = "AX" Then
+            Return "00"
+        ElseIf str = "BX" Then
+            Return "01"
+        ElseIf str = "CX" Then
+            Return "10"
+        ElseIf str = "DX" Then
+            Return "11"
+        End If
+    End Function
 
-	Function assemble(ByVal asm As String) As String
+    Function assemble(ByVal asm As String) As String
 		Dim code As String = ""
 		Dim lines As String() = asm.Replace(vbCr, "").Split(vbLf)
 		Dim ic As Integer = 0
@@ -775,10 +786,9 @@ Module Asm
 			Try
 				add = Trail16(Convert.ToString(labels(lab(i)), 2))
 			Catch
-				Console.WriteLine("error in label dictionary")
-				Console.ReadLine()
-				Environment.Exit(2)
-			End Try
+                Console.WriteLine("error in label dictionary")
+                'Environment.Exit(2)
+            End Try
 			code = code.Replace("," + lab(i) + ",", add)
 		Next
 		Return code
