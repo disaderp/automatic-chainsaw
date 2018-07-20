@@ -1,6 +1,6 @@
 fastcall void print(char x) {
 	asm("X10111111");
-	asm("X[" + &x + "]");
+	asm("X[?]", &x);
 }
 void printf_l(char *text, int length){
 	int i;
@@ -40,7 +40,7 @@ char scan() {
 	asm("IN");
 	asm("CZF");
 	int zf;
-	asm("MOV [" + &zf + "],DX");
+	asm("MOV [?],DX", &zf);
 	if(zf == 0) {/*no data in buffer*/
 		asm("MOV DX,(0)");
 		asm("PUSH DX");
