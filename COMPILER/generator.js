@@ -27,6 +27,10 @@ exports.Generator = function Generator() {
     },
   });
 
+  function inline(asm) {
+    out.push(asm);
+  }
+
   function data(name, size, bytes) {
     dataEntries.push({ name, size, bytes });
   }
@@ -34,13 +38,16 @@ exports.Generator = function Generator() {
   function dumpBinary(bytes) {
     if (typeof bytes === 'number') {
       return bytes.toString(2);
-    } else if (typeof bytes === 'string') return bytes
-      .split('')
-      .map(b => b.charCodeAt(0))
-      .filter(b => b < 0x100)
-      .map(b => '0'.repeat(8 - b.toString(2).length) + b.toString(2))
-      .join('\nX');
-    else console.log(`dumpBinary(): unexpected type ${typeof bytes}`);
+    } else if (typeof bytes === 'string') {
+      return bytes
+        .split('')
+        .map(b => b.charCodeAt(0))
+        .filter(b => b < 0x100)
+        .map(b => '0'.repeat(8 - b.toString(2).length) + b.toString(2))
+        .join('\nX');
+    } else {
+      console.log(`dumpBinary(): unexpected type ${typeof bytes}`);
+    }
   }
 
   function db(what) {
@@ -90,5 +97,6 @@ exports.Generator = function Generator() {
       .join('');
   }
 
-  return { db, op, m, l, L, r, mem, label, data, getAssembly, dumpBinary, zeros, randomIdentifier };
+  return { db, op, m, l, L, r, mem, label, data, getAssembly, dumpBinary, zeros,
+    randomIdentifier, inline };
 };

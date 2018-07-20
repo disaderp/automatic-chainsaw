@@ -16,7 +16,7 @@ function compile(program) {
 }
 
 let callingConventions = {};
-const visitors = {
+const visitors = new Proxy({
   VariableDeclaration(generator, { type, name, initial }) {
     generator.data(name, typeSize(type), initial !== null ? initial.value : generator.zeros(typeSize(type)));//@TODO: add check type size (pi=314)
   },
@@ -85,8 +85,9 @@ const visitors = {
 
       if (typeof statement.leftHandSide === 'string') {
         generator.op.mov(generator.l[statement.leftHandSide], generator.r.ax);
-      } else {
-        throw new Error('todo todo todo');
+      } else if (statement.leftHandSide.kind === 'ArrayDereference') {
+        error('todo todo todo');
+        compilerBug();
       }
     }
   },
@@ -148,15 +149,32 @@ const visitors = {
 
   ExpressionStatement(generator, statement) {
     if (statement.expression.kind == 'FunctionCall') {
-      if (statement.expression.name == 'print_const') {
+      if (statement.expression.name.string == 'print_const') {
         for (let i = 0; i < statement.expression.args[0].value.length; i++) {
           generator.db(0b11000001);
           generator.db(statement.expression.args[0].value[i]);
         }
         generator.db(0b11000001);
         generator.db(0);
+
+        return;
+      } else if (statement.expression.name.string === 'asm') {
+        let asmCode = statement.expression.args[0].value;
+        const params = statement.expression.args.slice(1);
+
+        for (let param of params) {
+          if (!isIdentifier(param)) {
+            error(statement, 'only an identifier is allowed as a parameter to asm()');
+          }
+
+          asmCode = asmCode.replace('?', `.${param}`);
+        }
+
+        generator.inline(asmCode);
+
         return;
       }
+
       generator.op.cpc();
       generator.op.push(generator.r.dx);
       statement.expression.convention = callingConventions[statement.expression.name];
@@ -322,18 +340,29 @@ const visitors = {
         throw new Error(`operator not implemented: ${statement.operator}`);
     }
   },
-};
+
+  String(generator, meow) {
+  },
+}, {
+  get(target, prop, receiver) {
+    if (!(prop in target)) {
+      console.error(`no visitor for node: ${prop}`);
+      console.log(new Error().stack);
+      compilerBug();
+    }
+
+    return target[prop];
+  }
+});
 
 function visit(generator, statements, tag) {
   statements.forEach((st) => {
     try {
-      if (!visitors.hasOwnProperty(st.kind)) {
-        throw new Error(`statement ${st.kind} not implemented`);
-      }
       visitors[st.kind](generator, st, tag);
     } catch (e) {
-      console.log('ERROR: TYPE: ' + e.stack + ' CODE: ' + inspect(st) + 'END ERROR \n');
-      return;
+      console.log('error: ' + e.stack);
+      console.log('processing node: ' + inspect(st) + 'end error\n');
+      compilerBug();
     }
   });
 }
@@ -346,4 +375,21 @@ function typeSize(type) {
     }
     return 1; // pointer
   } else return 1; // for int and char
+}
+
+function isIdentifier(parsem) {
+  return typeof parsem === 'string'
+    || isProperObject(parsem) && parsem.kind === 'Identifier';
+}
+
+function isProperObject(o) {
+  return typeof o === 'object' && o.kind === 'Identifier';
+}
+
+function compilerBug() {
+  process.exit(1);
+}
+
+function error(sta, msg) {
+  console.error('compile error:', msg);
 }

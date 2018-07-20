@@ -20,7 +20,9 @@
         if (Array.isArray(object[key])) {
           object[key].forEach(cleanUp);
           object[key] = object[key].filter(isDefined);
-        } else cleanUp(object[key]);
+        } else {
+          cleanUp(object[key]);
+        }
         break;
       }
     }
@@ -199,6 +201,7 @@ EmptyStatement
 
 Identifier "identifier"
   = chars: $([a-zA-Z_][a-zA-Z0-9_]*) { return Node('Identifier', {
+    string: chars,
     toString() {
       return chars;
     },
