@@ -7,7 +7,7 @@ SET CPU_FILES=..\CPU\
 SET GPU_FILES=..\GPU\
 SET IVERILOG_PATH=c:\iverilog\bin\
 SET GTKWAVE_PATH=C:\Users\Karol\Downloads\gtkwave-3.3.80-bin-win32\gtkwave\bin\
-SET CC_PATH=node ..\COMPILER\compile.js
+SET CC_PATH=node ..\COMPILER\cli.js
 SET INPUT_EXT=%~x1
 SET TMP_PATH=tmp\
 

@@ -31,21 +31,21 @@ Module Asm
 		contable(0) = 0
 		For i As Integer = 0 To lines.Count() - 1
 			Dim mn As String = lines(i).ToUpper().Trim().Replace(vbTab, " ")
-			If mn.StartsWith(".") Then
-				labels(mn) = ic - contable(context)
-				ic -= 1
-			ElseIf mn.StartsWith(":") Then
-				labels(mn) = ic - contable(context)
-				context += 1
-				contable(context) = ic
-				ic -= 1
-			ElseIf mn.StartsWith("'") Then
-				ic -= 1
-			ElseIf mn.StartsWith("X") Then
-				code += Trail16(mn.Substring(1))
-			ElseIf mn.StartsWith("X[") Then
-				code += Trail16(mn.Substring(2).Replace("]", ""))
-			ElseIf mn.StartsWith("NOP") Then
+            If mn.StartsWith(".") Then
+                labels(mn) = ic - contable(context)
+                ic -= 1
+            ElseIf mn.StartsWith(":") Then
+                labels(mn) = ic - contable(context)
+                context += 1
+                contable(context) = ic
+                ic -= 1
+            ElseIf mn.StartsWith("'") Then
+                ic -= 1
+            ElseIf mn.StartsWith("X[") Then
+                code += Trail16(mn.Substring(2).Replace("]", ""))
+            ElseIf mn.StartsWith("X") Then
+                code += Trail16(mn.Substring(1))
+            ElseIf mn.StartsWith("NOP") Then
 				code += Trail16("0")
 			ElseIf mn.StartsWith("SFC") Then
 				code += Trail16("1") + Trail16(mn.Remove(0, 4)(0))
@@ -795,8 +795,9 @@ Module Asm
 				Dim d As Byte() = StrToBin(assemble(File.ReadAllText(args(2))))
 				File.WriteAllBytes(args(1), d)
 			ElseIf (args(0) = "-ram") Then
-				Dim d As String = toRAM(assemble(File.ReadAllText(args(2))))
-				File.WriteAllText(args(1), d)
+                Dim d As String = toRAM(assemble(File.ReadAllText(args(2))))
+                Console.WriteLine(d)
+                File.WriteAllText(args(1), d)
 			ElseIf (args(0) = "-plain") Then
 				Console.WriteLine(assemble(File.ReadAllText(args(1))))
 			Else

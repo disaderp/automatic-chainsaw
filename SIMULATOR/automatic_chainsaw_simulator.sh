@@ -3,7 +3,7 @@ set -o errexit
 
 ROOTDIR=$(dirname $(dirname $(realpath $0)))
 ASM="mono $ROOTDIR/ASM/CPUAssembler/bin/Debug/CPUAssembler.exe"
-COMPILE="${COMPILER-"node $ROOTDIR/COMPILER/compile.js "}"
+COMPILE="${COMPILER-"node $ROOTDIR/COMPILER/cli.js "}"
 CPUFILES=$ROOTDIR/CPU
 IVERILOG=iverilog
 TMPDIR=$(mktemp -d)
