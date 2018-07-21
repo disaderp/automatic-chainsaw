@@ -14,7 +14,7 @@ SYSTEM
 bool read_cfs(char *c_name){
 	int u_address = 0; int i = 0; int u_temp = 0;
 	char c_temp[MAX_FILENAME_LENGTH];
-	
+
 	while (1)
 	{
 		while (i < MAX_FILENAME_LENGTH){
@@ -25,7 +25,7 @@ bool read_cfs(char *c_name){
 		}
 		/*replace with shift instruction*/
 		u_temp = u_address + 256*(readbyte(u_address + 11)) +(readbyte(u_address + 12) + 12;
-		
+
 		/*Check if procedure is running correctly*/
 		if (u_address < u_temp){
 			u_address = u_temp;
@@ -34,19 +34,19 @@ bool read_cfs(char *c_name){
 			return false;
 		}
 	}
-	
+
 	/* ----------------------------------------------------------------------------------
 	// NOT SURE IF THIS WILL WORK!!*/
 	u_temp = u_address + 256*(readbyte(u_address + 11)) +(readbyte(u_address + 12) + 12;
 	/*Check if procedure is running correctly*/
-		if (u_address < u_temp){
-			u_address = u_temp;
-		}
-		else{
-			return false;
-		}
+    if (u_address < u_temp){
+        u_address = u_temp;
+    }
+    else{
+        return false;
+    }
 	/*TODO - WRITE CODE HERE TO DO SOMETHING WITH THE FOUND DATA!*/
-	
+
 	return true;
 	/*FUNCTION TYPE PROBABLY WILL BE CHANGED (PROBABLY IT'LL RETURN DATA ADDRESS AND LENGTH)*/
 }
@@ -54,10 +54,10 @@ bool read_cfs(char *c_name){
 bool write_cfs (char *c_data, char *c_name)
 {
 	/*TODO - CHECK IF THE FILE NAME ALREADY EXISTS!
-	
+
 	//TODO - FIND IF THERE IS PLACE FOR FILE OF THIS SIZE
-	
+
 	//TODO - SAVE FILE*/
-	
+
 	return true;
 }

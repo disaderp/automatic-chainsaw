@@ -35,7 +35,7 @@ while (1){
 				newline();
 				break;
 			}
-			
+
 			if (c_temp == backspace){
 				if (p_user_buffer != 0){
 					p_user_buffer = p_user_buffer - 1;
@@ -43,10 +43,10 @@ while (1){
 					continue;
 				}
 			}
-			
+
 			c_user_buffer[p_user_buffer] = c_temp;
 			print(c_temp);
-			
+
 			if (p_user_buffer < max_buffer_size) {
 				p_user_buffer = p_user_buffer + 1;
 			}
@@ -55,18 +55,23 @@ while (1){
 				c_user_buffer[max_buffer_size] = 0;
 				break;
 			}
-	
+
 		}
 	}
 	/* Check if buffer contains function
 	 First characters contains function name. The rest is either parameters, null or gibberish. */
 
 	/*TODO (CREATE FUNCTION CHECKER)*/
+
+#define enter 13
+#define backspace 8
+#define max_buffer_size 63
+#define function_name_lenght 6
 		if (char_compare_l (c_user_buffer, "helpme",6)){
 		/*TODO (CREATE PARAMETER CHECKER AND RELAY)*/
 	}
 	else if (char_compare_l (c_user_buffer, "exec",4)){
-		
+
 	}
 	else if (char_compare_l (c_user_buffer, "shutdown",8)){
 		shutdown();
@@ -74,12 +79,12 @@ while (1){
 		while (1){}
 	}
 	else if (char_compare_l (c_user_buffer, "login",5)){
-		
+
 	}
 	else if (char_compare_l (c_user_buffer, "logout",6)){
-		
+
 	}
-	
+
 	/*b_isEnterPressed = false;*/
 }
 }
