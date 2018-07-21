@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -o errexit
 
-ROOTDIR=$(dirname $(dirname $(realpath $0)))
+ROOTDIR="$(dirname "$(dirname "$0")")"
 ASM="mono $ROOTDIR/ASM/CPUAssembler/bin/Debug/CPUAssembler.exe"
-COMPILE="${COMPILER-"node $ROOTDIR/COMPILER/cli.js "}"
+COMPILE="${COMPILER-"node $ROOTDIR/COMPILER/cli.js "}
 CPUFILES=$ROOTDIR/CPU
 IVERILOG=iverilog
 TMPDIR=$(mktemp -d)
@@ -26,7 +26,7 @@ function assemble {
 }
 
 function compile {
-  local ASMFILE="${TMPDIR-/tmp}/XXXXXX.c)"
+  local ASMFILE="$(mktemp ${TMPDIR-/tmp}/XXXXXX.c)"
   $COMPILE "$INPUT" -o $ASMFILE
   INPUT=$ASMFILE
   assemble
