@@ -64,6 +64,7 @@ Module Asm
                 current.type = mn(0)
                 Dim pars As String() = mn(1).Split(",")
                 For j As Integer = 0 To pars.Count - 1
+                    current.pars(j).val = pars(j)
                     If pars(j).Contains("(") Then
                         current.pars(j).isVal = True
                         current.pars(j).val = skipFirstandLast(pars(j))
@@ -885,8 +886,9 @@ Module Asm
 
     Structure Instr
         Dim type As String
-        Dim pars() As Param
+        Dim pars As Param()
         Public Sub init()
+            ReDim pars(2)
             pars(0) = New Param
             pars(1) = New Param
             pars(0).isLabel = False
