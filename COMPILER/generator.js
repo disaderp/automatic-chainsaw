@@ -38,6 +38,11 @@ exports.Generator = function Generator() {
     const op = new Proxy({}, {
         get(target, property, receiver) {
             return function (...params) {
+                if (params.length === 0) {
+                    out.push(property.toUpperCase());
+
+                    return;
+                }
                 out.push(`${property.toUpperCase()} ${params.map(paramToString).join(',')}`);
             };
         },

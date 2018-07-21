@@ -186,7 +186,7 @@ function peg$parse(input, options) {
       peg$c33 = peg$literalExpectation("{", false),
       peg$c34 = "}",
       peg$c35 = peg$literalExpectation("}", false),
-      peg$c36 = function(inner) { return inner.length ? inner : Node('EmptyStatement'); },
+      peg$c36 = function(inner) { return inner.length ? inner : [Node('EmptyStatement')]; },
       peg$c37 = peg$otherExpectation("function definition"),
       peg$c38 = function(convention, type, name, args, statement) {
                   return Node('FunctionDefinition', {

@@ -27,7 +27,7 @@ try {
 const { preprocessFile } = require('./preprocess');
 const { compile } = require('./compile');
 
-let assembler, program, code, macros;
+let program, code, macros;
 try {
     const _ = preprocessFile(cli.input[0]);
     code = _.code;
@@ -82,16 +82,21 @@ if (cli.flags.tree) {
     inspect(program);
 }
 
-assembler = compile(program);
+const { failed, assembly } = compile(program);
+
+if (failed) {
+    console.error('compilation failed');
+    process.exit(1);
+}
 
 if (cli.flags.o != null) {
     try {
-        input = fs.writeFileSync(cli.flags.o, assembler);
+        input = fs.writeFileSync(cli.flags.o, assembly);
     } catch (e) {
         console.log(`failed to write output file ${cli.flags.o}`);
         process.exit(1);
     }
 } else {
-    console.log(assembler);
+    console.log(assembly);
 }
 

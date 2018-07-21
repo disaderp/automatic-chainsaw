@@ -3,6 +3,8 @@ const assert = require('assert');
 const util = require('util');
 const Generator = require('./generator').Generator;
 
+let failed = false;
+
 global.inspect = inspect;
 
 function inspect(value) {
@@ -14,13 +16,30 @@ exports.compile = compile;
 function compile(program) {
     const generator = Generator();
     visit(generator, program, {});
-    return generator.getAssembly();
+
+    return {
+        failed,
+        assembly: generator.getAssembly(),
+    };
 }
 
 let callingConventions = {};
 const visitors = new Proxy({
-    VariableDeclaration(generator, { type, name, initial }) {
-        generator.data(name, typeSize(type), initial !== null ? initial.value : generator.zeros(typeSize(type)));//@TODO: add check type size (pi=314)
+    VariableDeclaration(generator, s) {
+        const { type, name, initial } = s;
+        const valueSize = maybe(initial, i => i.value, 0);
+        if (typeSize(type) < valueSize) {
+            error(s, `array is smaller than initial value: ${name}`);
+        }
+
+        const size = Math.max(valueSize, typeSize(type));
+
+        let data = initial.value;
+        while (data.length < size) {
+            data += '\0';
+        }
+
+        generator.data(name, size, initial !== null ? data : generator.zeros(size));
     },
 
     ConditionalStatement(generator, statement) {
@@ -392,6 +411,10 @@ function isIdentifier(parsem) {
         || isProperObject(parsem) && parsem.kind === 'Identifier';
 }
 
+function maybe(o, f, def) {
+    return isProperObject(o) ? f(o) : def;
+}
+
 function isProperObject(o) {
     return typeof o === 'object' && o.kind === 'Identifier';
 }
@@ -402,4 +425,5 @@ function compilerBug() {
 
 function error(sta, msg) {
     console.error('compile error:', msg);
+    failed = true;
 }

@@ -77,7 +77,7 @@ ExpressionStatement "expression statement"
     = expression:Expression _ StatementTerminator { return Node('ExpressionStatement', { expression }); }
 
 CompoundStatement "compound statement"
-    = _ "{" _ inner:Statement * _ "}" _ { return inner.length ? inner : Node('EmptyStatement'); }
+    = _ "{" _ inner:Statement * _ "}" _ { return inner.length ? inner : [Node('EmptyStatement')]; }
 
 FunctionDefinition "function definition"
     = convention:CallingConvention _ type:TypeSpecifier _ name:Identifier _ "(" _ args:FormalArguments _ ")" _ statement: CompoundStatement {
