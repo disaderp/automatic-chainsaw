@@ -20,6 +20,15 @@ Module Asm
         Next
         Return ram
     End Function
+    Function skipFirstandLast(str As String) As String
+        Return str.Substring(1, str.Length - 2)
+    End Function
+    Function isReg(str As String) As Boolean
+        If regToBin(str) = "X" Then
+            Return False
+        Else Return True
+        End If
+    End Function
     Function regToBin(str As String) As String
         If str = "AX" Then
             Return "00"
@@ -29,7 +38,55 @@ Module Asm
             Return "10"
         ElseIf str = "DX" Then
             Return "11"
+        Else Return "X"
         End If
+    End Function
+    Function parse(str As String) As List(Of Instr)
+        Dim lines As String() = str.Replace(vbCr, "").Split(vbLf)
+        Dim parsed As New List(Of Instr)
+
+        For i As Integer = 0 To lines.Count() - 1
+            Dim mn As String() = lines(i).ToUpper().Trim().Replace(vbTab, " ").Split(" ")
+            Dim current As New Instr
+            current.init()
+            If mn.Count() = 1 Then
+                current.pars(0).val = mn(0)
+                If mn(0).StartsWith(".") Then
+                    current.type = "LABEL"
+                ElseIf mn(0).StartsWith(":") Then
+                    current.type = "SUBROUTINE"
+                ElseIf mn(0).StartsWith("X") Then
+                    current.type = "BINARY"
+                Else
+                    current.type = mn(0)
+                End If
+            ElseIf mn.Count() = 2 Then
+                current.type = mn(0)
+                Dim pars As String() = mn(1).Split(",")
+                For j As Integer = 0 To pars.Count - 1
+                    If pars(j).Contains("(") Then
+                        current.pars(j).isVal = True
+                        current.pars(j).val = skipFirstandLast(pars(j))
+                    ElseIf pars(j).Contains("<") Then
+                        current.pars(j).isAbs = True
+                        current.pars(j).val = skipFirstandLast(pars(j))
+                    ElseIf pars(j).Contains("[") Then
+                        current.pars(j).isAbs = False
+                        current.pars(j).val = skipFirstandLast(pars(j))
+                    End If
+                    If isReg(current.pars(j).val) Then
+                        current.pars(j).isReg = True
+                    End If
+                    If current.pars(j).val.Contains(".") Then
+                        current.pars(j).isLabel = True
+                    End If
+                Next
+            Else
+                Throw New Exception("syntax error")
+            End If
+            parsed.Add(current)
+        Next
+        Return parsed
     End Function
 
     Function assemble(ByVal asm As String) As String
@@ -728,8 +785,8 @@ Module Asm
 				ic += 1
 			ElseIf mn.StartsWith("JMP <" & mn.Contains("X")) Then
 				code += Trail16("110011")
-				Dim params As String = mn.Remove(0, 5).Replace("]", "")
-				Dim regs As String
+                Dim params As String = mn.Remove(0, 5).Replace(">", "")
+                Dim regs As String
 				If params = "AX" Then
 					regs = Trail16(regs + "00")
 				ElseIf params = "BX" Then
@@ -796,15 +853,16 @@ Module Asm
 	Sub Main(args As String())
 		Console.WriteLine(vbNewLine + "xCPUAssembler by Disa" + vbNewLine)
 		Try
-			If args.Count() = 0 Then
-				Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
-							"-bin <input filename> - writes binary file:" + vbNewLine &
-							"-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
-							"-plain - prints 0s and 1s")
-			ElseIf (args(0) = "-bin") Then
-				Dim d As Byte() = StrToBin(assemble(File.ReadAllText(args(2))))
-				File.WriteAllBytes(args(1), d)
-			ElseIf (args(0) = "-ram") Then
+            If args.Count() = 0 Then
+                Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
+                            "-bin <input filename> - writes binary file:" + vbNewLine &
+                            "-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
+                            "-plain - prints 0s and 1s")
+            ElseIf (args(0) = "-bin") Then
+                Dim d As Byte() = StrToBin(assemble(File.ReadAllText(args(2))))
+                File.WriteAllBytes(args(1), d)
+            ElseIf (args(0) = "-ram") Then
+                parse(File.ReadAllText(args(2)))
                 Dim d As String = toRAM(assemble(File.ReadAllText(args(2))))
                 Console.WriteLine(d)
                 File.WriteAllText(args(1), d)
@@ -824,4 +882,28 @@ Module Asm
 		End Try
 	End Sub
 
+
+    Structure Instr
+        Dim type As String
+        Dim pars() As Param
+        Public Sub init()
+            pars(0) = New Param
+            pars(1) = New Param
+            pars(0).isLabel = False
+            pars(0).isReg = False
+            pars(0).isVal = False
+            pars(0).isAbs = False
+            pars(1).isLabel = False
+            pars(1).isReg = False
+            pars(1).isVal = False
+            pars(1).isAbs = False
+        End Sub
+    End Structure
+    Structure Param
+        Dim isLabel As Boolean
+        Dim isReg As Boolean
+        Dim isVal As Boolean
+        Dim isAbs As Boolean
+        Dim val As String
+    End Structure
 End Module
