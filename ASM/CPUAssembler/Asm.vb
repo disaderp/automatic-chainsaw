@@ -57,6 +57,7 @@ Module Asm
                     current.type = "SUBROUTINE"
                 ElseIf mn(0).StartsWith("X") Then
                     current.type = "BINARY"
+                    current.pars(0).val = mn(0).Substring(1)
                 Else
                     current.type = mn(0)
                 End If
@@ -888,7 +889,7 @@ Module Asm
         Dim type As String
         Dim pars As Param()
         Public Sub init()
-            ReDim pars(2)
+            ReDim pars(1)
             pars(0) = New Param
             pars(1) = New Param
             pars(0).isLabel = False
