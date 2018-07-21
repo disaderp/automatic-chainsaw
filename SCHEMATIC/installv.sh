@@ -1,7 +1,7 @@
 #!/bin/bash
 set -ev
 
-sudo apt-get -y install mono-complete
+sudo apt-get -y install mono-runtime
 
 wget ftp://icarus.com/pub/eda/verilog/v10/verilog-10.1.1.tar.gz -O v.tar.gz
 tar -xzf v.tar.gz
