@@ -2,11 +2,46 @@
     Dim table As New List(Of Assembled)
     Function Find(match As Instr) As Assembled
         For Each ins In table
-            If ins.instr.type = match.type And Asm.chkParams(ins.instr, match) Then
+            If ins.instr.type = match.type And chkParams(ins.instr, match) Then
                 Return ins
             End If
         Next
         Return Nothing
+    End Function
+    Function isReg(str As String) As Boolean
+        If regToBin(str) = "X" Then
+            Return False
+        Else Return True
+        End If
+    End Function
+    Function regToBin(str As String) As String
+        If str = "AX" Then
+            Return "00"
+        ElseIf str = "BX" Then
+            Return "01"
+        ElseIf str = "CX" Then
+            Return "10"
+        ElseIf str = "DX" Then
+            Return "11"
+        Else Return "X"
+        End If
+    End Function
+    Function chkParams(orig As Instr, match As Instr) As Boolean
+        For i As Integer = 0 To 1
+            If orig.pars(i).isAbs And Not match.pars(i).isAbs Then
+                Return False
+            End If
+            If orig.pars(i).isVal And Not match.pars(i).isVal Then
+                Return False
+            End If
+            If orig.pars(i).isAddress And Not match.pars(i).isAddress Then
+                Return False
+            End If
+            If orig.pars(i).isReg And Not match.pars(i).isReg Then
+                Return False
+            End If
+        Next
+        Return True
     End Function
     Sub gen()
         Dim ins As Assembled
