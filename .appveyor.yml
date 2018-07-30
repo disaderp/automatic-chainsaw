@@ -1,3 +1,10 @@
+version: 1.0.{build}
+build:
+  project: ASM/CPUAssembler/CPUAssembler.sln
+  verbosity: minimal
+artifacts:
+- path: '**\bin\Debug\CPUAssembler.exe'
+  name: CPUAssembler
 deploy:
   description: 'Automatic release'
   provider: GitHub
