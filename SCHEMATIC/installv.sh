@@ -1,6 +1,7 @@
 #!/bin/bash
 set -ev
 
+sudo apt-get update
 sudo apt-get -y install mono-runtime
 sudo apt-get -y install libmono-system-core4.0-cil
 sudo apt-get -y install libmono-corlib4.5-cil
