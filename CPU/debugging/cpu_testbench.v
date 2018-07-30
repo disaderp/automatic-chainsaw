@@ -8,7 +8,7 @@ module testbench();
 	wire hsync; 
 	wire vsync;
 	CPU c0 (
-		.clk (clk),
+		.clkR (clk),
 		.ADDRBUS(ADDRBUS),
 		.CTRLBUS(CTRLBUS),
 		.DATABUS(DATABUS),
