@@ -1,11 +1,17 @@
+version: 1.0.{build}
+build:
+  project: ASM/CPUAssembler/CPUAssembler.sln
+  verbosity: minimal
+artifacts:
+- path: '**\bin\Debug\CPUAssembler.exe'
+  name: CPUAssembler
 deploy:
-  release: ASM-v$(appveyor_build_version)
   description: 'Automatic release'
   provider: GitHub
   auth_token:
     secure: wATY3X+tJutkWJAYQcVl7S0g2vxAfA7GicBKnDOHVuODeCme9wm3UKjqzSvfdbkx
   draft: false
   prerelease: true
+  force_update: true
   on:
-    branch: master                 # release from master branch only
     appveyor_repo_tag: true        # deploy on tag push only
