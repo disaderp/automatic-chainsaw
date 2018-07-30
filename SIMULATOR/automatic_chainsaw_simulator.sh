@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit
 
-ROOTDIR="$(dirname "$(dirname "$0")")"
+ROOTDIR="$(dirname "$(dirname "$(readlink -f "$0")")")"
 ASM="mono $ROOTDIR/ASM/CPUAssembler/bin/Debug/CPUAssembler.exe"
 COMPILE="${COMPILE-"node $ROOTDIR/COMPILER/cli.js"}"
 CPUFILES=$ROOTDIR/CPU
