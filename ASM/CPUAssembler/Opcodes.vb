@@ -1,5 +1,13 @@
 ﻿Module Opcodes
     Dim table As New List(Of Assembled)
+    Function Find(match As Instr) As Assembled
+        For Each ins In table
+            If ins.instr.type = match.type And Asm.chkParams(ins.instr, match) Then
+                Return ins
+            End If
+        Next
+        Return Nothing
+    End Function
     Sub gen()
         Dim ins As Assembled
 
@@ -190,7 +198,256 @@
 
         '''' Arithmetic instructions
 
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "ADD"
+        ins.opcode = hexToBin("C")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "ADC"
+        ins.opcode = hexToBin("D")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
 
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "SUB"
+        ins.opcode = hexToBin("E")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "SUC"
+        ins.opcode = hexToBin("F")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "MUL8"
+        ins.opcode = hexToBin("10")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "MUL6"
+        ins.opcode = hexToBin("11")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "DIV8"
+        ins.opcode = hexToBin("12")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "DIV6"
+        ins.opcode = hexToBin("13")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "CMP"
+        ins.opcode = hexToBin("14")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        '''' Logic instructions 
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "AND"
+        ins.opcode = hexToBin("15")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "NEG"
+        ins.opcode = hexToBin("16")
+        ins.instr.pars(0).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "NOT"
+        ins.opcode = hexToBin("17")
+        ins.instr.pars(0).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "OR"
+        ins.opcode = hexToBin("18")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "SHL"
+        ins.opcode = hexToBin("19")
+        ins.instr.pars(0).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "SHR"
+        ins.opcode = hexToBin("1A")
+        ins.instr.pars(0).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "XOR"
+        ins.opcode = hexToBin("1B")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "TEST"
+        ins.opcode = hexToBin("1C")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(1).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        '''' Jump instructions 
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "INT"
+        ins.opcode = hexToBin("1D")
+        ins.instr.pars(0).isVal = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "CALL"
+        ins.opcode = hexToBin("1E")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "RET"
+        ins.opcode = hexToBin("1F")
+        ins.size = 1
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JMP"
+        ins.opcode = hexToBin("20")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JMP"
+        ins.opcode = hexToBin("31")
+        ins.instr.pars(0).isAbs = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JMP"
+        ins.opcode = hexToBin("32")
+        ins.instr.pars(0).isReg = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JMP"
+        ins.opcode = hexToBin("33")
+        ins.instr.pars(0).isReg = True
+        ins.instr.pars(0).isAbs = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JC"
+        ins.opcode = hexToBin("21")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JNC"
+        ins.opcode = hexToBin("22")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JZ"
+        ins.opcode = hexToBin("23")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JNZ"
+        ins.opcode = hexToBin("24")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
+
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JO"
+        ins.opcode = hexToBin("25")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
+        ins = New Assembled
+        ins.instr.init()
+        ins.instr.type = "JNO"
+        ins.opcode = hexToBin("26")
+        ins.instr.pars(0).isAddress = True
+        ins.size = 2
+        table.Add(ins)
 
     End Sub
     Function hexToBin(str As String) As String
