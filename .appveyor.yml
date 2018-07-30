@@ -6,6 +6,7 @@ deploy:
     secure: wATY3X+tJutkWJAYQcVl7S0g2vxAfA7GicBKnDOHVuODeCme9wm3UKjqzSvfdbkx
   draft: false
   prerelease: true
+  artifact: ASM\CPUAssembler\bin\Debug\CPUAssembler.exe
   on:
     branch: master                 # release from master branch only
     appveyor_repo_tag: true        # deploy on tag push only
