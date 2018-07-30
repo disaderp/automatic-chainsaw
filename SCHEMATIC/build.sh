@@ -10,10 +10,7 @@ elif [ "${BUILD}" = "GPU" ]; then
 elif [ "${BUILD}" = "OS" ]; then
 	node ./COMPILER/cli.js ./OS/main.c
 elif [ "${BUILD}" = "SIM" ]; then
-	echo "exit 0" > gtkwave.sh
-	chmod a+x gtkwave.sh
-	chmod a+x ./SIMULATOR/automatic_chainsaw_simulator.sh
-	cd /ASM/CPUAssembler
+	cd ../ASM/CPUAssembler
 	mkdir bin
 	cd bin
 	mkdir Debug
@@ -21,5 +18,9 @@ elif [ "${BUILD}" = "SIM" ]; then
 	wget https://github.com/disaderp/automatic-chainsaw/releases/download/ASM/CPUAssembler.exe -O CPUAssembler.exe
 	chmod a+x ./CPUAssembler.exe
 	cd ../../../../
+	cd SIMULATOR
+	echo "exit 0" > gtkwave.sh
+	chmod a+x gtkwave.sh
+	chmod a+x ./SIMULATOR/automatic_chainsaw_simulator.sh
 	./SIMULATOR/automatic_chainsaw_simulator.sh ./SIMULATOR/test.asm
 fi
