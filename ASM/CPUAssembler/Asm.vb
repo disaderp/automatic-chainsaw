@@ -23,41 +23,7 @@ Module Asm
     Function skipFirstandLast(str As String) As String
         Return str.Substring(1, str.Length - 2)
     End Function
-    Function isReg(str As String) As Boolean
-        If regToBin(str) = "X" Then
-            Return False
-        Else Return True
-        End If
-    End Function
-    Function regToBin(str As String) As String
-        If str = "AX" Then
-            Return "00"
-        ElseIf str = "BX" Then
-            Return "01"
-        ElseIf str = "CX" Then
-            Return "10"
-        ElseIf str = "DX" Then
-            Return "11"
-        Else Return "X"
-        End If
-    End Function
-    Function chkParams(orig As Instr, match As Instr) As Boolean
-        For i As Integer = 0 To 1
-            If orig.pars(i).isAbs And Not match.pars(i).isAbs Then
-                Return False
-            End If
-            If orig.pars(i).isVal And Not match.pars(i).isVal Then
-                Return False
-            End If
-            If orig.pars(i).isAddress And Not match.pars(i).isAddress Then
-                Return False
-            End If
-            If orig.pars(i).isReg And Not match.pars(i).isReg Then
-                Return False
-            End If
-        Next
-        Return True
-    End Function
+
     Function parse(str As String) As List(Of Instr)
         Dim lines As String() = str.Replace(vbCr, "").Split(vbLf)
         Dim parsed As New List(Of Instr)
@@ -75,8 +41,6 @@ Module Asm
                 ElseIf mn(0).StartsWith("X") Then
                     current.type = "BINARY"
                     current.pars(0).val = mn(0).Substring(1)
-                ElseIf mn(0).StartsWith("'") Then
-                    current.type = "COMMENT"
                 Else
                     current.type = mn(0)
                 End If
@@ -102,15 +66,20 @@ Module Asm
                         current.pars(j).isLabel = True
                     End If
                 Next
-            Else
+            ElseIf Not mn(0).StartsWith("'") Or mn(0) = "" Then
                 Throw New Exception("syntax error in parser: Line: " + (i + 1).ToString + ". Code: " + lines(i))
+            End If
+
+            If mn(0).StartsWith("'") Or mn(0) = "" Then
+                current.type = "COMMENT"
             End If
             parsed.Add(current)
         Next
         Return parsed
     End Function
     Function match(prog As List(Of Instr)) As String
-        Dim code As String = ""
+        Dim code As New List(Of String)
+        Dim codestr As String = ""
         Dim ic As Integer = 0
         Dim labels As New Dictionary(Of String, Integer)
         Dim context As Integer = 0
@@ -120,56 +89,81 @@ Module Asm
             Dim orig As Nullable(Of Assembled) = Opcodes.Find(prog(i))
             If prog(i).type = "LABEL" Then
                 labels(prog(i).pars(0).val) = ic - contable(context)
-                ic -= 1
             ElseIf prog(i).type = "SUBROUTINE" Then
                 labels(prog(i).pars(0).val) = ic - contable(context)
                 context += 1
                 contable(context) = ic
-                ic -= 1
             ElseIf prog(i).type = "BINARY" Then
-                code += Trail16(prog(i).pars(0).val)
+                code.Add(prog(i).pars(0).val)
                 ic += 1
             ElseIf Not orig.Value.opcode Is Nothing Then
-                code += Trail16(orig.Value.opcode)
-                'add params
+                code.Add(orig.Value.opcode)
+                If orig.Value.size = 2 Then
+                    If prog(i).pars(1).val Is Nothing Then
+                        code.Add(prepareParam(prog(i).pars(0)))
+                    Else
+                        code.Add(prepareParam(prog(i).pars(1)) + prepareParam(prog(i).pars(0)))
+                    End If
+                ElseIf orig.Value.size = 3 Then
+                    code.Add(prepareParam(prog(i).pars(0)))
+                    code.Add(prepareParam(prog(i).pars(1)))
+                End If
                 ic += orig.Value.size
             ElseIf Not prog(i).type = "COMMENT" Then
                 Throw New Exception("syntax error in matcher: Line: " + (i + 1).ToString + ". Code: " + prog(i).type)
             End If
         Next
+        For i As Integer = 0 To code.Count - 1
+            If code(i).StartsWith(".") Then
+                If Not labels.ContainsKey(code(i)) Then
+                    Throw New Exception("error in label dictionary: Label not found: " + code(i))
+                End If
+                codestr += Trail16(Convert.ToString(labels(code(i)), 2))
+            Else
+                    codestr += Trail16(code(i))
+            End If
+        Next
+        Return codestr
+    End Function
+    Function prepareParam(par As Param) As String
+        If par.isReg Then
+            Return regToBin(par.val)
+        Else
+            Return par.val
+        End If
     End Function
 
 
     Sub Main(args As String())
-        Console.WriteLine(vbNewLine + "xCPUAssembler by Disa" + vbNewLine)
+        Console.WriteLine(vbNewLine + "automatic-chainsawxCPUAssembler by Disa" + vbNewLine)
         Opcodes.gen()
-        'Try
-        If args.Count() = 0 Then
+        Try
+            If args.Count() = 0 Then
                 Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
-                            "-bin <input filename> - writes binary file:" + vbNewLine &
-                            "-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
-                            "-plain - prints 0s and 1s")
+                                "-bin <input filename> - writes binary file:" + vbNewLine &
+                                "-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
+                                "-plain - prints 0s and 1s")
             ElseIf (args(0) = "-bin") Then
-                Dim d As Byte() = StrToBin(assemble(File.ReadAllText(args(2))))
+                Dim d As Byte() = StrToBin(match(parse(File.ReadAllText(args(2)))))
                 File.WriteAllBytes(args(1), d)
             ElseIf (args(0) = "-ram") Then
                 Dim d As String = toRAM(match(parse(File.ReadAllText(args(2)))))
-                Console.WriteLine(d)
+                'Console.WriteLine(d)
                 File.WriteAllText(args(1), d)
-			ElseIf (args(0) = "-plain") Then
-				Console.WriteLine(assemble(File.ReadAllText(args(1))))
-			Else
-				Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
-							"-bin <input filename> - writes binary file:" + vbNewLine &
-							"-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
-							"-plain - prints 0s and 1s")
-			End If
-			Console.WriteLine("Done.")
-			Environment.Exit(0)
-        'Catch ex As Exception
-        'Console.Error.WriteLine(ex.ToString)
-        '      Environment.Exit(1)
-        'End Try
+            ElseIf (args(0) = "-plain") Then
+                Console.WriteLine(match(parse(File.ReadAllText(args(2)))))
+            Else
+                Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
+                                "-bin <input filename> - writes binary file:" + vbNewLine &
+                                "-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
+                                "-plain - prints 0s and 1s")
+            End If
+            Console.WriteLine("Done.")
+            Environment.Exit(0)
+        Catch ex As Exception
+            Console.Error.WriteLine(ex.ToString)
+            Environment.Exit(1)
+        End Try
     End Sub
 
 

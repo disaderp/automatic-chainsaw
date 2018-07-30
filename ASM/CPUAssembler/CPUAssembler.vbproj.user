@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>-ram a.ram "C:\Users\Karol\Documents\Visual Studio 2013\Projects\automatic-chainsaw\ASM\test3.asm"</StartArguments>
+    <StartArguments>-ram a.ram "C:\Users\Karol\Documents\Visual Studio 2013\Projects\automatic-chainsaw\SIMULATOR\test.asm"</StartArguments>
     <RemoteDebugEnabled>false</RemoteDebugEnabled>
   </PropertyGroup>
 </Project>

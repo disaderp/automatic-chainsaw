@@ -33,4 +33,4 @@ X10
 
 'simulation must end with inf loop
 .inf
-JMP .inf
+JMP [.inf]
