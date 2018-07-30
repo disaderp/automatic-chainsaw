@@ -12,5 +12,6 @@ deploy:
     secure: wATY3X+tJutkWJAYQcVl7S0g2vxAfA7GicBKnDOHVuODeCme9wm3UKjqzSvfdbkx
   draft: false
   prerelease: true
+  force_update: true
   on:
     appveyor_repo_tag: true        # deploy on tag push only

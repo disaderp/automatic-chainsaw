@@ -13,5 +13,7 @@ elif [ "${BUILD}" = "SIM" ]; then
 	echo "exit 0" > gtkwave.sh
 	chmod a+x gtkwave.sh
 	chmod a+x ./SIMULATOR/automatic_chainsaw_simulator.sh
+	wget https://github.com/disaderp/automatic-chainsaw/releases/download/ASM/CPUAssembler.exe -O ./ASM/CPUAssembler/bin/Debug/CPUAssembler.exe
+	chmod a+x ./ASM/CPUAssembler/bin/Debug/CPUAssembler.exe
 	./SIMULATOR/automatic_chainsaw_simulator.sh ./SIMULATOR/test.asm
 fi
