@@ -73,7 +73,7 @@ Module Asm
                         current.pars(j).isAbs = True
                         current.pars(j).val = skipFirstandLast(pars(j))
                     ElseIf pars(j).Contains("[") Then
-                        current.pars(j).isAbs = False
+                        current.pars(j).isAddress = True
                         current.pars(j).val = skipFirstandLast(pars(j))
                     End If
                     If isReg(current.pars(j).val) Then
@@ -853,8 +853,9 @@ Module Asm
 		Return code
 	End Function
 	Sub Main(args As String())
-		Console.WriteLine(vbNewLine + "xCPUAssembler by Disa" + vbNewLine)
-		Try
+        Console.WriteLine(vbNewLine + "xCPUAssembler by Disa" + vbNewLine)
+        Opcodes.gen()
+        Try
             If args.Count() = 0 Then
                 Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
                             "-bin <input filename> - writes binary file:" + vbNewLine &
@@ -896,10 +897,12 @@ Module Asm
             pars(0).isReg = False
             pars(0).isVal = False
             pars(0).isAbs = False
+            pars(0).isAddress = False
             pars(1).isLabel = False
             pars(1).isReg = False
             pars(1).isVal = False
             pars(1).isAbs = False
+            pars(1).isAddress = False
         End Sub
     End Structure
     Structure Param
@@ -907,6 +910,12 @@ Module Asm
         Dim isReg As Boolean
         Dim isVal As Boolean
         Dim isAbs As Boolean
+        Dim isAddress As Boolean
         Dim val As String
+    End Structure
+    Structure Assembled
+        Dim instr As Instr
+        Dim opcode As String
+        Dim size As Integer
     End Structure
 End Module
