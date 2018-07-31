@@ -18,14 +18,14 @@ Assembler for the machine code.
 ## syntax
 
 ```
-' copy DX to AX
-MOV AX,DX
-' copy a 16-bit immediate value to AX
+' copy DX to  absolute address 01100 - abs values in < >
+MOV <01100>,DX
+' copy a 16-bit immediate value to AX, exact values in ( ) - binary form
 MOV AX,(1001)
 ' declare a label
 .loop
-' jump to a label
-JMP .loop
+' jump to a label, addresses in [ ] - label or exact
+JMP [.loop]
 ```
 
 See a [complete list of opcodes](https://github.com/disaderp/automatic-chainsaw/blob/master/SCHEMATIC/op.txt).
