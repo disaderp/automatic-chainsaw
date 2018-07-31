@@ -6,7 +6,13 @@ artifacts:
 - path: '**\bin\Debug\CPUAssembler.exe'
   name: CPUAssembler
 deploy:
-  description: 'Automatic release'
+  description: '###Usage: <param> <out file> 
+###Params:
+                            -bin <in filename> - writes binary file:
+                            -ram <in filename> - prints in RAM Verilog format
+                            -plain - prints 0s and 1s
+
+[Download latest version](https://ci.appveyor.com/project/disaderp/automatic-chainsaw/build/artifacts)'
   provider: GitHub
   auth_token:
     secure: wATY3X+tJutkWJAYQcVl7S0g2vxAfA7GicBKnDOHVuODeCme9wm3UKjqzSvfdbkx
