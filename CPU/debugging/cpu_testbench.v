@@ -19,8 +19,8 @@ module testbench();
 	
 	
 	initial begin
-		//$monitor ("%g\t clk=%b in=%b base=%b data=%b flag=%b",
-		//$time, clk, in, base, data, flag);
+		//$monitor ("%g\t clk= addr=%b ctrl=%b data=%b",
+		//$time,  ADDRBUS, CTRLBUS, DATABUS);
 		//reset = 0;
 		$dumpfile("CPU_dump.lxt");
 		$dumpvars(0,testbench);
