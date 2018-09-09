@@ -151,8 +151,8 @@ Module Asm
                 'Console.WriteLine(d)
                 File.WriteAllText(args(1), d)
             ElseIf (args(0) = "-plain") Then
-                Console.WriteLine(match(parse(File.ReadAllText(args(2)))))
-            Else
+				Console.WriteLine(match(parse(File.ReadAllText(args(1)))))
+			Else
                 Console.WriteLine("###Usage: <param> <output filename>" + vbNewLine + "###Params:" + vbNewLine &
                                 "-bin <input filename> - writes binary file:" + vbNewLine &
                                 "-ram <input filename> - prints in RAM Verilog format" + vbNewLine &
