@@ -5,8 +5,9 @@ module CPU(
 	inout [15:0] DATABUS,
 	output vga, output hsync, output vsync
 	);
+	
 	wire clk;
-	//CPUclk clk3(.CLK_IN1(clkR), .CLK_OUT1(clk));
+	CPUclk clk3(.CLK_IN1(clkR), .CLK_OUT1(clk));
 	
 	reg reset = 0;
 	
