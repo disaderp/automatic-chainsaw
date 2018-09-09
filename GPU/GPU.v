@@ -22,7 +22,7 @@ reg [6:0] i;
 reg [7:0] ascii = 0;
 wire [11:0] asciiaddress;
 wire vgaclock;
-//VGAclk clk2(.CLK_IN1(clk), .CLK_OUT1(vgaclock));
+CPUclk clk2(.CLK_IN1(clk), .CLK_OUT1(vgaclock));
 
 TXT d0 (
 		.clk (vgaclock),
